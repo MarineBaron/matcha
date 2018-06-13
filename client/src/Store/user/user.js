@@ -1,6 +1,6 @@
 import { USER_REQUEST, USER_ERROR, USER_SUCCESS, USER_LOGOUT } from './mutation-types'
 import { AUTH_LOGOUT } from '../auth/mutation-types'
-import apiCall from '../../Api/api'
+import callApi from '../../Api/mockApi'
 import Vue from 'vue'
 
 const state = {
@@ -16,7 +16,7 @@ const getters = {
 const actions = {
   [USER_REQUEST]: ({commit, dispatch}) => {
     commit(USER_REQUEST)
-    apiCall({url: 'user/me'})
+    callApi({url: 'user/me'})
       .then(resp => {
         commit(USER_SUCCESS, resp)
       })

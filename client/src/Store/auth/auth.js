@@ -1,6 +1,6 @@
 import { AUTH_REQUEST, AUTH_ERROR, AUTH_SUCCESS, AUTH_LOGOUT } from './mutation-types'
 import { USER_REQUEST } from '../user/mutation-types'
-import apiCall from '../../Api/api'
+import callApi from '../../Api/mockApi'
 import Vue from 'vue'
 
 const state = {
@@ -18,7 +18,7 @@ const actions = {
   [AUTH_REQUEST]: ({commit, dispatch}, user) => {
     return new Promise((resolve, reject) => {
       commit(AUTH_REQUEST)
-      apiCall({url: 'auth', data: user, method: 'POST'})
+      callApi({url: 'auth', data: user, method: 'POST'})
       .then(resp => {
         localStorage.setItem('user-token', resp.token)
         commit(AUTH_SUCCESS, resp.token)
