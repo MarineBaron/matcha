@@ -29,7 +29,6 @@ const ifAuthenticated = (to, from, next) => {
 export default [
 	{
     path: '/',
-    name: 'Home',
     component: Home,
     meta: {}
   },
@@ -68,6 +67,7 @@ export default [
   },
   {
     path: '/forum',
+    name: 'Forum',
     components: {default: ForumContent, sidebar: ForumSidebar},
     meta: {
       sidebar: true

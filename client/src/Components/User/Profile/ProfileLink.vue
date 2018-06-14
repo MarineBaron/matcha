@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item href="/profile">{{username}}</b-nav-item>
+  <b-nav-item :to="{path: '/profile'}">{{username}}</b-nav-item>
 </template>
 
 <script>
