@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item href="/profile">{{name}}</b-nav-item>
+  <b-nav-item href="/profile">{{username}}</b-nav-item>
 </template>
 
 <script>
@@ -17,7 +17,7 @@
       ]),
       ...mapState({
         authLoading: state => state.auth.status === 'loading',
-        name: state => `${state.user.profile.title} ${state.user.profile.name}`
+        username: state => `${state.user.profile.username}`
       })
     }
   }

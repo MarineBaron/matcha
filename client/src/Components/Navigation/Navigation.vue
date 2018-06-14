@@ -51,7 +51,7 @@ export default {
     ]),
     ...mapState({
       authLoading: state => state.auth.status === 'loading',
-      name: state => isProfileLoaded ? `${state.user.profile.title} ${state.user.profile.name}` : ''
+      username: state => isProfileLoaded ? `${state.user.profile.username}` : ''
     })
   }
 }

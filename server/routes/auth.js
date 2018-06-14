@@ -4,7 +4,7 @@ var controller = require('../controllers/authController')
 
 /* POST login */
 router.post('/login', function(req, res, next) {
-  authController.login(req.body.username, req.body.password, function(err, result) {
+  controller.login(req.body.username, req.body.password, function(err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -33,7 +33,7 @@ router.post('/login', function(req, res, next) {
 
 /* POST register */
 router.post('/register', function(req, res, next) {
-  authController.register(req.body.username, req.body.password, function (err, result) {
+  controller.register(req.body.username, req.body.password, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -58,7 +58,7 @@ router.post('/register', function(req, res, next) {
 
 /* POST logout */
 router.post('/logout', function(req, res, next) {
-  authController.logout(req.params.token, function (err, result) {
+  controller.logout(req.params.token, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({

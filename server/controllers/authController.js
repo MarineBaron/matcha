@@ -36,12 +36,14 @@ module.exports = {
   logout: function(token) {
   },
   
-  register: function (username, password, role, callback) {
+  register: function (username, password, callback) {
+    console.log(username, password)
     const newUser = new User({
       username: username, 
       password: password, 
       role: 'user'
     })
+    console.log(newUser)
     newUser.save(function(err, user) {
       if (err) {
         callback(err, null)

@@ -73,13 +73,14 @@
       onSubmit(e) {
         e.preventDefault()
         const { username, password } = this.form
-        this.$store.dispatch(AUTH_REQUEST, {username, password}).then(() => {
+        this.$store.dispatch(AUTH_REQUEST, {username, password})
+        .then(() => {
           this.$router.push('/')
+        })
+        .catch(() => {          
+          this.$router.push('/login')
         })
       }
     }
   }
 </script>
-
-<style>
-</style>
