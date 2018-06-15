@@ -14,6 +14,7 @@
         e.preventDefault()
         this.$store.dispatch(AUTH_LOGOUT)
           .then(() => {
+            this.$socket.emit(AUTH_LOGOUT, {username: JSON.parse(localStorage.getItem('profile')).username})
             this.$router.push('/login')
           })
       }

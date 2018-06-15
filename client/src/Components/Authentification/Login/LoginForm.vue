@@ -41,7 +41,7 @@
 </template>
 
 <script>
-  import { AUTH_REQUEST } from '../../../Store/auth/mutation-types'
+  import { AUTH_REQUEST, AUTH_SUCCESS } from '../../../Store/auth/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength } from 'vuelidate/lib/validators'
   
@@ -49,6 +49,7 @@
     name: 'login-form',
     data() {
       return {
+        isConnected: false,
         form: {}
       }
     },
@@ -69,12 +70,23 @@
         },
       }
     },
+    sockets: {
+      connect() {
+        // Fired when the socket connects.
+        this.isConnected = true;
+      },
+
+      disconnect() {
+        this.isConnected = false;
+      }
+    },
     methods: {
       onSubmit(e) {
         e.preventDefault()
         const { username, password } = this.form
         this.$store.dispatch(AUTH_REQUEST, {username, password})
         .then(() => {
+          this.$socket.emit(AUTH_SUCCESS, {username: username})
           this.$router.push('/')
         })
         .catch(() => {          

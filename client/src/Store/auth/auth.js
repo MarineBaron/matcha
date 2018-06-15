@@ -27,6 +27,7 @@ const actions = {
         const data = resp.data.data
         localStorage.setItem('user-token', data.token)
         commit(AUTH_SUCCESS, data.token)
+        //this.$socket.emit(AUTH_SUCCESS, {username: username})
         dispatch(USER_REQUEST, data.username)
         resolve(resp)
       })
@@ -40,6 +41,8 @@ const actions = {
   [AUTH_LOGOUT]: ({commit, dispatch}) => {
     return new Promise((resolve, reject) => {
       commit(AUTH_LOGOUT)
+      //this.$socket.emit(AUTH_LOGOUT, {username: JSON.parse(localStorage.getItem('profile')).username})
+      //this.$socket.emit(AUTH_LOGOUT, {username: JSON.parse(localStorage.getItem('profile').username}))
       localStorage.removeItem('user-token')
       resolve()
     })
