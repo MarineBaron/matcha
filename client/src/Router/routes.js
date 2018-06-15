@@ -7,7 +7,6 @@ import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
 import ForumContent from '../Components/Forum/ForumContent.vue'
 import ForumSidebar from '../Components/Forum/ForumSidebar.vue'
-import TestApi from '../Components/TestApi/TestApi.vue'
 
 import store from '../Store/store'
 
@@ -34,7 +33,7 @@ export default [
     component: Home,
     meta: {}
   },
-	{ 
+	{
     path: '/about',
     components: {default: About, sidebar: About},
     meta: {
