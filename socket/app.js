@@ -19,11 +19,8 @@ io.on('connection', function(socket) {
     
     // Reception d'un mesage de login
     socket.on('AUTH_SUCCESS', function(data) {
-      console.log('AUTH_SUCCESS ' + data.username)
         //affectation du username au visiteur
         visitorsData[socket.id].username = data.username
-        console.log('visitorsData', visitorsData)
-        console.log('connectedUsers', connectedUsers)
         //ajout ou creation de la propriete connected
         if (!connectedUsers[data.username]) {
           connectedUsers[data.username] = {connected: true}
@@ -31,7 +28,6 @@ io.on('connection', function(socket) {
         } else {
           connectedUsers[data.username].connected = true
         }
-        console.log('connectedUsers', connectedUsers)
         io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
     })
     

@@ -49,7 +49,6 @@
     name: 'login-form',
     data() {
       return {
-        isConnected: false,
         form: {}
       }
     },
@@ -68,16 +67,6 @@
           minLength: minLength(3),
           maxLength: maxLength(20),
         },
-      }
-    },
-    sockets: {
-      connect() {
-        // Fired when the socket connects.
-        this.isConnected = true;
-      },
-
-      disconnect() {
-        this.isConnected = false;
       }
     },
     methods: {

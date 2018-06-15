@@ -15,7 +15,6 @@ router.get('/profile/:username', function(req, res, next) {
       return
     }
     if (result) {
-      console.log("RESULT",result)
       res.status(200).json({
         success: 1,
         data: result.data
@@ -26,6 +25,6 @@ router.get('/profile/:username', function(req, res, next) {
       })
     }
   })
-});
+})
 
 module.exports = router;
