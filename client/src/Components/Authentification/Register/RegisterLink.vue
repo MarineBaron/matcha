@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item href="/register">Sign Up</b-nav-item>
+  <b-nav-item :to="{path: '/register'}">Register</b-nav-item>
 </template>
 
 <script>

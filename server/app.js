@@ -1,12 +1,25 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var logger = require('morgan');
+const express = require('express')
+const bodyParser = require('body-parser')
+const logger = require('morgan')
+const cors = require('cors')
 
 /* Variables d'environnement */
 require('dotenv').config()
 
 /* Application */
-var app = express();
+const app = express();
+/* Socket.io */
+// const io = require('socket.io')
+// const http = require('http')
+// const server = http.createServer()
+// server.listen(8080, 'localhost')
+// const socketIo = io.listen(server)
+// const socket = require('socket.io')
+// const http = require('http')
+// const server = http.createServer(app).listen(8080)
+// const io = socket.listen(server)
+// io.set('transports',['websockets'])
+
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -23,17 +36,22 @@ mongoose.connect(dbURL, function(err){
   }
 })
 
+/* CORS */
+app.use(cors())
+app.options('*', cors())
+
 /* Routeur */
 app.get('/', function(req, res) {
   res.status(200)
   res.json({message: 'Matcha API'})
 });
 
-var authRouter = require('./routes/auth');
-// var userRouter = require('./routes/user');
+const authRouter = require('./routes/auth');
+const userRouter = require('./routes/user');
 // var tagRouter = require('./routes/tag');
 // var chatRouter = require('./routes/chat');
-app.use('/auth', authRouter);
+app.use('/auth', authRouter)
+app.use('/user', userRouter)
 // app.use('/user', userRouter);
 // app.use('/tag', tagRouter);
 // app.use('/chat', chatRouter);
@@ -51,5 +69,13 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.json('error');
 });
+
+/* Socket.io */
+// socketIo.on('connection', function(socket) {
+//   console.log('Socket: new User')
+//   socket.on('disconnect', function() {
+//     console.log('Socket: bye bye User')
+//   })
+// })
 
 module.exports = app;

@@ -1,12 +1,13 @@
-import { AUTH_REQUEST, AUTH_ERROR, AUTH_SUCCESS, AUTH_LOGOUT } from './mutation-types'
+import { AUTH_REQUEST, AUTH_ERROR, AUTH_SUCCESS, AUTH_LOGOUT, REGISTER_REQUEST, REGISTER_ERROR, REGISTER_SUCCESS } from './mutation-types'
 import { USER_REQUEST } from '../user/mutation-types'
-import callApi from '../../Api/mockApi'
+import mockApi from '../../Api/mockApi'
+import callApi from '../../Api/callApi'
 import Vue from 'vue'
 
 const state = {
-  token: localStorage.getItem('user-token') || '',
   status: '',
-  hasLoadedOnce: false
+  token: localStorage.getItem('user-token') ? localStorage.getItem('user-token') : '',
+  hasLoadedOnce: localStorage.getItem('user-token') ? true : false
 }
 
 const getters = {
@@ -18,11 +19,15 @@ const actions = {
   [AUTH_REQUEST]: ({commit, dispatch}, user) => {
     return new Promise((resolve, reject) => {
       commit(AUTH_REQUEST)
-      callApi({url: 'auth', data: user, method: 'POST'})
-      .then(resp => {
-        localStorage.setItem('user-token', resp.token)
-        commit(AUTH_SUCCESS, resp.token)
-        dispatch(USER_REQUEST)
+      callApi({url: 'auth/login', data: user, method: 'POST'})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          reject(err)
+        }
+        const data = resp.data.data
+        localStorage.setItem('user-token', data.token)
+        commit(AUTH_SUCCESS, data.token)
+        dispatch(USER_REQUEST, data.username)
         resolve(resp)
       })
       .catch(err => {
@@ -38,7 +43,21 @@ const actions = {
       localStorage.removeItem('user-token')
       resolve()
     })
-  }
+  },
+  [REGISTER_REQUEST]: ({commit, dispatch}, user) => {
+    return new Promise((resolve, reject) => {
+      commit(REGISTER_REQUEST)
+      callApi({url: 'auth/register', data: user, method: 'POST'})
+      .then(resp => {
+        commit(REGISTER_SUCCESS)
+        resolve(resp)
+      })
+      .catch(err => {
+        commit(REGISTER_ERROR, err)
+        reject(err)
+      })
+    })
+  },
 }
 
 const mutations = {
@@ -47,7 +66,7 @@ const mutations = {
   },
   [AUTH_SUCCESS]: (state, token) => {
     state.status = 'success'
-    state.token = token
+    Vue.set(state, 'token', token)
     state.hasLoadedOnce = true
   },
   [AUTH_ERROR]: (state) => {
@@ -56,6 +75,15 @@ const mutations = {
   },
   [AUTH_LOGOUT]: (state) => {
     state.token = ''
+  },
+  [REGISTER_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [REGISTER_SUCCESS]: (state) => {
+    state.status = 'success'
+  },
+  [REGISTER_ERROR]: (state) => {
+    state.status = 'error'
   },
 }
 

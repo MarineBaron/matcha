@@ -1,7 +1,7 @@
 <template>
   <div>
     <home-anonymous v-if="!isAuthenticated" />
-    <home-authenticated v-if="isAuthenticated" />
+    <home-authenticated v-else />
   </div>
 </template>
 
