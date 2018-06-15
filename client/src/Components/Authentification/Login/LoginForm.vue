@@ -76,9 +76,11 @@
         this.$store.dispatch(AUTH_REQUEST, {username, password})
         .then(() => {
           this.$socket.emit(AUTH_SUCCESS, {username: username})
+          this.flash('Bienvenue ' + username, 'success', {timeout: 2000})
           this.$router.push('/')
         })
-        .catch(() => {          
+        .catch(() => {
+          this.flash('Vos identifiants sont incorrects.', 'error', {timeout: 2000})
           this.$router.push('/login')
         })
       }

@@ -6,6 +6,7 @@
 </template>
 
 <script>
+  import Vue from 'vue'
   import LoginForm from './LoginForm.vue'
   
   export default {
