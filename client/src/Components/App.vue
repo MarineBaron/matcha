@@ -17,21 +17,19 @@
         </b-col>
       </b-row>
     </b-container>
-    <footer>Footer: {{count}}</footer>
+    <footer><counter /></footer>
   </div>
 </template>
 
 <script>
 import Navigation from './Navigation/Navigation.vue'
+import Counter from './Counter/Counter.vue'
+
 export default {
   name: 'app',
   components: {
-    Navigation
-  },
-  computed: {
-    count() {
-      return this.$store.state.count
-    }
+    Navigation,
+    Counter
   }
 }
 </script>

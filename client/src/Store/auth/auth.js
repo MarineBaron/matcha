@@ -5,7 +5,9 @@ import callApi from '../../Api/callApi'
 import Vue from 'vue'
 
 const state = {
-  status: ''
+  status: '',
+  token: '',
+  hasLoadedOnce: ''
 }
 
 const getters = {
