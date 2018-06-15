@@ -42,7 +42,7 @@ router.post('/register', function(req, res, next) {
       })
       return
     }
-    if (result) {
+    if (result && result.success) {
       res.status(200).json({
         success: 1,
         data: {token: result}

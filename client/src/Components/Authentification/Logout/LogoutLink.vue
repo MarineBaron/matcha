@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item @click="logout">Logout</b-nav-item>
+  <b-nav-item @click="logout">Déconnexion</b-nav-item>
 </template>
 
 <script>

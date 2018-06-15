@@ -1,7 +1,7 @@
 <template>
   <b-navbar toggleable="sm" variant="info">
     <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
-    <b-navbar-brand href="#">Matcha</b-navbar-brand>
+    <b-navbar-brand :to="{path: '/'}">Matcha</b-navbar-brand>
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav v-for="link in links" :key="links.url">
         <b-nav-item :to="{path: link.path}">{{link.text}}</b-nav-item>
@@ -36,10 +36,9 @@ export default {
   data () {
     return {
       links: [
-        {text: 'Home', path: '/'},
-        {text: 'Search', path: '/search'},
+        {text: 'Recherche', path: '/search'},
         {text: 'Forum', path: '/forum'},
-        {text: 'About', path: '/about'}
+        {text: 'A propos', path: '/about'}
       ]
     }
   },

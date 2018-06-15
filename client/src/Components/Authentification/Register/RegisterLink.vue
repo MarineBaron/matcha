@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item :to="{path: '/register'}">Register</b-nav-item>
+  <b-nav-item :to="{path: '/register'}">Enregistrement</b-nav-item>
 </template>
 
 <script>

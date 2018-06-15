@@ -37,18 +37,33 @@ module.exports = {
   },
   
   register: function (username, password, callback) {
-    const newUser = new User({
-      username: username, 
-      password: password, 
-      role: 'user'
-    })
-    newUser.save(function(err, user) {
+    User.findOne({username: username}, function (err, user) {
       if (err) {
-        callback(err, null)
+          callback(err, null)
+          return
+      }
+      if (user) {
+        callback(null, {
+          success: false
+        })
         return
       }
-      const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
-      callback(null, authToken)
+      const newUser = new User({
+        username: username, 
+        password: password, 
+        role: 'user'
+      })
+      newUser.save(function(err, user) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        callback(null, {
+          success: true,
+          token: jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
+        })
+      })
     })
+    
   },
 }

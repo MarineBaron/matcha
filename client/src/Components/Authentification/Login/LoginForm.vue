@@ -2,7 +2,7 @@
   <div>
     <b-form @submit="onSubmit" >
       <b-form-group id="usernameGroup"
-        label="Username"
+        label="Pseudo"
         label-for="username"
       >
         <b-form-input id="username"
@@ -13,11 +13,11 @@
           :state="!$v.form.username.$invalid"
         />
         <b-form-invalid-feedback id="usernameFeedback">
-          This is a required field and must be between 4 and 20 characters
+          Ce champs est requis et doit contenir entre 3 et 20 caractères.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-form-group id="passwordGroup"
-        label="Password"
+        label="Mot de passe"
         label-for="password"
       >
         <b-form-input id="password"
@@ -28,14 +28,14 @@
           :state="!$v.form.password.$invalid"
         />
         <b-form-invalid-feedback id="passwordFeedback">
-          This is a required field and must be between 4 and 20 characters
+          Ce champs est requis et doit contenir entre 3 et 20 caractères.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-button
         type="submit"
         variant="primary"
         :disabled="$v.form.$invalid">
-      Login</b-button>
+      Connexion</b-button>
     </b-form>
   </div>
 </template>
@@ -76,7 +76,7 @@
         this.$store.dispatch(AUTH_REQUEST, {username, password})
         .then(() => {
           this.$socket.emit(AUTH_SUCCESS, {username: username})
-          this.flash('Bienvenue ' + username, 'success', {timeout: 2000})
+          this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 2000})
           this.$router.push('/')
         })
         .catch(() => {

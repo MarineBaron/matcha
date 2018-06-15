@@ -15,7 +15,7 @@
     },
     data() {
       return {
-        title: 'Login Page'
+        title: 'Connexion'
       }
     }
   }
