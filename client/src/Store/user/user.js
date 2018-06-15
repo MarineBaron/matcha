@@ -4,7 +4,7 @@ import callApi from '../../Api/callApi'
 import Vue from 'vue'
 
 const state = {
-  profile: {},
+  profile: localStorage.getItem('profile') ? JSON.parse(localStorage.getItem('profile')) : {},
   status: ''
 }
 
@@ -19,11 +19,12 @@ const actions = {
     callApi({url: 'user/profile/' + username})
       .then(resp => {
         const data = resp.data.data
+        localStorage.setItem('profile', JSON.stringify(data))
         commit(USER_SUCCESS, data)
       })
       .catch(err => {
         commit(USER_ERROR)
-        // if resp is unauthorized, logout, to
+        localStorage.removeItem('profile')
         dispatch(AUTH_LOGOUT)
       })
   },

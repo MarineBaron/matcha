@@ -6,8 +6,8 @@ import Vue from 'vue'
 
 const state = {
   status: '',
-  token: '',
-  hasLoadedOnce: ''
+  token: localStorage.getItem('user-token') ? localStorage.getItem('user-token') : '',
+  hasLoadedOnce: localStorage.getItem('user-token') ? true : false
 }
 
 const getters = {
