@@ -41,10 +41,10 @@
 </template>
 
 <script>
-  import { AUTH_REQUEST, AUTH_SUCCESS } from '../../../Store/auth/mutation-types'
+  import { AUTH_LOGIN_REQUEST, AUTH_LOGIN_SUCCESS } from '../../../Store/auth/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-  
+
   export default {
     name: 'login-form',
     data() {
@@ -73,9 +73,9 @@
       onSubmit(e) {
         e.preventDefault()
         const { username, password } = this.form
-        this.$store.dispatch(AUTH_REQUEST, {username, password})
+        this.$store.dispatch(AUTH_LOGIN_REQUEST, {username, password})
         .then(() => {
-          this.$socket.emit(AUTH_SUCCESS, {username: username})
+          this.$socket.emit('AUTH_LOGIN', {username: username})
           this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 2000})
           this.$router.push('/')
         })

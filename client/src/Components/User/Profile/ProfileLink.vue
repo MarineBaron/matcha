@@ -5,7 +5,7 @@
 <script>
   import bNavItem from 'bootstrap-vue/es/components/nav/nav-item'
   import { mapGetters, mapState } from 'vuex'
-  
+
   export default {
     components: {
       bNavItem
@@ -17,7 +17,7 @@
       ]),
       ...mapState({
         authLoading: state => state.auth.status === 'loading',
-        username: state => `${state.user.profile.username}`
+        username: state => `${state.auth.profile.username}`
       })
     }
   }

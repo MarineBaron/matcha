@@ -56,10 +56,10 @@
 </template>
 
 <script>
-  import { REGISTER_REQUEST } from '../../../Store/auth/mutation-types'
+  import { USER_REGISTER_REQUEST } from '../../../Store/user/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-  
+
   export default {
     name: 'register-form',
     data() {
@@ -93,7 +93,7 @@
       onSubmit(e) {
         e.preventDefault()
         const { username, password } = this.form
-        this.$store.dispatch(REGISTER_REQUEST, {username, password})
+        this.$store.dispatch(USER_REGISTER_REQUEST, {username, password})
           .then(() => {
             this.flash('Vous avez été enregistré, veuillez entrer vos identifiants de connexion.', 'success', {timeout: 2000})
             this.$router.push('/login')
