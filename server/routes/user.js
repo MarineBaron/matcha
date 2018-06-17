@@ -5,7 +5,7 @@ const verifyToken = require('../middleware/verifyToken')
 
 /* POST create */
 router.post('/create', function(req, res, next) {
-  controller.create(req.body.username, req.body.password, function (err, result) {
+  controller.create(req.body.username, req.body.email, req.body.password, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -14,17 +14,7 @@ router.post('/create', function(req, res, next) {
       })
       return
     }
-    if (result && result.success) {
-      res.status(200).json({
-        success: 1,
-        data: {token: result}
-      })
-    } else {
-      res.status(200).json({
-        success: 0,
-        data: result
-      })
-    }
+    res.status(200).json(result)
   })
 })
 

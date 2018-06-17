@@ -33,7 +33,7 @@ export default [
     component: Home,
     meta: {}
   },
-	{ 
+	{
     path: '/about',
     components: {default: About, sidebar: About},
     meta: {
@@ -52,6 +52,11 @@ export default [
     component: RegisterPage,
     meta: {},
     beforeEnter: ifNotAuthenticated
+  },
+  {
+    path: '/confirmation/:username/:token',
+    component: ConfirmationPage,
+    meta: {},
   },
   {
     path: '/profile',

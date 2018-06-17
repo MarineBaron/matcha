@@ -14,10 +14,28 @@ router.post('/login', function(req, res, next) {
       return
     }
     if (result) {
+      res.status(200).json(result)
+    } else {
       res.status(200).json({
-        success: 1,
-        data: result
+        success: 0
       })
+    }
+  })
+})
+
+/* POST confirm */
+router.post('/confirm', function(req, res, next) {
+  controller.login(req.body.username, req.body.token, function(err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    if (result) {
+      res.status(200).json(result)
     } else {
       res.status(200).json({
         success: 0

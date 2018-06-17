@@ -27,14 +27,27 @@ const actions = {
       callApi({url: 'user/create', data: user, method: 'POST'})
       .then((resp, err) => {
         if (!resp.data.success) {
-          reject(err)
+          let message = ''
+          switch(resp.data.message) {
+            case 'DUPLICATE USERNAME':
+              message = 'Votre pseudo est déjà utilisé. Veuillez en choisir un autre.'
+            break
+            case 'NOT CONFIRMED':
+              message = 'Vous avez déjà été enregistré, mais vous n\'avez pas confirmé votre inscription. Veuillez confirmer votre inscription en cliquant sur le lien dans le mail que nous vous avons envoyé.'
+            break
+            default:
+              message = 'Votre enregistrement a échoué. Veuillez réessayer.'
+            break
+          }
+          commit(USER_REGISTER_ERROR)
+          reject(message)
         } else {
           commit(USER_REGISTER_SUCCESS)
           resolve(resp)
         }
       })
       .catch(err => {
-        commit(USER_REGISTER_ERROR, err)
+        commit(USER_REGISTER_ERROR)
         reject(err)
       })
     })

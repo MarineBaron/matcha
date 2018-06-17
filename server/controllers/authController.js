@@ -9,28 +9,75 @@ module.exports = {
         return
       }
       if (!user) {
-        callback(err, null)
-      } else {
-        user.comparePassword(password, function (err, isMatch) {
-          if (err) {
-            callback(err, null)
-            return
-          }
-          if (isMatch) {
-            const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
-            callback(null, {
-              token: authToken
-            })
-          } else {
-            callback(err, null)
-          }
+        callback(null, {
+          success: 0,
+          message: 'INEXISTANT LOGIN'
         })
+        return
       }
+      if (user.confirmed === false) {
+        callback(null, {
+          success: 0,
+          message: 'UNCONFIRMED USER'
+        })
+        return
+      }
+      if (user.banished === true) {
+        callback(null, {
+          success: 0,
+          message: 'BANISHED USER'
+        })
+        return
+      }
+      user.comparePassword(password, function (err, isMatch) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        if (!isMatch) {
+          callback(null, {
+            success: 0,
+            message: 'BAD CREDENTIALS'
+          })
+          return
+        }
+        const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
+        callback(null, {
+          success: 1,
+          token: authToken
+        })
+      })
     })
   },
 
   logout: function(token) {
   },
 
-
+  confirm: function(username, token) {
+    jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
+      if (err) {
+        callback(null, {
+          success: 0,
+          message: 'BAD TOKEN'
+        })
+        return
+      }
+      if (decoded.username !== username) {
+        callback(null, {
+          success: 0,
+          message: 'BAD USERNAME'
+        })
+        return
+      }
+      User.findOneAndUpdate({username: username}, {confirmed: true}, function(err, user) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        callback(null, {
+          success: 1
+        })
+      })
+    })
+  }
 }
