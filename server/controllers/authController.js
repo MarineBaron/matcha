@@ -53,8 +53,9 @@ module.exports = {
   logout: function(token) {
   },
 
-  confirm: function(username, token) {
+  confirm: function(username, token, callback) {
     jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
+      
       if (err) {
         callback(null, {
           success: 0,
@@ -72,6 +73,13 @@ module.exports = {
       User.findOneAndUpdate({username: username}, {confirmed: true}, function(err, user) {
         if (err) {
           callback(err, null)
+          return
+        }
+        if (!user) {
+          callback(null, {
+            success: 0,
+            message: 'USER NOT FOUND'
+          })
           return
         }
         callback(null, {

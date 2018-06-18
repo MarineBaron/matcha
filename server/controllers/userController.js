@@ -79,13 +79,13 @@ module.exports = {
           return
         }
         const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
-        const url = process.env.URL_CLIENT + '/confirmation/' + user.username + '/' + authToken
+        const url = encodeURI(process.env.URL_CLIENT + '/confirmation/' + user.username + '/' + authToken)
         const text = 'Bonjour,\nVous devez confirmer votre instription en copiant cette url dans votre navigateur: '
           + url + '\nBonne journée !'
         const html = '<p>Bonjour,</p><p>Vous devez confirmer votre instription en cliquant sur le lien suivant : <a href="'
           + url + '">' + url + '</a></p><p>Bonne journée !</p>'
         mailController.send('user', {
-          subject: '[Matcha] Confirmation de votre inscription',
+          subject: '[Matcha][' + user.username + '] Confirmation de votre inscription',
           text: text,
           html: html
         })

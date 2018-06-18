@@ -6,45 +6,28 @@
       </ul>
     </b-alert>
     <b-form @submit.prevent="onSubmit" >
-      <b-form-group  id="usernameGroup"
-        label="Pseudo"
-        label-for="username"
+      <b-form-group  id="emailGroup"
+        label="Email"
+        label-for="email"
       >
-        <b-form-input id="username"
+        <b-form-input id="email"
           type="text"
-          v-model.trim="form.username"
+          v-model.trim="form.email"
           required
-          placeholder="Entrez votre pseudo"
-          :state="statusField($v.form.username)"
-          @input="$v.form.username.$touch()"
+          placeholder="Entrez votre email"
+          :state="statusField($v.form.email)"
+          @input="$v.form.email.$touch()"
         />
-        <b-form-invalid-feedback id="usernameFeedback">
-          Ce champs est requis et doit contenir entre 3 et 20 caractères.
-        </b-form-invalid-feedback>
-      </b-form-group>
-      <b-form-group id="passwordGroup"
-        label="Mot de passe"
-        label-for="password"
-      >
-        <b-form-input id="password"
-          type="password"
-          v-model.trim="form.password"
-          required
-          placeholder="Entrez votre mot de passe"
-          :state="this.statusField($v.form.password)"
-          @input="$v.form.password.$touch()"
-        />
-        <b-form-invalid-feedback id="passwordFeedback">
-          Ce champs est requis et doit contenir entre 3 et 20 caractères.
+        <b-form-invalid-feedback id="emailFeedback">
+          L'email n'st pas valide.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-button
         type="submit"
         variant="primary"
         :disabled="$v.form.$invalid">
-        Connexion
+        Envoyer
       </b-button>
-      </b-form-group>
     </b-form>
   </div>
 </template>
@@ -52,16 +35,18 @@
 <script>
   import { AUTH_LOGIN_REQUEST, AUTH_LOGIN_SUCCESS } from '../../../Store/auth/mutation-types'
   import { validationMixin } from "vuelidate"
-  import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+  import { required, email } from 'vuelidate/lib/validators'
 
   export default {
-    name: 'login-form',
+    name: 'ask-form',
+    props: ['type'],
     data() {
       return {
         form: {
-          username: '',
+          email: '',
           password: ''
         },
+        type: '',
         showError: false,
         errors: []
       }
@@ -71,15 +56,9 @@
     ],
     validations: {
       form: {
-        username: {
+        email: {
           required,
-          minLength: minLength(3),
-          maxLength: maxLength(20),
-        },
-        password: {
-          required,
-          minLength: minLength(3),
-          maxLength: maxLength(20),
+          required
         },
       }
     },
