@@ -6,6 +6,9 @@ import {
   AUTH_PROFILE_REQUEST,
   AUTH_PROFILE_ERROR,
   AUTH_PROFILE_SUCCESS,
+  AUTH_CONFIRM_REQUEST,
+  AUTH_CONFIRM_ERROR,
+  AUTH_CONFIRM_SUCCESS,
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'

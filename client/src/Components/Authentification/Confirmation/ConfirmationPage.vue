@@ -6,7 +6,7 @@
 
 <script>
   import Vue from 'vue'
-  import { USER_CONFIRM_REQUEST } from '../../../Store/auth/mutation-types'
+  import { AUTH_CONFIRM_REQUEST } from '../../../Store/auth/mutation-types'
 
   export default {
     data() {

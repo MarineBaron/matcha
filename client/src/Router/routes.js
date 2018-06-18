@@ -2,12 +2,12 @@ import Home from '../Components/Home/Home.vue'
 import About from '../Components/Pages/About.vue'
 import LoginPage from '../Components/Authentification/Login/LoginPage.vue'
 import RegisterPage from '../Components/Authentification/Register/RegisterPage.vue'
+import ConfirmationPage from '../Components/Authentification/Confirmation/ConfirmationPage.vue'
 import ProfilePage from '../Components/User/Profile/ProfilePage.vue'
 import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
 import ForumContent from '../Components/Forum/ForumContent.vue'
 import ForumSidebar from '../Components/Forum/ForumSidebar.vue'
-//import Chat from '../Components/Chat/Chat.vue'
 
 import store from '../Store/store'
 
