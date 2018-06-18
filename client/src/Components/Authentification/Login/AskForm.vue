@@ -33,7 +33,7 @@
 </template>
 
 <script>
-  import { AUTH_LOGIN_REQUEST, AUTH_LOGIN_SUCCESS } from '../../../Store/auth/mutation-types'
+  import { AUTH_ASK_REQUEST } from '../../../Store/auth/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, email } from 'vuelidate/lib/validators'
 
@@ -46,7 +46,6 @@
           email: '',
           password: ''
         },
-        type: '',
         showError: false,
         errors: []
       }
@@ -70,13 +69,10 @@
         return !fieldState.$invalid
       },
       onSubmit(e) {
-        const { username, password } = this.form
-        this.$store.dispatch(AUTH_LOGIN_REQUEST, {username, password})
+        const email = form.email
+        this.$store.dispatch(AUTH_ASK_REQUEST, {type: type, email: email})
         .then((response) => {
-          this.$socket.emit('AUTH_LOGIN', {username: username})
-          this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 5000})
-          this.$router.push('/')
-
+          console.log(response)
         }, (error) => {
           this.setError(error)
         })

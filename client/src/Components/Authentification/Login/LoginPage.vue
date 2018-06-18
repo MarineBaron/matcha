@@ -2,7 +2,19 @@
   <div>
     <h2>{{title}}</h2>
     <login-form v-if="type==='login'"></login-form>
-    <ask-form type="password" v-if="type!=='login'"></ask-form>
+    <ask-form :type="type" v-else></ask-form>
+    <b-button v-if="type==='login'" variant="primary" @click="changeForm('password')">
+      Mot de passe oublié
+    </b-button>
+    <b-button v-if="type==='login'" variant="primary" @click="changeForm('username')">
+      Pseudo oublié
+    </b-button>
+    <b-button v-if="type==='login'" variant="primary" @click="changeForm('confirmation')">
+      Nouveau lien de confirmation
+    </b-button>
+    <b-button v-if="type!=='login'"variant="primary" @click="changeForm('login')">
+      Connexion
+    </b-button>
   </div>
 </template>
 
@@ -21,6 +33,12 @@
         title: 'Connexion',
         type: 'login'
       }
+    },
+    methods: {
+      changeForm(type) {
+        console.log(type)
+        this.type = type
+      },
     }
   }
 </script>

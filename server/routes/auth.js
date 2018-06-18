@@ -34,7 +34,21 @@ router.post('/confirm', function(req, res, next) {
       })
       return
     }
-    console.log(result)
+    res.status(200).json(result)
+  })
+})
+
+/* POST ask */
+router.post('/ask', function(req, res, next) {
+  controller.ask(req.body.type, req.body.email, function(err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
     res.status(200).json(result)
   })
 })

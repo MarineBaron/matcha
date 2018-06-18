@@ -9,6 +9,9 @@ import {
   AUTH_CONFIRM_REQUEST,
   AUTH_CONFIRM_ERROR,
   AUTH_CONFIRM_SUCCESS,
+  AUTH_ASK_REQUEST,
+  AUTH_ASK_ERROR,
+  AUTH_ASK_SUCCESS,
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
@@ -130,6 +133,28 @@ const actions = {
       })
     })
   },
+  [AUTH_ASK_REQUEST]: ({commit, dispatch}, data) => {
+    return new Promise((resolve, reject) => {
+      commit(AUTH_ASK_REQUEST)
+      callApi({url: 'auth/ask', data, method: 'POST'})
+      .then((resp) => {
+        if (resp.data.success === 0) {
+          let message = resp.data.message
+          commit(AUTH_ASK_ERROR)
+          reject(message)
+        }
+        commit(AUTH_ASK_SUCCESS)
+        resolve(resp)
+      }, (error) => {
+        commit(AUTH_ASK_ERROR)
+        reject(error)
+      })
+      .catch(err => {
+        commit(AUTH_ASK_ERROR)
+        reject(error)
+      })
+    })
+  }
 }
 
 const mutations = {
@@ -166,6 +191,15 @@ const mutations = {
     state.status = 'success'
   },
   [AUTH_CONFIRM_ERROR]: (state) => {
+    state.status = 'error'
+  },
+  [AUTH_ASK_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [AUTH_ASK_SUCCESS]: (state) => {
+    state.status = 'success'
+  },
+  [AUTH_ASK_ERROR]: (state) => {
     state.status = 'error'
   },
 }

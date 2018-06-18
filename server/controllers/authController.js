@@ -87,5 +87,11 @@ module.exports = {
         })
       })
     })
+  },
+  
+  ask: function(type, email, callback) {
+    return callback(null, {
+      success: 1
+    })
   }
 }
