@@ -19,7 +19,7 @@
           @input="$v.form.email.$touch()"
         />
         <b-form-invalid-feedback id="emailFeedback">
-          L'email n'st pas valide.
+          L'email n'est pas valide.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-button

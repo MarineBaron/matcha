@@ -9,6 +9,7 @@ import {
   AUTH_CONFIRM_REQUEST,
   AUTH_CONFIRM_ERROR,
   AUTH_CONFIRM_SUCCESS,
+  USER_PROFILE_REQUEST,
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
@@ -130,6 +131,7 @@ const actions = {
       })
     })
   },
+  
 }
 
 const mutations = {

@@ -22,7 +22,7 @@
     data() {
       return {
         mode: 'view',
-        title: 'Profile Page',
+        title: 'Votre Interface',
         buttonText: 'Editer'
       }
     },

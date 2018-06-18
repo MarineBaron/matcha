@@ -1,6 +1,8 @@
 <template>
   <div>
     ProfileView {{mode}}
+
+    
   </div>
 </template>
 
