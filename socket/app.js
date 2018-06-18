@@ -16,9 +16,9 @@ io.on('connection', function(socket) {
     io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
     // creation d'un objet null pour cet utilisateur
     visitorsData[socket.id] = {}
-    
+
     // Reception d'un mesage de login
-    socket.on('AUTH_SUCCESS', function(data) {
+    socket.on('AUTH_LOGIN', function(data) {
         //affectation du username au visiteur
         visitorsData[socket.id].username = data.username
         //ajout ou creation de la propriete connected
@@ -30,7 +30,7 @@ io.on('connection', function(socket) {
         }
         io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
     })
-    
+
     // Reception d'un mesage de logout
     socket.on('AUTH_LOGOUT', function(data) {
         //suppression de la propriete username sur tous les visiteurs associes
@@ -46,12 +46,12 @@ io.on('connection', function(socket) {
         }
         io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
     })
-    
+
     // Test Chat
     socket.on('SEND_MESSAGE', function(data) {
         io.emit('MESSAGE', data)
     })
-    
+
     // Deconnexion d'un utilisateur
     socket.on('disconnect', function() {
       nbUsers--;
@@ -66,7 +66,7 @@ io.on('connection', function(socket) {
               delete connectedUsers[data.username]
               nbConnectedUsers--
             }
-          
+
           io.emit('BYEBYE', data.username)
         }
       }

@@ -14,51 +14,18 @@ router.post('/login', function(req, res, next) {
       return
     }
     if (result) {
-      res.status(200).json({
-        success: 1,
-        data: {
-          token: result.token,
-          username: result.username,
-          role: result.role
-        }
-      })
+      res.status(200).json(result)
     } else {
       res.status(200).json({
-        success: 0,
-        data: result
+        success: 0
       })
     }
   })
-});
+})
 
-/* POST register */
-router.post('/register', function(req, res, next) {
-  controller.register(req.body.username, req.body.password, function (err, result) {
-    if (err) {
-      console.log(err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    if (result && result.success) {
-      res.status(200).json({
-        success: 1,
-        data: {token: result}
-      })
-    } else {
-      res.status(200).json({
-        success: 0,
-        data: result
-      })
-    }
-  })
-});
-
-/* POST logout */
-router.post('/logout', function(req, res, next) {
-  controller.logout(req.params.token, function (err, result) {
+/* POST confirm */
+router.post('/confirm', function(req, res, next) {
+  controller.login(req.body.username, req.body.token, function(err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -68,15 +35,13 @@ router.post('/logout', function(req, res, next) {
       return
     }
     if (result) {
-      res.status(200).json({
-        success: 1
-      })
+      res.status(200).json(result)
     } else {
       res.status(200).json({
         success: 0
       })
     }
   })
-});
+})
 
 module.exports = router;

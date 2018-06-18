@@ -1,6 +1,14 @@
 <template>
   <div>
-    <b-form @submit="onSubmit" >
+    <b-alert :show="showError" variant="danger">
+      <ul>
+        <li v-for="(error, index) in errors" :key="index">{{error}}</li>
+      </ul>
+    </b-alert>
+    <b-alert :show="showRegistered" variant="success">
+      Vous avez été enregistré, vous devez confirmer votre inscription en cliquant sur le lien dans le mail que nous vous avons envoyé.
+    </b-alert>
+    <b-form v-if="showForm" @submit.prevent="onSubmit" >
       <b-form-group id="usernameGroup"
         label="Pseudo"
         label-for="username"
@@ -9,11 +17,28 @@
           type="text"
           v-model.trim="form.username"
           required
-          placeholder="Enter your username"
-          :state="!$v.form.username.$invalid"
+          placeholder="Entrez votre pseudo"
+          :state="statusField($v.form.username)"
+          @input="$v.form.username.$touch()"
         />
         <b-form-invalid-feedback id="usernameFeedback">
           Ce champs est requis et doit contenir entre 3 et 20 caractères.
+        </b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group id="emailGroup"
+        label="Email"
+        label-for="email"
+      >
+        <b-form-input id="email"
+          type="text"
+          v-model.trim="form.email"
+          required
+          placeholder="Entrez votre email"
+          :state="statusField($v.form.email)"
+          @input="$v.form.email.$touch()"
+        />
+        <b-form-invalid-feedback id="emailFeedback">
+          L'email n'est pas correct.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-form-group id="passwordGroup"
@@ -24,8 +49,9 @@
           type="password"
           v-model.trim="form.password"
           required
-          placeholder="Enter your password"
-          :state="!$v.form.password.$invalid"
+          placeholder="Entrez votre mot de passe"
+          :state="statusField($v.form.password)"
+          @input="$v.form.password.$touch()"
         />
         <b-form-invalid-feedback id="passwordFeedback">
           Ce champs est requis et doit contenir entre 3 et 20 caractères.
@@ -39,11 +65,12 @@
           type="password"
           v-model.trim="form.password2"
           required
-          placeholder="Enter your password"
-          :state="!$v.form.password2.$invalid"
+          placeholder="Entrez votre mot de passe"
+          :state="statusField($v.form.password2)"
+          @input="$v.form.password2.$touch()"
         />
         <b-form-invalid-feedback id="password2Feedback">
-          Ce champs est requis et doit contenir entre 3 et 20 caractères.
+          Les mots de passe ne sont pas identiques.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-button
@@ -56,15 +83,24 @@
 </template>
 
 <script>
-  import { REGISTER_REQUEST } from '../../../Store/auth/mutation-types'
+  import { USER_REGISTER_REQUEST } from '../../../Store/user/mutation-types'
   import { validationMixin } from "vuelidate"
-  import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-  
+  import { required, minLength, maxLength, sameAs, email } from 'vuelidate/lib/validators'
+
   export default {
     name: 'register-form',
     data() {
       return {
-        form: {}
+        form: {
+          username: '',
+          email: '',
+          password: '',
+          password2: '',
+        },
+        showForm: true,
+        showRegistered: false,
+        showError: false,
+        errors: []
       }
     },
     mixins: [
@@ -77,30 +113,41 @@
           minLength: minLength(3),
           maxLength: maxLength(20),
         },
+        email: {
+          required,
+          email,
+        },
         password: {
           required,
           minLength: minLength(3),
           maxLength: maxLength(20),
         },
         password2: {
-          required,
-          minLength: minLength(3),
-          maxLength: maxLength(20),
+          sameAsPassword: sameAs('password'),
         },
       }
     },
     methods: {
+      statusField(fieldState) {
+        if (!fieldState.$dirty) {
+          return null
+        }
+        return !fieldState.$invalid
+      },
       onSubmit(e) {
-        e.preventDefault()
-        const { username, password } = this.form
-        this.$store.dispatch(REGISTER_REQUEST, {username, password})
-          .then(() => {
-            this.flash('Vous avez été enregistré, veuillez entrer vos identifiants de connexion.', 'success', {timeout: 2000})
-            this.$router.push('/login')
+        const { username, email, password } = this.form
+        this.$store.dispatch(USER_REGISTER_REQUEST, {username, email, password})
+          .then((response) => {
+            this.showForm = false
+            this.showError = false
+            this.showRegistered = true
+          }, (error) => {
+            this.setError(error)
           })
-          .catch(() => {
-            this.flash('Ce pseudo existe déjà, choisissez un autre pseudo', 'error', {timeout: 2000})
-          })
+      },
+      setError(error) {
+        this.showError = true
+        this.errors = [error]
       }
     }
   }

@@ -1,6 +1,11 @@
 <template>
   <div>
-    <b-form @submit="onSubmit" >
+    <b-alert :show="showError" variant="danger">
+      <ul>
+        <li v-for="(error, index) in errors" :key="index">{{error}}</li>
+      </ul>
+    </b-alert>
+    <b-form @submit.prevent="onSubmit" >
       <b-form-group id="usernameGroup"
         label="Pseudo"
         label-for="username"
@@ -9,8 +14,9 @@
           type="text"
           v-model.trim="form.username"
           required
-          placeholder="Enter your username"
-          :state="!$v.form.username.$invalid"
+          placeholder="Entrez votre pseudo"
+          :state="statusField($v.form.username)"
+          @input="$v.form.username.$touch()"
         />
         <b-form-invalid-feedback id="usernameFeedback">
           Ce champs est requis et doit contenir entre 3 et 20 caractères.
@@ -24,8 +30,9 @@
           type="password"
           v-model.trim="form.password"
           required
-          placeholder="Enter your password"
-          :state="!$v.form.password.$invalid"
+          placeholder="Entrez votre mot de passe"
+          :state="this.statusField($v.form.password)"
+          @input="$v.form.password.$touch()"
         />
         <b-form-invalid-feedback id="passwordFeedback">
           Ce champs est requis et doit contenir entre 3 et 20 caractères.
@@ -41,15 +48,20 @@
 </template>
 
 <script>
-  import { AUTH_REQUEST, AUTH_SUCCESS } from '../../../Store/auth/mutation-types'
+  import { AUTH_LOGIN_REQUEST, AUTH_LOGIN_SUCCESS } from '../../../Store/auth/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-  
+
   export default {
     name: 'login-form',
     data() {
       return {
-        form: {}
+        form: {
+          username: '',
+          password: ''
+        },
+        showError: false,
+        errors: []
       }
     },
     mixins: [
@@ -70,19 +82,27 @@
       }
     },
     methods: {
+      statusField(fieldState) {
+        if (!fieldState.$dirty) {
+          return null
+        }
+        return !fieldState.$invalid
+      },
       onSubmit(e) {
-        e.preventDefault()
         const { username, password } = this.form
-        this.$store.dispatch(AUTH_REQUEST, {username, password})
-        .then(() => {
-          this.$socket.emit(AUTH_SUCCESS, {username: username})
-          this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 2000})
+        this.$store.dispatch(AUTH_LOGIN_REQUEST, {username, password})
+        .then((response) => {
+          this.$socket.emit('AUTH_LOGIN', {username: username})
+          this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 5000})
           this.$router.push('/')
+
+        }, (error) => {
+          this.setError(error)
         })
-        .catch(() => {
-          this.flash('Vos identifiants sont incorrects.', 'error', {timeout: 2000})
-          this.$router.push('/login')
-        })
+      },
+      setError(error) {
+        this.showError = true
+        this.errors = [error]
       }
     }
   }

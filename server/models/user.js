@@ -8,12 +8,20 @@ const UserSchema = new mongoose.Schema({
     type: String,
     index: {unique: true}
   },
+  password: String,
   role: {
     type: String,
     enum: ['admin', 'user']
   },
-  password: String,
+  email: String,
+  confirmed: Boolean,
+  banished: Boolean,
   created: {
+    type: Date,
+    required: true,
+    default: new Date()
+  },
+  updated: {
     type: Date,
     required: true,
     default: new Date()
@@ -26,7 +34,7 @@ UserSchema.methods.comparePassword = function comparePassword(password, callback
 
 UserSchema.pre('save', function saveHook(next) {
   const user = this
-  
+
   if (!user.isModified('password')) {
     return next()
   }
