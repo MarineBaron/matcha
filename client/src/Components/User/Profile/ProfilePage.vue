@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>{{title}}</h2>
-    <div>TODO</div>
+    <div>Votre Interface Personnalisée</div>
   </div>
 </template>
 
