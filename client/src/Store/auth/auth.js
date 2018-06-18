@@ -41,7 +41,7 @@ const actions = {
               message = 'Ce pseudo est inexistant.'
             break;
             case 'UNCONFIRMED USER':
-              message = 'Vous devez confirmer votre inscrption.'
+              message = 'Vous devez confirmer votre inscription.'
             break;
             case 'BANISHED USER':
               message = 'Vous avez été banni.'
@@ -97,13 +97,36 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(AUTH_CONFIRM_REQUEST)
       callApi({url: 'auth/confirm', data, method: 'POST'})
-      .then((response) => {
-
+      .then((resp) => {
+        if (resp.data.success === 0) {
+          let message = ''
+          switch(resp.message) {
+            case 'BAD TOKEN':
+              message = 'Votre token est invalide.'
+            break;
+            case 'BAD USERNAME':
+              message = 'Votre token ne correspond pas à votre pseudo.'
+            break;
+            case 'USER NOT FOUND':
+              message = 'Votre pseudo ne correspond à aucun utilisateur enregistré.'
+            break;
+            default :
+              message = 'La confirmation de votre inscription a échoué.'
+            break;
+          }
+          commit(AUTH_CONFIRM_ERROR)
+          reject(message)
+        } else {
+          commit(AUTH_CONFIRM_SUCCESS)
+          resolve(resp)
+        }
       }, (error) => {
-
+          commit(AUTH_CONFIRM_ERROR)
+          reject(message)
       })
       .catch(err => {
-
+        commit(AUTH_CONFIRM_ERROR)
+        reject(err)
       })
     })
   },

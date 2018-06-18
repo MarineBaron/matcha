@@ -25,7 +25,7 @@ router.post('/login', function(req, res, next) {
 
 /* POST confirm */
 router.post('/confirm', function(req, res, next) {
-  controller.login(req.body.username, req.body.token, function(err, result) {
+  controller.confirm(req.body.username, req.body.token, function(err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -34,13 +34,8 @@ router.post('/confirm', function(req, res, next) {
       })
       return
     }
-    if (result) {
-      res.status(200).json(result)
-    } else {
-      res.status(200).json({
-        success: 0
-      })
-    }
+    console.log(result)
+    res.status(200).json(result)
   })
 })
 

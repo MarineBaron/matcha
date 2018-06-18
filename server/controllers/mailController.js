@@ -13,14 +13,12 @@ const transporter = nodeMailer.createTransport({
 module.exports = {
   send: function(to, obj) {
     const mailOptions = {
-      from: process.env.MAIL_ADMIN_USER, // sender address
+      from: process.env.MAIL_ADMIN_USER,
       to: to === 'admin' ? process.env.MAIL_ADMIN_USER : process.env.MAIL_USER_USER, // list of receivers
-      subject: obj.subject, // Subject line
-      text: obj.text, // plain text body
-      html: obj.html// html body
+      subject: obj.subject,
+      text: obj.text,
+      html: obj.html
     }
-    console.log(mailOptions)
-
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           return console.log(error);

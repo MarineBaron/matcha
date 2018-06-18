@@ -1,6 +1,7 @@
 <template>
   <div>
     <h2>{{title}}</h2>
+    <div>{{text}}</div>
   </div>
 </template>
 
@@ -13,19 +14,19 @@
       return {
         username: '',
         token: '',
-        title: 'Confirmation'
+        title: 'Confirmation',
+        text: ''
       }
     },
-    created() {
-      this.username = his.$route.params.username
-      this.token = his.$route.params.token
-    },
     mounted() {
+      this.username = this.$route.params.username
+      this.token = this.$route.params.token
       this.$store.dispatch(AUTH_CONFIRM_REQUEST, {username: this.username, token: this.token})
       .then((response) => {
+        this.flash('Votre inscription a été confirmée, connectez-vous !', 'success', {timeout: 5000})
         this.$router.push('/login')
       }, (error) => {
-        this.setError(error)
+        this.text = "Une erreur est survenue lors de la confirmation de votre inscription."
       })
     }
   }
