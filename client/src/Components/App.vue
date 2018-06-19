@@ -4,6 +4,7 @@
       <navigation />
     </header>
     <b-container fluid>
+      <flash-message class="flash-message"></flash-message>
       <b-row>
         <b-col auto>
           <section id="content">
@@ -60,12 +61,7 @@ a {
   color: #42b983;
 }
 
-/*
-section#content {
-  background-color: red;
+.flash-message {
+  margin-top: 10px;
 }
-aside {
-  background-color: blue;
-}
-*/
 </style>

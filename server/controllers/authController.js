@@ -1,7 +1,6 @@
-const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-
-const User = require('../models/User')
+const User = require('../models/user')
+const userController = require('./userController')
 
 module.exports = {
   login: function(username, password, callback) {
@@ -11,46 +10,196 @@ module.exports = {
         return
       }
       if (!user) {
+        callback(null, {
+          success: 0,
+          message: 'INEXISTANT LOGIN'
+        })
+        return
+      }
+      if (user.confirmed === false) {
+        callback(null, {
+          success: 0,
+          message: 'UNCONFIRMED USER'
+        })
+        return
+      }
+      if (user.banished === true) {
+        callback(null, {
+          success: 0,
+          message: 'BANISHED USER'
+        })
+        return
+      }
+      user.comparePassword(password, function (err, isMatch) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        if (!isMatch) {
+          callback(null, {
+            success: 0,
+            message: 'BAD CREDENTIALS'
+          })
+          return
+        }
+        const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
+        callback(null, {
+          success: 1,
+          token: authToken
+        })
+      })
+    })
+  },
+
+  logout: function(token) {
+  },
+
+  confirm: function(username, token, callback) {
+    jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
+      
+      if (err) {
+        callback(null, {
+          success: 0,
+          message: 'BAD TOKEN'
+        })
+        return
+      }
+      if (decoded.username !== username) {
+        callback(null, {
+          success: 0,
+          message: 'BAD USERNAME'
+        })
+        return
+      }
+      User.findOneAndUpdate({username: username}, {confirmed: true}, function(err, user) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        if (!user) {
+          callback(null, {
+            success: 0,
+            message: 'USER NOT FOUND'
+          })
+          return
+        }
+        callback(null, {
+          success: 1
+        })
+      })
+    })
+  },
+  
+  ask: function(type, email, callback) {
+    User.findOne({email: email}, function(err, user) {
+      if (err) {
         callback(err, null)
-      } else {
+        return
+      }
+      if (!user) {
+        callback(null, {
+          success: 0,
+          message: 'USER NOT FOUND'
+        })
+        return
+      }
+      if (user.banished === true) {
+        callback(null, {
+          success: 0,
+          message: 'BANISHED USER'
+        })
+        return
+      }
+      if (type === 'confirmation' && user.confirmed) {
+        callback(null, {
+          success: 0,
+          message: 'CONFIRMED USER'
+        })
+        return
+      }
+      const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
+      switch(type) {
+        case 'password':
+          userController.sendEmailPasswordReset(user, authToken)
+        break;
+        case 'username':
+          userController.sendEmailAskUsername(user, authToken)
+        break
+        case 'confirmation':
+          userController.sendEmailConfirmation(user, authToken)
+        break;
+      }
+      callback(null, {
+        success: 1
+      })
+    })
+  },
+  
+  passwordreset: function(username, token, password, callback) {
+    jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
+      if (err) {
+        callback(null, {
+          success: 0,
+          message: 'BAD TOKEN'
+        })
+        return
+      }
+      if (decoded.username !== username) {
+        callback(null, {
+          success: 0,
+          message: 'BAD TOKEN'
+        })
+        return
+      }
+      User.findOne({username: username}, function(err, user) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        if (!user) {
+          callback(null, {
+            success: 0,
+            message: 'USER NOT FOUND'
+          })
+          return
+        }
+        if (user.banished) {
+          callback(null, {
+            success: 0,
+            message: 'BANISHED USER'
+          })
+          return
+        }
+        if (!user.confirmed) {
+          callback(null, {
+            success: 0,
+            message: 'UNCONFIRMED USER'
+          })
+          return
+        }
         user.comparePassword(password, function (err, isMatch) {
           if (err) {
             callback(err, null)
             return
           }
           if (isMatch) {
-            const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
             callback(null, {
-              token: authToken,
-              username: user.username,
-              role: user.role,
+              success: 1,
             })
-          } else {
-            callback(err, null)
+            return
           }
+          user.password = password
+          user.save(function(err, user) {
+            if (err) {
+              callback(err, null)
+              return
+            }
+            callback(null, {
+              success: 1,
+            })
+          })
         })
-      }
-    })
-  },
-  
-  logout: function(token) {
-  },
-  
-  register: function (username, password, callback) {
-    console.log(username, password)
-    const newUser = new User({
-      username: username, 
-      password: password, 
-      role: 'user'
-    })
-    console.log(newUser)
-    newUser.save(function(err, user) {
-      if (err) {
-        callback(err, null)
-        return
-      }
-      const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
-      callback(null, authToken)
+      })
     })
   },
 }

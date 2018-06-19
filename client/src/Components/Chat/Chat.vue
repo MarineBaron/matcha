@@ -28,22 +28,20 @@
 </template>
 
 <script>
-import io from 'socket.io-client';
 
 export default {
     data() {
         return {
             user: '',
             message: '',
-            messages: [],
-            socket : io('localhost:3001')
+            messages: []
         }
     },
     methods: {
         sendMessage(e) {
             e.preventDefault();
             
-            this.socket.emit('SEND_MESSAGE', {
+            this.$socket.emit('SEND_MESSAGE', {
                 user: this.user,
                 message: this.message
             });
@@ -51,11 +49,11 @@ export default {
         }
     },
     mounted() {
-        this.socket.on('MESSAGE', (data) => {
+        this.$socket.on('MESSAGE', (data) => {
             this.messages = [...this.messages, data];
             // you can also do this.messages.push(data)
         });
-        this.socket.on('BYEBYE', (data) => {
+        this.$socket.on('BYEBYE', (data) => {
           const inputMsg = {
             user: data,
             message: '... is gone'
@@ -65,7 +63,3 @@ export default {
     }
 }
 </script>
-
-<style>
-
-</style>

@@ -1,46 +1,87 @@
-import { USER_REQUEST, USER_ERROR, USER_SUCCESS, USER_LOGOUT } from './mutation-types'
-import { AUTH_LOGOUT } from '../auth/mutation-types'
+import {
+  USER_REGISTER_REQUEST,
+  USER_REGISTER_SUCCESS,
+  USER_REGISTER_ERROR,
+  USER_USER_REQUEST,
+  USER_USER_ERROR,
+  USER_USER_SUCCESS
+} from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
 
 const state = {
-  profile: localStorage.getItem('profile') ? JSON.parse(localStorage.getItem('profile')) : {},
-  status: ''
+  status: '',
+  user: {},
+  users: []
 }
 
 const getters = {
-  getProfile: state => state.profile,
-  isProfileLoaded: state => !!state.profile.username
+  getUser: state => state.user,
+  getUsers: state => state.users,
 }
 
 const actions = {
-  [USER_REQUEST]: ({commit, dispatch}, username) => {
-    commit(USER_REQUEST)
-    callApi({url: 'user/profile/' + username})
-      .then(resp => {
-        const data = resp.data.data
-        localStorage.setItem('profile', JSON.stringify(data))
-        commit(USER_SUCCESS, data)
+  [USER_REGISTER_REQUEST]: ({commit, dispatch}, user) => {
+    return new Promise((resolve, reject) => {
+      commit(USER_REGISTER_REQUEST)
+      callApi({url: 'user/create', data: user, method: 'POST'})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          commit(USER_REGISTER_ERROR)
+          reject(resp.data.message)
+        } else {
+          commit(USER_REGISTER_SUCCESS)
+          resolve(resp)
+        }
       })
       .catch(err => {
-        commit(USER_ERROR)
-        localStorage.removeItem('profile')
-        dispatch(AUTH_LOGOUT)
+        commit(USER_REGISTER_ERROR)
+        reject(err)
       })
+    })
   },
+  [USER_USER_REQUEST]: ({commit, dispatch}, username) => {
+    return new Promise((resolve, reject) => {
+      commit(USER_USER_REQUEST)
+      callApi({url: 'user/user/' + username})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          commit(USER_USER_ERROR)
+          reject(resp.data.message)
+        } else {
+          console.log('action USER_USER_REQUEST',resp.data)
+          commit(USER_USER_SUCCESS)
+          resolve(resp.data.data)
+        }
+      })
+      .catch(err => {
+        commit(USER_USER_ERROR)
+        reject(err)
+      })
+    })
+  }
 }
 
 const mutations = {
-  [USER_REQUEST]: (state) => {
+  [USER_REGISTER_REQUEST]: (state) => {
     state.status = 'loading'
   },
-  [USER_SUCCESS]: (state, data) => {
+  [USER_REGISTER_SUCCESS]: (state) => {
     state.status = 'success'
-    Vue.set(state, 'profile', data)
   },
-  [USER_ERROR]: (state) => {
+  [USER_REGISTER_ERROR]: (state) => {
     state.status = 'error'
-    state.profile = {}
+  },
+  [USER_USER_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [USER_USER_SUCCESS]: (state, data) => {
+    state.status = 'success',
+    state.user = data
+  },
+  [USER_USER_ERROR]: (state) => {
+    state.status = 'error',
+    state.user = {}
   },
 }
 

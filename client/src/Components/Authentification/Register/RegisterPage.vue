@@ -14,7 +14,7 @@
     },
     data() {
       return {
-        title: 'Register Page'
+        title: 'Enregistrement'
       }
     }
   }
