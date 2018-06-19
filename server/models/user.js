@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
   age:{ 
       type: Number, 
       min: 18, 
-      max: 65 
+      max: 250 
   },
   resume: String,
   city: String,
@@ -47,10 +47,14 @@ const UserSchema = new mongoose.Schema({
   }, 
   latitude: Number,
   longitude: Number,
+  // friends: [{
+  //     type: String,
+  // }],
+  avatar: String,
   friends: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-  }],
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+}],
   likes: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
@@ -67,7 +71,7 @@ const UserSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Preference'
   }], 
-  images: [{
+  galery: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Image'
   }]
