@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item :to="{path: '/login'}">Login</b-nav-item>
+  <b-nav-item :to="{path: '/login'}">Connexion</b-nav-item>
 </template>
 
 <script>

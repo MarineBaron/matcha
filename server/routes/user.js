@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var controller = require('../controllers/userController')
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/userController')
+const verifyToken = require('../middleware/verifyToken')
 
-/* GET profile */
-router.get('/profile/:username', function(req, res, next) {
-  controller.findByUsername(req.params.username, function (err, result) {
-    console.log(result, err)
+/* POST create */
+router.post('/create', function(req, res, next) {
+  controller.create(req.body.username, req.body.email, req.body.password, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -14,18 +14,38 @@ router.get('/profile/:username', function(req, res, next) {
       })
       return
     }
-    if (result) {
-      console.log("RESULT",result)
-      res.status(200).json({
-        success: 1,
-        data: result.data
-      })
-    } else {
-      res.status(200).json({
-        success: 0
-      })
-    }
+    res.status(200).json(result)
   })
-});
+})
+
+/* GET profile */
+router.get('/profile', verifyToken, function(req, res, next) {
+  controller.findById(req.user._id, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
+/* GET user */
+router.get('/user/:username', function(req, res, next) {
+  controller.findAllByUsername(req.params.username, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
 
 module.exports = router;

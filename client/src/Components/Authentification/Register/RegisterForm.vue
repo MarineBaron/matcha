@@ -1,70 +1,106 @@
 <template>
   <div>
-    <b-form @submit="onSubmit" >
+    <b-alert :show="showError" variant="danger">
+      <ul>
+        <li v-for="(error, index) in errors" :key="index">{{error}}</li>
+      </ul>
+    </b-alert>
+    <b-alert :show="showRegistered" variant="success">
+      Vous avez été enregistré, vous devez confirmer votre inscription en cliquant sur le lien dans le mail que nous vous avons envoyé.
+    </b-alert>
+    <b-form v-if="showForm" @submit.prevent="onSubmit" >
       <b-form-group id="usernameGroup"
-        label="Username"
+        label="Pseudo"
         label-for="username"
       >
         <b-form-input id="username"
           type="text"
           v-model.trim="form.username"
           required
-          placeholder="Enter your username"
-          :state="!$v.form.username.$invalid"
+          placeholder="Entrez votre pseudo"
+          :state="statusField($v.form.username)"
+          @input="$v.form.username.$touch()"
         />
         <b-form-invalid-feedback id="usernameFeedback">
-          This is a required field and must be between 4 and 20 characters
+          Ce champs est requis et doit contenir entre 3 et 20 caractères.
+        </b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group id="emailGroup"
+        label="Email"
+        label-for="email"
+      >
+        <b-form-input id="email"
+          type="text"
+          v-model.trim="form.email"
+          required
+          placeholder="Entrez votre email"
+          :state="statusField($v.form.email)"
+          @input="$v.form.email.$touch()"
+        />
+        <b-form-invalid-feedback id="emailFeedback">
+          L'email n'est pas correct.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-form-group id="passwordGroup"
-        label="Password"
+        label="Mot de passe"
         label-for="password"
       >
         <b-form-input id="password"
           type="password"
           v-model.trim="form.password"
           required
-          placeholder="Enter your password"
-          :state="!$v.form.password.$invalid"
+          placeholder="Entrez votre mot de passe"
+          :state="statusField($v.form.password)"
+          @input="$v.form.password.$touch()"
         />
         <b-form-invalid-feedback id="passwordFeedback">
-          This is a required field and must be between 4 and 20 characters
+          Ce champs est requis et doit contenir entre 3 et 20 caractères.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-form-group id="password2Group"
-        label="Confirm your password"
+        label="Confirmez votre mot de passe"
         label-for="password2"
       >
         <b-form-input id="password2"
           type="password"
           v-model.trim="form.password2"
           required
-          placeholder="Enter your password"
-          :state="!$v.form.password2.$invalid"
+          placeholder="Entrez votre mot de passe"
+          :state="statusField($v.form.password2)"
+          @input="$v.form.password2.$touch()"
         />
         <b-form-invalid-feedback id="password2Feedback">
-          This is a required field and must be between 4 and 20 characters
+          Les mots de passe ne sont pas identiques.
         </b-form-invalid-feedback>
       </b-form-group>
       <b-button
         type="submit"
         variant="primary"
         :disabled="$v.form.$invalid">
-      Register</b-button>
+      Valider</b-button>
     </b-form>
   </div>
 </template>
 
 <script>
-  import { REGISTER_REQUEST } from '../../../Store/auth/mutation-types'
+  import { USER_REGISTER_REQUEST } from '../../../Store/user/mutation-types'
   import { validationMixin } from "vuelidate"
-  import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-  
+  import { required, minLength, maxLength, sameAs, email } from 'vuelidate/lib/validators'
+
   export default {
     name: 'register-form',
     data() {
       return {
-        form: {}
+        form: {
+          username: '',
+          email: '',
+          password: '',
+          password2: '',
+        },
+        showForm: true,
+        showRegistered: false,
+        showError: false,
+        errors: []
       }
     },
     mixins: [
@@ -77,25 +113,53 @@
           minLength: minLength(3),
           maxLength: maxLength(20),
         },
+        email: {
+          required,
+          email,
+        },
         password: {
           required,
           minLength: minLength(3),
           maxLength: maxLength(20),
         },
         password2: {
-          required,
-          minLength: minLength(3),
-          maxLength: maxLength(20),
+          sameAsPassword: sameAs('password'),
         },
       }
     },
     methods: {
+      statusField(fieldState) {
+        if (!fieldState.$dirty) {
+          return null
+        }
+        return !fieldState.$invalid
+      },
       onSubmit(e) {
-        e.preventDefault()
-        const { username, password } = this.form
-        this.$store.dispatch(REGISTER_REQUEST, {username, password}).then(() => {
-          this.$router.push('/login')
-        })
+        const { username, email, password } = this.form
+        this.$store.dispatch(USER_REGISTER_REQUEST, {username, email, password})
+          .then((response) => {
+            this.showForm = false
+            this.showError = false
+            this.showRegistered = true
+          }, (error) => {
+            let message = ''
+            switch(error) {
+              case 'DUPLICATE USERNAME':
+                message = 'Votre pseudo est déjà utilisé. Veuillez en choisir un autre.'
+              break
+              case 'NOT CONFIRMED':
+                message = 'Vous avez déjà été enregistré, mais vous n\'avez pas confirmé votre inscription. Veuillez confirmer votre inscription en cliquant sur le lien dans le mail que nous vous avons envoyé.'
+              break
+              default:
+                message = 'Votre enregistrement a échoué. Veuillez réessayer.'
+              break
+            }
+            this.setError(message)
+          })
+      },
+      setError(error) {
+        this.showError = true
+        this.errors = [error]
       }
     }
   }
