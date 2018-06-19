@@ -133,5 +133,73 @@ module.exports = {
         success: 1
       })
     })
-  }
+  },
+  
+  passwordreset: function(username, token, password, callback) {
+    jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
+      if (err) {
+        callback(null, {
+          success: 0,
+          message: 'BAD TOKEN'
+        })
+        return
+      }
+      if (decoded.username !== username) {
+        callback(null, {
+          success: 0,
+          message: 'BAD TOKEN'
+        })
+        return
+      }
+      User.findOne({username: username}, function(err, user) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        if (!user) {
+          callback(null, {
+            success: 0,
+            message: 'USER NOT FOUND'
+          })
+          return
+        }
+        if (user.banished) {
+          callback(null, {
+            success: 0,
+            message: 'BANISHED USER'
+          })
+          return
+        }
+        if (!user.confirmed) {
+          callback(null, {
+            success: 0,
+            message: 'UNCONFIRMED USER'
+          })
+          return
+        }
+        user.comparePassword(password, function (err, isMatch) {
+          if (err) {
+            callback(err, null)
+            return
+          }
+          if (isMatch) {
+            callback(null, {
+              success: 1,
+            })
+            return
+          }
+          user.password = password
+          user.save(function(err, user) {
+            if (err) {
+              callback(err, null)
+              return
+            }
+            callback(null, {
+              success: 1,
+            })
+          })
+        })
+      })
+    })
+  },
 }

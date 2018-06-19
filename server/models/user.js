@@ -52,4 +52,19 @@ UserSchema.pre('save', function saveHook(next) {
   })
 })
 
+UserSchema.methods.hashPassword = function hashPassword(next) {
+  return bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+    if (err) {
+      return next(err)
+    }
+    return bcrypt.hash(this.password, salt, function (hashError, hash) {
+      if (hashError) {
+        return next(hashError)
+      }
+      this.password = hash
+      return next()
+    })
+  })
+}
+
 module.exports = mongoose.model('User', UserSchema)

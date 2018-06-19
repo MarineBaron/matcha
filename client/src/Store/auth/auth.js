@@ -12,6 +12,9 @@ import {
   AUTH_ASK_REQUEST,
   AUTH_ASK_ERROR,
   AUTH_ASK_SUCCESS,
+  AUTH_PASSWORD_RESET_REQUEST,
+  AUTH_PASSWORD_RESET_ERROR,
+  AUTH_PASSWORD_RESET_SUCCESS,
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
@@ -135,7 +138,28 @@ const actions = {
         reject(error)
       })
     })
-  }
+  },
+  [AUTH_PASSWORD_RESET_REQUEST]: ({commit, dispatch}, data) => {
+    return new Promise((resolve, reject) => {
+      commit(AUTH_PASSWORD_RESET_REQUEST)
+      callApi({url: 'auth/passwordreset', data, method: 'POST'})
+      .then((resp) => {
+        if (!resp.data.success) {
+          commit(AUTH_PASSWORD_RESET_ERROR)
+          reject(resp.data.message)
+        }
+        commit(AUTH_PASSWORD_RESET_SUCCESS)
+        resolve(resp)
+      }, (error) => {
+        commit(AUTH_PASSWORD_RESET_ERROR)
+        reject(error)
+      })
+      .catch(err => {
+        commit(AUTH_PASSWORD_RESET_ERROR)
+        reject(error)
+      })
+    })
+  },
 }
 
 const mutations = {
@@ -181,6 +205,15 @@ const mutations = {
     state.status = 'success'
   },
   [AUTH_ASK_ERROR]: (state) => {
+    state.status = 'error'
+  },
+  [AUTH_PASSWORD_RESET_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [AUTH_PASSWORD_RESET_SUCCESS]: (state) => {
+    state.status = 'success'
+  },
+  [AUTH_PASSWORD_RESET_ERROR]: (state) => {
     state.status = 'error'
   },
 }

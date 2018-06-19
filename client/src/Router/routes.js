@@ -3,6 +3,7 @@ import About from '../Components/Pages/About.vue'
 import LoginPage from '../Components/Authentification/Login/LoginPage.vue'
 import RegisterPage from '../Components/Authentification/Register/RegisterPage.vue'
 import ConfirmationPage from '../Components/Authentification/Confirmation/ConfirmationPage.vue'
+import PasswordResetPage from '../Components/Authentification/PasswordReset/PasswordResetPage.vue'
 import ProfilePage from '../Components/User/Profile/ProfilePage.vue'
 import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
@@ -56,6 +57,11 @@ export default [
   {
     path: '/confirmation/:username/:token',
     component: ConfirmationPage,
+    meta: {},
+  },
+  {
+    path: '/passwordreset/:username/:token',
+    component: PasswordResetPage,
     meta: {},
   },
   {

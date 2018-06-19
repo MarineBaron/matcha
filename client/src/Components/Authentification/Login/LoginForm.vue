@@ -103,19 +103,19 @@
           switch(error) {
             case 'INEXISTANT LOGIN':
               message = 'Ce pseudo est inexistant.'
-            break;
+            break
             case 'UNCONFIRMED USER':
               message = 'Vous devez confirmer votre inscription.'
-            break;
+            break
             case 'BANISHED USER':
               message = 'Vous avez été banni.'
-            break;
+            break
             case 'BAD CREDENTIALS':
               message = 'Votre pseudo et votre mot de passe ne concordent pas.'
-            break;
+            break
             default :
               message = 'Vos identifiants sont incorrects.'
-            break;
+            break
           }
           this.setError(message)
         })

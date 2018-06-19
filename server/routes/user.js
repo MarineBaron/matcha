@@ -29,7 +29,6 @@ router.get('/profile', verifyToken, function(req, res, next) {
       })
       return
     }
-    console.log('/profile', result)
     res.status(200).json(result)
   })
 })
@@ -45,7 +44,6 @@ router.get('/user/:username', function(req, res, next) {
       })
       return
     }
-    console.log('/user/:username', result)
     res.status(200).json(result)
   })
 })

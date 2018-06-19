@@ -53,4 +53,20 @@ router.post('/ask', function(req, res, next) {
   })
 })
 
+
+/* POST ask */
+router.post('/passwordreset', function(req, res, next) {
+  controller.passwordreset(req.body.username, req.body.token, req.body.password, function(err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
 module.exports = router;
