@@ -12,7 +12,7 @@ const app = express();
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use('/images', express.static ('images'));
 /* Base de données & ORM */
 const mongoose = require('mongoose')
 const dbURL = process.env.MONGO_DB_URL

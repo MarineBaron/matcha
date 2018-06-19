@@ -9,9 +9,13 @@ import {
   AUTH_CONFIRM_REQUEST,
   AUTH_CONFIRM_ERROR,
   AUTH_CONFIRM_SUCCESS,
+<<<<<<< HEAD
   AUTH_ASK_REQUEST,
   AUTH_ASK_ERROR,
   AUTH_ASK_SUCCESS,
+=======
+  USER_PROFILE_REQUEST,
+>>>>>>> 96db7a9275278cb2ed667a5b3946a8f038c5c663
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
@@ -133,6 +137,7 @@ const actions = {
       })
     })
   },
+<<<<<<< HEAD
   [AUTH_ASK_REQUEST]: ({commit, dispatch}, data) => {
     return new Promise((resolve, reject) => {
       commit(AUTH_ASK_REQUEST)
@@ -155,6 +160,9 @@ const actions = {
       })
     })
   }
+=======
+  
+>>>>>>> 96db7a9275278cb2ed667a5b3946a8f038c5c663
 }
 
 const mutations = {

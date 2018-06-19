@@ -1,5 +1,9 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const Gender = require('./gender.js')
+const Hobbie = require('./hobbie.js')
+const Preference = require('./preference.js')
+const Image = require('./image.js')
 
 const SALT_WORK_FACTOR = 10
 
@@ -25,7 +29,52 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     required: true,
     default: new Date()
-  }
+  },
+  firstname: String,
+  lastname: String,
+  age:{ 
+      type: Number, 
+      min: 18, 
+      max: 250 
+  },
+  resume: String,
+  city: String,
+  zip: Number,
+  tel: [String],
+  visibility: {
+      type: String,
+      enum: ["LoggedOut", "LoggedIn", "Absent", "Buzy" ]
+  }, 
+  latitude: Number,
+  longitude: Number,
+  // friends: [{
+  //     type: String,
+  // }],
+  avatar: String,
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+}],
+  likes: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+  }],
+  genders: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Gender'
+  }],
+  hobbies: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hobbie'
+  }], 
+  preferences: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Preference'
+  }], 
+  galery: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Image'
+  }]
 })
 
 UserSchema.methods.comparePassword = function comparePassword(password, callback) {

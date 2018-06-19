@@ -44,7 +44,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getProfile',
+      //'getProfile',
       'isAuthenticated',
       'isProfileLoaded'
     ]),

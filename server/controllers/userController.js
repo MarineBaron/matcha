@@ -35,12 +35,34 @@ module.exports = {
           success: 0
         })
       } else {
+          delete user.password
           callback(null, {
             success: 1,
-            data: {
-              username: user.username,
-              role: user.role,
-            }
+            data: user
+        })
+      }
+    })
+  },
+  findAllByUsername: function(username, callback) {
+    
+    User.findOne({username: username})
+      .populate('friends')
+      .exec(function (err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(null, {
+          success: 0
+        })
+      } else {
+        // console.log(`Et ? ... ${user.users['role']}`)
+          delete user.password
+          callback(null, {
+            success: 1,
+            data: user
+            
         })
       }
     })
