@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const Image = require('../models/image')
 const jwt = require('jsonwebtoken')
 const mailController = require('./mailController')
 
@@ -46,7 +47,8 @@ module.exports = {
   findAllByUsername: function(username, callback) {
     
     User.findOne({username: username})
-      .populate('friends')
+    .populate('friends')
+    .populate('avatar')
       .exec(function (err, user) {
       if (err) {
         callback(err, null)
@@ -57,12 +59,19 @@ module.exports = {
           success: 0
         })
       } else {
-        // console.log(`Et ? ... ${user.users['role']}`)
+        console.log(`Et ? ... ${user}`)
+        Image.findById(user.avatar.image, function (err, image){
+          if (err) {
+            callback(err, null)
+            return
+          }
+          user.avatar.image = image
           delete user.password
           callback(null, {
             success: 1,
             data: user
             
+        })
         })
       }
     })

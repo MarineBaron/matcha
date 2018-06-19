@@ -35,6 +35,7 @@ router.get('/profile', verifyToken, function(req, res, next) {
 
 /* GET user */
 router.get('/user/:username', function(req, res, next) {
+  console.log('ici')
   controller.findAllByUsername(req.params.username, function (err, result) {
     if (err) {
       console.log(err)

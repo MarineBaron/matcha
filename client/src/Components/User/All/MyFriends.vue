@@ -7,12 +7,11 @@
 
                 <div class="col-sm-4" v-for="user in users">
 
-                   
                     <b-link :to="{path: '/user/' + user.username}" title="">
                     {{user.username}}
                      
                     </b-link> 
-                    <b-img src="http://localhost:5000/public/images/00.png" fluid alt="image" />
+                    <b-img :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
                 </div>
                
             </b-row>

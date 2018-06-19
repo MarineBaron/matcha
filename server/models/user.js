@@ -4,6 +4,7 @@ const Gender = require('./gender.js')
 const Hobbie = require('./hobbie.js')
 const Preference = require('./preference.js')
 const Image = require('./image.js')
+const Gallery = require('./gallery.js')
 
 const SALT_WORK_FACTOR = 10
 
@@ -50,7 +51,13 @@ const UserSchema = new mongoose.Schema({
   // friends: [{
   //     type: String,
   // }],
-  avatar: String,
+  avatar: {
+    image: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Image'
+    },
+    alt: String
+  },
   friends: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -71,11 +78,16 @@ const UserSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Preference'
   }], 
-  galery: [{
+  gallery: [{
+    image: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Image'
-  }]
+    },
+    alt: String
+  }],
 })
+
+
 
 UserSchema.methods.comparePassword = function comparePassword(password, callback) {
   bcrypt.compare(password, this.password, callback)
