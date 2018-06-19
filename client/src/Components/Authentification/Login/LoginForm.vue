@@ -99,7 +99,24 @@
           this.$router.push('/')
 
         }, (error) => {
-          this.setError(error)
+          let message = ''
+          switch(error) {
+            case 'INEXISTANT LOGIN':
+              message = 'Ce pseudo est inexistant.'
+            break;
+            case 'UNCONFIRMED USER':
+              message = 'Vous devez confirmer votre inscription.'
+            break;
+            case 'BANISHED USER':
+              message = 'Vous avez été banni.'
+            break;
+            case 'BAD CREDENTIALS':
+              message = 'Votre pseudo et votre mot de passe ne concordent pas.'
+            break;
+            default :
+              message = 'Vos identifiants sont incorrects.'
+            break;
+          this.setError(message)
         })
       },
       setError(error) {

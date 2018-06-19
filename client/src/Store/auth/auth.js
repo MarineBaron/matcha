@@ -38,27 +38,9 @@ const actions = {
       callApi({url: 'auth/login', data: user, method: 'POST'})
       .then((resp, err) => {
         if (!resp.data.success) {
-          let message = ''
-          switch(resp.data.message) {
-            case 'INEXISTANT LOGIN':
-              message = 'Ce pseudo est inexistant.'
-            break;
-            case 'UNCONFIRMED USER':
-              message = 'Vous devez confirmer votre inscription.'
-            break;
-            case 'BANISHED USER':
-              message = 'Vous avez été banni.'
-            break;
-            case 'BAD CREDENTIALS':
-              message = 'Votre pseudo et votre mot de passe ne concordent pas.'
-            break;
-            default :
-              message = 'Vos identifiants sont incorrects.'
-            break;
-          }
           commit(AUTH_LOGIN_ERROR)
           localStorage.removeItem('user-token')
-          reject(message)
+          reject(resp.data.message)
         } else {
           const data = resp.data
           localStorage.setItem('user-token', data.token)

@@ -142,7 +142,19 @@
             this.showError = false
             this.showRegistered = true
           }, (error) => {
-            this.setError(error)
+            let message = ''
+            switch(error) {
+              case 'DUPLICATE USERNAME':
+                message = 'Votre pseudo est déjà utilisé. Veuillez en choisir un autre.'
+              break
+              case 'NOT CONFIRMED':
+                message = 'Vous avez déjà été enregistré, mais vous n\'avez pas confirmé votre inscription. Veuillez confirmer votre inscription en cliquant sur le lien dans le mail que nous vous avons envoyé.'
+              break
+              default:
+                message = 'Votre enregistrement a échoué. Veuillez réessayer.'
+              break
+            }
+            this.setError(message)
           })
       },
       setError(error) {
