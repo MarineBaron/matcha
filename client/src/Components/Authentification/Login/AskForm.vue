@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div>{{text}}</div>
     <b-alert :show="showError" variant="danger">
       <ul>
         <li v-for="(error, index) in errors" :key="index">{{error}}</li>
@@ -43,11 +44,11 @@
     data() {
       return {
         form: {
-          email: '',
-          password: ''
+          email: ''
         },
         showError: false,
-        errors: []
+        errors: [],
+        text: this.getText()
       }
     },
     mixins: [
@@ -62,6 +63,21 @@
       }
     },
     methods: {
+      getText() {
+        let text = ''
+        switch (this.type) {
+          case 'confirmation':
+            text = 'Entrez votre email, et nous vous renverrons un lien de confirmation de votre inscription.'
+          break
+          case 'password':
+            text = 'Entrez votre email, et nous vous renverrons un lien vous permettant de modifier votre mot de passe.'
+          break
+          case 'username':
+            text = 'Entrez votre email, et nous vous renverrons votre pseudo.'
+          break
+        }
+        return text
+      },
       statusField(fieldState) {
         if (!fieldState.$dirty) {
           return null
@@ -69,12 +85,40 @@
         return !fieldState.$invalid
       },
       onSubmit(e) {
-        const email = form.email
-        this.$store.dispatch(AUTH_ASK_REQUEST, {type: type, email: email})
+        const email = this.form.email
+        this.$store.dispatch(AUTH_ASK_REQUEST, {type: this.type, email: email})
         .then((response) => {
-          console.log(response)
+          let message = ''
+          switch(this.type) {
+            case 'username':
+              this.flash('Un email contenant votre pseudo vous a été envoyé.', 'primary', {timeout: 5000})
+            break
+            case 'password':
+              this.flash('Un email contenant un lien de modification de votre mot de passe vous a été envoyé.', 'primary', {timeout: 5000})
+            break
+            case 'password':
+              this.flash('Un email de confirmation de votre inscription vous a été envoyé.', 'primary', {timeout: 5000})
+            break
+          }
+          this.$emit('change-form', 'login')
+
         }, (error) => {
-          this.setError(error)
+          let message = ''
+          switch(error) {
+            case 'CONFIRMED USER':
+              message = 'Votre compte a déjà été confirmé, vous pouvez vous connecter.'
+            break;
+            case 'BANISHED USER':
+              message = 'Vous avez été banni.'
+            break;
+            case 'USER NOT FOUND':
+              message = 'Aucun compte ne correspond à cette adresse email.'
+            break;
+            default :
+              message = 'Un problème est survenu.'
+            break;
+          }
+          this.setError(message)
         })
       },
       setError(error) {

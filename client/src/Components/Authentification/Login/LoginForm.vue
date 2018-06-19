@@ -116,6 +116,7 @@
             default :
               message = 'Vos identifiants sont incorrects.'
             break;
+          }
           this.setError(message)
         })
       },

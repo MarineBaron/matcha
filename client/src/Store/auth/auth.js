@@ -120,10 +120,9 @@ const actions = {
       commit(AUTH_ASK_REQUEST)
       callApi({url: 'auth/ask', data, method: 'POST'})
       .then((resp) => {
-        if (resp.data.success === 0) {
-          let message = resp.data.message
+        if (!resp.data.success) {
           commit(AUTH_ASK_ERROR)
-          reject(message)
+          reject(resp.data.message)
         }
         commit(AUTH_ASK_SUCCESS)
         resolve(resp)

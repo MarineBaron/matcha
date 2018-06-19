@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+const userController = require('./userController')
 
 module.exports = {
   login: function(username, password, callback) {
@@ -90,8 +91,47 @@ module.exports = {
   },
   
   ask: function(type, email, callback) {
-    return callback(null, {
-      success: 1
+    User.findOne({email: email}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(null, {
+          success: 0,
+          message: 'USER NOT FOUND'
+        })
+        return
+      }
+      if (user.banished === true) {
+        callback(null, {
+          success: 0,
+          message: 'BANISHED USER'
+        })
+        return
+      }
+      if (type === 'confirmation' && user.confirmed) {
+        callback(null, {
+          success: 0,
+          message: 'CONFIRMED USER'
+        })
+        return
+      }
+      const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
+      switch(type) {
+        case 'password':
+          userController.sendEmailPasswordReset(user, authToken)
+        break;
+        case 'username':
+          userController.sendEmailAskUsername(user, authToken)
+        break
+        case 'confirmation':
+          userController.sendEmailConfirmation(user, authToken)
+        break;
+      }
+      callback(null, {
+        success: 1
+      })
     })
   }
 }

@@ -2,19 +2,25 @@
   <div>
     <h2>{{title}}</h2>
     <login-form v-if="type==='login'"></login-form>
-    <ask-form :type="type" v-else></ask-form>
-    <b-button v-if="type==='login'" variant="primary" @click="changeForm('password')">
-      Mot de passe oublié
-    </b-button>
-    <b-button v-if="type==='login'" variant="primary" @click="changeForm('username')">
-      Pseudo oublié
-    </b-button>
-    <b-button v-if="type==='login'" variant="primary" @click="changeForm('confirmation')">
-      Nouveau lien de confirmation
-    </b-button>
-    <b-button v-if="type!=='login'"variant="primary" @click="changeForm('login')">
-      Connexion
-    </b-button>
+    <ask-form @change-form="changeForm" :type="type" v-else></ask-form>
+    <div>
+      <div v-if="type==='login'">
+        <b-link @click.prevent="changeForm('password')">
+          Mot de passe oublié
+          </b-link><br />
+        <b-link @click.prevent="changeForm('username')">
+          Pseudo oublié
+          </b-link><br />
+        <b-link @click.prevent="changeForm('confirmation')">
+          Nouveau lien de confirmation
+          </b-link>
+      </div>
+      <div v-else>
+        <b-link v-if="type!=='login'" @click.prevent="changeForm('login')">
+          Retour à la page de Connexion
+        </b-link>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -36,9 +42,9 @@
     },
     methods: {
       changeForm(type) {
-        console.log(type)
+        console.log("one", type)
         this.type = type
-      },
+      }
     }
   }
 </script>
