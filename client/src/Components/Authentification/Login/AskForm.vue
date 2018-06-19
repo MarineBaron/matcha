@@ -115,10 +115,15 @@
               message = 'Aucun compte ne correspond à cette adresse email.'
             break;
             default :
-              message = 'Un problème est survenu.'
+              message = 'Un problème est survenu. Réessayez...'
             break;
           }
-          this.setError(message)
+          if (error === 'CONFIRMED USER') {
+            this.flash(message, 'success', {timeout: 5000})
+            this.$emit('change-form', 'login')
+          } else {
+            this.setError(message)
+          }
         })
       },
       setError(error) {
