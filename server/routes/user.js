@@ -35,7 +35,7 @@ router.get('/profile', verifyToken, function(req, res, next) {
 
 /* GET user */
 router.get('/user/:username', function(req, res, next) {
-  controller.findByUsername(req.params.username, function (err, result) {
+  controller.findAllByUsername(req.params.username, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({

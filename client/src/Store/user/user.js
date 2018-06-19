@@ -41,14 +41,24 @@ const actions = {
     })
   },
   [USER_USER_REQUEST]: ({commit, dispatch}, username) => {
-    callApi({url: 'user/user/' + username})
-      .then(resp => {
-        const data = resp.data.data
-        commit(USER_USER_SUCCESS, data)
+    return new Promise((resolve, reject) => {
+      commit(USER_USER_REQUEST)
+      callApi({url: 'user/user/' + username})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          commit(USER_USER_ERROR)
+          reject(resp.data.message)
+        } else {
+          console.log('action USER_USER_REQUEST',resp.data)
+          commit(USER_USER_SUCCESS)
+          resolve(resp.data.data)
+        }
       })
       .catch(err => {
         commit(USER_USER_ERROR)
+        reject(err)
       })
+    })
   }
 }
 
