@@ -69,4 +69,4 @@ router.post('/passwordreset', function(req, res, next) {
   })
 })
 
-module.exports = router;
+module.exports = router

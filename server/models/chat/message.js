@@ -22,6 +22,6 @@ const ChatMessageSchema = new mongoose.Schema({
     required: true,
     default: new Date()
   },
-})
+}, { collection: 'chatmessages' })
 
 module.exports = mongoose.model('ChatMessage', ChatMessageSchema)

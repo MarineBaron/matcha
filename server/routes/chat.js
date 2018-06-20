@@ -40,6 +40,7 @@ router.post('/room', verifyToken, function(req, res, next) {
     {username: req.body.username1},
     {username: req.body.username2},
   ]
+  console.log(users)
   roomController.create(users, function (err, result) {
     if (err) {
       console.log(err)
@@ -141,3 +142,5 @@ router.get('/message/delete/:id', verifyToken, function(req, res, next) {
     res.status(200).json(result)
   })
 })
+
+module.exports = router

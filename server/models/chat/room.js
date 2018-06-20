@@ -7,7 +7,7 @@ const ChatRoomSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }]
-})
+}, { collection: 'chatrooms' })
 
 ChatRoomSchema.virtual('messages', {
   ref: 'ChatMessage',

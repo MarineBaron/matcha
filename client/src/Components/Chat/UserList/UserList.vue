@@ -1,7 +1,7 @@
 <template>
     <b-card no-body :header="title">
       <b-list-group flush>
-        <UserItem
+        <UserItem v-if="users"
           v-for="user in users"
           :key="user.username"
           :user="user"
@@ -23,24 +23,16 @@ export default {
   data() {
     return {
       title: 'Membres',
-      users: []
     }
   },
   created() {
-    console.log("MOUNTED")
     this.$store.dispatch(USER_USERS_REQUEST)
-    .then((response) => {
-      console.log("UsreList mounted",response)
-      //this.users = response.filter(user => user.username !== this.username)
-      this.users = response[0].filter(user => user.username !== this.username)
-    }, (error) => {
-      console.log(USER_USERS_REQUEST + ' ECHEC', error)
-    })
   },
   computed: {
     ...mapState({
-      username: state => `${state.auth.profile.username}`
+      username: state => state.auth.profile.username,
+      users: state => state.user.users.filter(user => user.username !== state.auth.profile.username)
     })
-  }
+  },
 }
 </script>

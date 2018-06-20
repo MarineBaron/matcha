@@ -21,7 +21,7 @@ module.exports = {
         success: 1,
         data: message
       })
-    }) 
+    })
   },
   getAllByRoom: function(id, callback) {
     ChatMessage.find({room: id}, function(err, messages) {
@@ -42,7 +42,7 @@ module.exports = {
         return
       }
       const message = new ChatMessage({
-        room: {_id: body.room}
+        room: {_id: body.room},
         user: user,
         message: body.message
       })

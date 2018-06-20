@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import auth from './auth/auth'
 import user from './user/user'
-import chat from './user/user'
+import chat from './chat/chat'
 import socket from './socket/socket'
 Vue.use(Vuex)
 
