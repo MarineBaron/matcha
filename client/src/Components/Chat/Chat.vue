@@ -14,6 +14,8 @@
 <script>
 import UserList from './UserList/UserList.vue'
 export default {
-    
+    components: {
+      UserList
+    }
 }
 </script>

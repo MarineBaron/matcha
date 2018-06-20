@@ -9,6 +9,7 @@ import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
 import ForumContent from '../Components/Forum/ForumContent.vue'
 import ForumSidebar from '../Components/Forum/ForumSidebar.vue'
+import Chat from '../Components/Chat/Chat.vue'
 
 import store from '../Store/store'
 
@@ -85,9 +86,9 @@ export default [
     },
     beforeEnter: ifAuthenticated
   },
-  // {
-  //   path: '/chat',
-  //   component: Chat,
-  //   meta: {}
-  // }
+  {
+    path: '/chat',
+    component: Chat,
+    meta: {}
+  }
 ]
