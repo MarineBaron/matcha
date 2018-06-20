@@ -9,4 +9,10 @@ const ChatRoomSchema = new mongoose.Schema({
   }]
 })
 
+ChatRoomSchema.virtual('messages', {
+  ref: 'ChatMessage',
+  localField: '_id',
+  foreignField: 'room'
+})
+
 module.exports = mongoose.model('ChatRoom', ChatRoomSchema)
