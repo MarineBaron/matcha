@@ -59,6 +59,25 @@ const actions = {
         reject(err)
       })
     })
+  },
+  [USER_USERS_REQUEST]: ({commit, dispatch}) => {
+    return new Promise((resolve, reject) => {
+      commit(USER_USERS_REQUEST)
+      callApi({url: 'user/users'})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          commit(USER_USERS_ERROR)
+          reject(resp.data.message)
+        } else {
+          commit(USER_USERS_SUCCESS)
+          resolve(resp.data.data)
+        }
+      })
+      .catch(err => {
+        commit(USER_USERS_ERROR)
+        reject(err)
+      })
+    })
   }
 }
 
@@ -82,6 +101,17 @@ const mutations = {
   [USER_USER_ERROR]: (state) => {
     state.status = 'error',
     state.user = {}
+  },
+  [USER_USERS_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [USER_USERS_SUCCESS]: (state, data) => {
+    state.status = 'success',
+    state.users = data
+  },
+  [USER_USERS_ERROR]: (state) => {
+    state.status = 'error',
+    state.users = []
   },
 }
 
