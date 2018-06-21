@@ -82,7 +82,6 @@ const actions = {
         commit(USER_USERS_ERROR)
         reject(err)
       })
-      return
     })
   }
 }
