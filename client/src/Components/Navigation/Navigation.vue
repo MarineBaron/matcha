@@ -37,6 +37,7 @@ export default {
     return {
       links: [
         {text: 'Recherche', path: '/search'},
+        {text: 'Chat', path: '/chat'},
         {text: 'Forum', path: '/forum'},
         {text: 'A propos', path: '/about'}
       ]
