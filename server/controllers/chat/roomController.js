@@ -24,7 +24,7 @@ module.exports = {
           success: 1,
           data: room
         })
-      }) 
+      })
   },
   getAll: function(callback) {
     ChatRoom.find()
@@ -45,35 +45,37 @@ module.exports = {
   create: function(users, callback) {
     async.parallel({
       user1: function(callback) {
-        user.find({username: users[0].username}, callback)
+        User.findOne({username: users[0].username}, callback)
       },
       user2: function(callback) {
-        user.find({username: users[1].username}, callback)
+        User.findOne({username: users[1].username}, callback)
       },
     }, function(err, users) {
       if (err) {
         callback(err, null)
         return
       }
-      ChatRoom.find($and: [
-        {user: user1},
-        {user: user2}
-      ], function (err, room) {
+      ChatRoom.findOne({users: users.user1._id, users: users.user2._id}, function (err, room) {
         if (err) {
           callback(err, null)
           return
         }
-        if (room) {
+        if (room && room.users) {
+          console.log('room exists')
           callback(null, {
             success: 1,
             data: room
           })
           return
         }
-        const newRoom = new Room({
-          users: [user1, user2]
+        console.log('new room is created')
+        const newRoom = new ChatRoom({
+          users: [
+            {_id: users.user1._id},
+            {_id: users.user2._id}
+          ]
         })
-        newRoom.save(function(err, callback) {
+        newRoom.save(function(err, newRoom) {
           if (err) {
             callback(err, null)
             return

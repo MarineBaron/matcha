@@ -13,9 +13,10 @@
 </template>
 
 <script>
+  import Vue from 'vue'
   import { mapGetters, mapState } from 'vuex'
   import { CHAT_OPENROOM_REQUEST } from '../../../Store/chat/mutation-types'
-  
+
   export default {
     props: {
       user: {
@@ -25,7 +26,6 @@
     },
     methods: {
       openChat(e) {
-        console.log("openChat", CHAT_OPENROOM_REQUEST)
         this.$store.dispatch(CHAT_OPENROOM_REQUEST, [this.username, this.user.username])
         .then((response) => {
           console.log("openChat SUCCESS", response)
