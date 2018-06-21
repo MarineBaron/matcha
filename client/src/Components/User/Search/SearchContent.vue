@@ -21,52 +21,54 @@
 </template>
 
 <script>
-import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
-import MemberListItem from './MemberListItem.vue'
-let nextMemberId = 0
+  import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
+  import MemberListItem from './MemberListItem.vue'
+  let nextMemberId = 0
 
-export default {
-  components: {
-    MemberListItem
-  },
-  data () {
-    return {
-      members: [
-        {
-          id: nextMemberId++,
-          photo: 'Photo Étoile',
-          text: 'Étoile, 60 ans, Designer, Paris ',
-          likes: 2
-        },
-        {
-          id: nextMemberId++,
-          photo: 'Photo MarieLaure',
-          text: 'MarieLaure, 57 ans, Hospitalière, Paris ',
-          likes: 3
-        },
-        {
-          id: nextMemberId++,
-          photo: 'Photo Nina',
-          text: 'Nina, 57 ans, Artiste, Paris ',
-          likes: 1
-        }
-      ],
-      mounted() {
-        this.$store.dispatch(USER_USER_REQUEST, this.username)
+  export default {
+    components: {
+      MemberListItem
+    },
+    data () {
+      return {
+        members: [
+          {
+            id: nextMemberId++,
+            photo: 'Photo Étoile',
+            text: 'Étoile, 60 ans, Designer, Paris ',
+            likes: 2
+          },
+          {
+            id: nextMemberId++,
+            photo: 'Photo MarieLaure',
+            text: 'MarieLaure, 57 ans, Hospitalière, Paris ',
+            likes: 3
+          },
+          {
+            id: nextMemberId++,
+            photo: 'Photo Nina',
+            text: 'Nina, 57 ans, Artiste, Paris ',
+            likes: 1
+          }
+        ],
+        liked: '',
+    methods: {
+      onPlusMoi: function (id) {
+      console.log(id)
+      this.liked = id
+      }
+    },
+    mounted() {
+      this.$store.dispatch(USER_USERS_REQUEST)
         .then((response) => {
           this.members = response
-        }, (error) => {
-          this.error = "Une erreur est survenue lors de la confirmation de votre inscription."
-        })
-      liked: ''
-    }
-  },
-  methods: {
-    onPlusMoi: function (id) {
-    console.log(id)
-    this.liked = id
-
+          console.log("Chargement des gentils membres")
+        },
+         (error) => {
+              console.log(error)
+          })
+        }
+      }
     }
   }
-}
 </script>
