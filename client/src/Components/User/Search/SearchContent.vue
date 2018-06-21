@@ -4,13 +4,14 @@
   <div>
     <p v-if="members.length">
       <MemberListItem
-        v-for="member in members"
+        v-for="member in orderedMembers"
+
         :key="member.id"
         :member="member"
         v-on:plus-moi="onPlusMoi ($event)"/>
     </p>
     <p v-else>
-      Aucun membre dans votre sélection.
+      Aucun membre ne correspond à votre sélection.
     </p>
 
     <h5 v-if=liked>
@@ -21,8 +22,9 @@
 </template>
 
 <script>
-  import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
+  import { USER_USERS_REQUEST } from '../../../Store/user/mutation-types'
   import MemberListItem from './MemberListItem.vue'
+
   let nextMemberId = 0
 
   export default {
@@ -35,7 +37,7 @@
           {
             id: nextMemberId++,
             photo: 'Photo Étoile',
-            text: 'Étoile, 60 ans, Designer, Paris ',
+            text: 'Etoile, 60 ans, Designer, Paris ',
             likes: 2
           },
           {
@@ -52,22 +54,27 @@
           }
         ],
         liked: '',
+      }
+    },
     methods: {
       onPlusMoi: function (id) {
       console.log(id)
       this.liked = id
       }
     },
-    mounted() {
-      this.$store.dispatch(USER_USERS_REQUEST)
-        .then((response) => {
-          this.members = response
-          console.log("Chargement des gentils membres")
-        },
-         (error) => {
-              console.log(error)
-          })
-        }
+    //mounted() {
+    //  this.$store.dispatch(USER_USERS_REQUEST)
+    //  .then((response) => {
+    //    this.members = response
+    //    console.log("Chargement des gentils membres")
+    //  },
+    //   (error) => {
+    //    console.log(error)
+    //  })
+    //}
+    computed: {
+      orderedMembers: function () {
+        return _.orderBy(this.members, ['likes', 'text'], ['desc', 'asc'])
       }
     }
   }
