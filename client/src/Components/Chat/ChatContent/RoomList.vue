@@ -1,12 +1,13 @@
 <template>
-  <b-card-group deck>
-  <h2>Rooms</h2>
-  <RoomItem
-    v-for="room in rooms"
-    :key="room.data._id"
-    :room="room"
-  ></RoomItem>
-  </b-card-group>
+  <div>
+  <h3>Chat Rooms</h3>
+  <b-card-group deck class="mb-3">
+    <RoomItem
+      v-for="room in rooms"
+      :key="room.data._id"
+      :room="room"
+    ></RoomItem>
+    </b-card-group></div>
 </template>
 
 <script>

@@ -15,7 +15,7 @@
 <script>
   import Vue from 'vue'
   import { mapGetters, mapState } from 'vuex'
-  import { CHAT_OPENROOM_REQUEST } from '../../../Store/chat/mutation-types'
+  import { CHAT_OPENROOM_REQUEST, CHAT_OPENROOM_SOCKET } from '../../../Store/chat/mutation-types'
 
   export default {
     props: {
@@ -28,7 +28,13 @@
       openChat(e) {
         this.$store.dispatch(CHAT_OPENROOM_REQUEST, [this.username, this.user.username])
         .then((response) => {
-          console.log("openChat SUCCESS", response)
+          console.log(response)
+          this.$socket.emit('CHAT_OPENROOM', {
+            room: response.room,
+            usernames: response.usernames,
+            user: this.username
+          })
+          //this.$store.dispatch(CHAT_OPENROOM_SOCKET, response)
         }, (error) => {
           console.log("openChat ERROR", error)
         })

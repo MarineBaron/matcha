@@ -2,6 +2,8 @@ import {
   CHAT_OPENROOM_REQUEST,
   CHAT_OPENROOM_ERROR,
   CHAT_OPENROOM_SUCCESS,
+  CHAT_OPENROOM_SOCKET,
+  CHAT_CLOSEROOM
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -25,9 +27,11 @@ const actions = {
   [CHAT_OPENROOM_REQUEST]: ({commit, dispatch}, usernames) => {
     return new Promise((resolve, reject) => {
       commit(CHAT_OPENROOM_REQUEST)
-      if (this.rooms && this.rooms[usernames[1]]) {
+      let room = {}
+      if (this.rooms && (room = this.rooms.find(room => room.otheruser === usernames[1]))) {
         commit(CHAT_OPENROOM_SUCCESS, usernames[1])
-        resolve(this.rooms[usernames[1]])
+        //dispatch(CHAT_OPENROOM_SOCKET, room)
+        resolve(room)
       } else {
         const data = {
           username1: usernames[0],
@@ -36,6 +40,7 @@ const actions = {
         callApi({url: 'chat/room', data: data, method: 'POST'})
         .then((resp) =>{
           commit(CHAT_OPENROOM_SUCCESS, resp.data.data)
+          //dispatch(CHAT_OPENROOM_SOCKET, resp.room)
           resolve(resp.data.data)
         }, (error) => {
           commit(CHAT_OPENROOM_ERROR)
@@ -43,6 +48,12 @@ const actions = {
         })
       }
     })
+  },
+  [CHAT_OPENROOM_SOCKET]: ({commit, dispatch}, usernames) => {
+    console.log('CHAT_OPENROOM_SOCKET')
+  },
+  [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
+    commit(CHAT_CLOSEROOM, room.username)
   }
 }
 
@@ -68,6 +79,10 @@ const mutations = {
   },
   [CHAT_OPENROOM_ERROR]: (state) => {
     state.status = 'error'
+  },
+  [CHAT_CLOSEROOM]: (state, otheruser) => {
+    state.rooms.splice(state.rooms.findIndex(room => room.otheruser === otheruser), 1)
+    state.status = 'success'
   },
 }
 
