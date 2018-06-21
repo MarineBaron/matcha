@@ -2,19 +2,26 @@
 
 <template>
   <div>
-    <ul v-if="members.length">
+    <p v-if="members.length">
       <MemberListItem
         v-for="member in members"
         :key="member.id"
-        :member="member"/>
-    </ul>
+        :member="member"
+        v-on:plus-moi="onPlusMoi ($event)"/>
+    </p>
     <p v-else>
       Aucun membre dans votre sélection.
     </p>
+
+    <h5 v-if=liked>
+      Qui s'est fait Liker, uh?
+      <b-badge>{{ liked }}</b-badge></h5>
+
   </div>
 </template>
 
 <script>
+import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
 import MemberListItem from './MemberListItem.vue'
 let nextMemberId = 0
 
@@ -44,6 +51,21 @@ export default {
           likes: 1
         }
       ],
+      mounted() {
+        this.$store.dispatch(USER_USER_REQUEST, this.username)
+        .then((response) => {
+          this.members = response
+        }, (error) => {
+          this.error = "Une erreur est survenue lors de la confirmation de votre inscription."
+        })
+      liked: ''
+    }
+  },
+  methods: {
+    onPlusMoi: function (id) {
+    console.log(id)
+    this.liked = id
+
     }
   }
 }
