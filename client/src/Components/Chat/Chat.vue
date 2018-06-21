@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <b-col>
-        Chat Content
+        <RoomList />
       </b-col>
       <b-col>
         <UserList />
@@ -12,9 +12,12 @@
 </template>
 
 <script>
+import RoomList from './ChatContent/RoomList.vue'
 import UserList from './UserList/UserList.vue'
+
 export default {
     components: {
+      RoomList,
       UserList
     }
 }

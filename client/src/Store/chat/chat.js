@@ -8,10 +8,17 @@ import Vue from 'vue'
 
 const state = {
   status: '',
-  rooms: {}
+  rooms: []
 }
 
 const getters = {
+  getActiveRooms: state => state.rooms
+  // getActiveRooms: state => {
+  //   //console.log(state.rooms)
+  //   return 
+  //   //!state.rooms ? {} : Object.keys(state.rooms).filter(key => state.rooms[key].status === 'actived')
+  //   state.rooms
+  // }
 }
 
 const actions = {
@@ -26,11 +33,9 @@ const actions = {
           username1: usernames[0],
           username2: usernames[1],
         }
-        console.log(callApi.defaults.headers)
         callApi({url: 'chat/room', data: data, method: 'POST'})
         .then((resp) =>{
-          console.log(resp.data.data)
-          commit(CHAT_OPENROOM_SUCCESS, resp.data.data._id)
+          commit(CHAT_OPENROOM_SUCCESS, resp.data.data)
           resolve(resp.data.data)
         }, (error) => {
           commit(CHAT_OPENROOM_ERROR)
@@ -45,14 +50,20 @@ const mutations = {
   [CHAT_OPENROOM_REQUEST]: (state) => {
     state.status = 'loading'
   },
-  [CHAT_OPENROOM_SUCCESS]: (state, username) => {
+  [CHAT_OPENROOM_SUCCESS]: (state, data) => {
     state.status = 'success'
-    if (state.rooms && state.rooms[username]) {
-      state.rooms[username].status = 'actived'
-    } else {
-      state.rooms[username] = {
-        status: 'actived'
-      }
+    const otheruser = data.usernames[1]
+    const rooms = state.rooms.filter(room => room.otheruser === otheruser)
+    if (rooms.length) {
+      rooms[0].status = 'actived'
+      rooms[0].data = data.room
+    }
+    else {
+      state.rooms.push({
+        otheruser: otheruser,
+        status: 'actived',
+        data: data.room
+      })
     }
   },
   [CHAT_OPENROOM_ERROR]: (state) => {

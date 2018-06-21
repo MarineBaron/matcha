@@ -64,7 +64,10 @@ module.exports = {
           console.log('room exists')
           callback(null, {
             success: 1,
-            data: room
+            data: {
+              usernames : [users.user1.username, users.user2.username],
+              room: room
+            }
           })
           return
         }
@@ -82,7 +85,10 @@ module.exports = {
           }
           callback(null, {
               success: 1,
-              data: newRoom
+              data: {
+                usernames : [users.user1.username, users.user2.username],
+                room: newRoom
+              }
           })
         })
       })
