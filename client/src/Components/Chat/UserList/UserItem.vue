@@ -14,7 +14,7 @@
 
 <script>
   import Vue from 'vue'
-  import { mapGetters, mapState } from 'vuex'
+  import { mapState } from 'vuex'
   import { CHAT_OPENROOM_REQUEST, CHAT_OPENROOM_SOCKET } from '../../../Store/chat/mutation-types'
 
   export default {

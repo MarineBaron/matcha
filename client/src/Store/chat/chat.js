@@ -17,7 +17,7 @@ const getters = {
   getActiveRooms: state => state.rooms
   // getActiveRooms: state => {
   //   //console.log(state.rooms)
-  //   return 
+  //   return
   //   //!state.rooms ? {} : Object.keys(state.rooms).filter(key => state.rooms[key].status === 'actived')
   //   state.rooms
   // }
@@ -53,7 +53,8 @@ const actions = {
     console.log('CHAT_OPENROOM_SOCKET')
   },
   [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
-    commit(CHAT_CLOSEROOM, room.username)
+    commit(CHAT_CLOSEROOM, room.otheruser)
+    return(room._id)
   }
 }
 
