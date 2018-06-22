@@ -1,6 +1,7 @@
-var express = require('express');
-var router = express.Router();
-var controller = require('../controllers/authController')
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/authController')
+const verifyToken = require('../middleware/verifyToken')
 
 /* POST login */
 router.post('/login', function(req, res, next) {
@@ -20,6 +21,21 @@ router.post('/login', function(req, res, next) {
         success: 0
       })
     }
+  })
+})
+
+/* GET profile */
+router.get('/profile', verifyToken, function(req, res, next) {
+  controller.profile(req.user._id, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
   })
 })
 
