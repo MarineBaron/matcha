@@ -1,7 +1,7 @@
 <template>
    
     <b-card class="card my-4">
-        <h5 class="card-header">{{ title }} {{username.toUpperCase() }}</h5>
+        <h5 class="card-header">{{ title }} {{ username.toUpperCase() }}</h5>
         <div class="card-body">
             <b-row>
 
@@ -16,12 +16,14 @@
             </b-row>
         </div>
     </b-card>
+    
 </template>
 <script>
   import { USER_FRIENDS_REQUEST } from '../../../Store/user/mutation-types'
   import { mapGetters, mapState } from 'vuex'
+
   export default {
-    components: { },
+    components: {},
     data() {
       return {
         mode: 'view',

@@ -1,34 +1,31 @@
 <template>
-   <div class="container">
+   <b-container>
     <h2>{{title}}</h2>
 
          <b-list-group>          
             <b-list-group-item style="background-color: rgba(0, 0, 0, 0);"> 
-               <div>{{user.username.toUpperCase()}}</div> 
+               <div>{{ user.username }}</div> 
             </b-list-group-item>
         </b-list-group>
 
             <div id="InfoRight">
-              <b-button variant="primary">
-                Notifications <b-badge variant="light">4</b-badge>
-              </b-button>
                 <b-button class="btn btn-info" title="Visite">
-                        <i class="fas fa-eye"></i> <span class="badge badge-light">10</span>
+                <icon name="eye"></icon> <span class="badge badge-light">10</span>
                 </b-button>
                 <b-button class="btn btn-info" title="Mails en attente">
-                    <i class="fa fa-envelope"></i> <span class="badge badge-light">4</span>
+                   <icon name="envelope"></icon> <span class="badge badge-light">4</span>
                 </b-button>
                 <b-button class="btn btn-info" title="Coup de Coeur">
-                    <i class="fa fa-heart"></i> <span class="badge badge-light">4</span>
+                    <icon name="heart"></icon> <span class="badge badge-light">4</span>
                 </b-button>
                 <b-button class="btn btn-info" title="Amis">
-                    <i class="fa fa-user-friends"></i> <span class="badge  badge-light">4</span>
+                     <icon name="user"></icon> <span class="badge  badge-light">4</span>
                 </b-button>
             </div>
     
 
           <b-row>
-        <b-col cols="12" md="8">
+       <b-col sm="8">
 
           <b-jumbotron header="Bootstrap Vue" lead="Bootstrap 4 Components for Vue.js 2" >
   <p>For more information visit website</p>
@@ -36,9 +33,9 @@
 </b-jumbotron>
 
         </b-col>
-        <b-col cols="6" md="4"><my-friends></my-friends></b-col>
+        <b-col sm="4"><my-friends></my-friends></b-col>
     </b-row>
-  </div>
+  </b-container>
 </template>
 
 <script>
@@ -51,7 +48,7 @@
     components: {
       ProfileView,
       MyFriends, 
-      ProfileForm
+      ProfileForm,
     },
     data() {
       return {
