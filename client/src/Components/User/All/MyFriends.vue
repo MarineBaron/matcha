@@ -5,13 +5,12 @@
         <div class="card-body">
             <b-row>
 
-                <div class="col-sm-4" v-for="user in users">
+                <div class="col-sm-6" v-for="user in users">
 
                     <b-link :to="{path: '/user/' + user.username}" title="">
-                    {{user.username}}
-                     
-                    </b-link> 
+                    {{user.username}}                     
                     <b-img v-if="user.avatar.image" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
+                    </b-link> 
                 </div>
                
             </b-row>

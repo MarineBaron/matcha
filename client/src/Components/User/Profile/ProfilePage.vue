@@ -1,40 +1,43 @@
 <template>
    <div class="container">
     <h2>{{title}}</h2>
-         <ol class="breadcrumb">
-          
-            <li class="breadcrumb-item active"> 
-               <div>{{user.username}}</div> 
-            </li>
-        </ol>
-            <div id="InfoRight">
-                <button type="button" class="btn btn-info" title="Visite">
-                        <i class="fas fa-eye"></i> <span class="badge badge-light">10</span>
-                </button>
-                <button type="button" class="btn btn-info" title="Mails en attente">
-                    <i class="fa fa-envelope"></i> <span class="badge badge-light">4</span>
-                </button>
-                <button type="button" class="btn btn-info" title="Coup de Coeur">
-                    <i class="fa fa-heart"></i> <span class="badge badge-light">4</span>
-                </button>
-                <button type="button" class="btn btn-info" title="Amis">
-                    <i class="fa fa-user-friends"></i> <span class="badge  badge-light">4</span>
-                </button>
-            </div>
-          <div class="row">
-     
-    
-            <!-- Blog Entries Column -->
-            <div class="col-md-8">
-                
 
-    <!-- <a href="#" @click.prevent="onClick">{{buttonText}}</a> -->
-    <my-friends></my-friends>
+         <b-list-group>          
+            <b-list-group-item style="background-color: rgba(0, 0, 0, 0);"> 
+               <div>{{user.username.toUpperCase()}}</div> 
+            </b-list-group-item>
+        </b-list-group>
+
+            <div id="InfoRight">
+              <b-button variant="primary">
+                Notifications <b-badge variant="light">4</b-badge>
+              </b-button>
+                <b-button class="btn btn-info" title="Visite">
+                        <i class="fas fa-eye"></i> <span class="badge badge-light">10</span>
+                </b-button>
+                <b-button class="btn btn-info" title="Mails en attente">
+                    <i class="fa fa-envelope"></i> <span class="badge badge-light">4</span>
+                </b-button>
+                <b-button class="btn btn-info" title="Coup de Coeur">
+                    <i class="fa fa-heart"></i> <span class="badge badge-light">4</span>
+                </b-button>
+                <b-button class="btn btn-info" title="Amis">
+                    <i class="fa fa-user-friends"></i> <span class="badge  badge-light">4</span>
+                </b-button>
+            </div>
     
-                    </div>
-                </div>
-    <!-- <profile-view v-bind:mode="mode" v-bind:user="user" v-if="mode==='view'"></profile-view>
-    <profile-form v-bind:mode="mode" v-else></profile-form> -->
+
+          <b-row>
+        <b-col cols="12" md="8">
+
+          <b-jumbotron header="Bootstrap Vue" lead="Bootstrap 4 Components for Vue.js 2" >
+  <p>For more information visit website</p>
+  <b-btn variant="primary" href="#">More Info</b-btn>
+</b-jumbotron>
+
+        </b-col>
+        <b-col cols="6" md="4"><my-friends></my-friends></b-col>
+    </b-row>
   </div>
 </template>
 
@@ -95,7 +98,8 @@
       }
      #InfoRight  {
           float: right;
-          margin-top: -60px;
+          margin-top: -44px;
+          margin-right: 4px;
       }
 
     </style>
