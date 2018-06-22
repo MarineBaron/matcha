@@ -36,6 +36,7 @@ export default {
   },
   created() {
     this.setAxiosAuthorization()
+    this.$socket.emit('IDENTIFY_USER', this.getProfile)
   },
   methods: {
     setAxiosAuthorization() {
@@ -45,6 +46,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters([
+      'getProfile'
+    ]),
     ...mapState({
       token: state => state.auth.token
     })

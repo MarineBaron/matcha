@@ -7,42 +7,67 @@ const server = app.listen(3001, function() {
 
 const io = require('socket.io')(server)
 let nbVisitors = 0
-let connectedUsers = []
+let authUsers = []
 let rooms = []
 
 function getUsersNb() {
   return {
-    nbUsers: nbVisitors,
-    nbConnectedUsers: connectedUsers.length
+    nbVisitors: nbVisitors,
+    nbAuthUsers: authUsers.length
   }
 }
 
-io.on('connection', function(socket) {
-  nbVisitors++
-  // envoi du nombre de connectes a tout nouvel utilisateur
-  io.emit('NBUSERS_CHANGE', getUsersNb())
-
-  // Reception d'un message de login
-  socket.on('AUTH_LOGIN', function(data) {
-    console.log('AUTH_LOGIN', data.username)
-    const connectedUser = connectedUsers.find(user => user.username === data.username)
-    if (connectedUser) {
-      connectedUser.sockets.push(socket)
+// Si l'utilisateur est authentifie (sur client), ajout a la liste des authentifies
+function authUser(socket, user) {
+  if (user.username) {
+    socket.username = user.username
+    const authUser = authUsers.find(u => u.username === user.username)
+    if (authUser) {
+      authUser.sockets.push(socket)
     } else {
-      connectedUsers.push({
-          username: data.username,
+      authUsers.push({
+          username: user.username,
           sockets: [socket]
         }
       )
     }
-    io.emit('NBUSERS_CHANGE', getUsersNb())
+    socket.join(user.username)
+  }
+  io.emit('NBUSERS_CHANGE', getUsersNb())
+}
+
+// Si l'utilisateur est authentifie (sur client), suppression de la liste des authentifies
+function disauthUser(socket) {
+  if (socket.username) {
+    const authUser = authUsers.find(u => u.username === socket.username)
+    if (authUser) {
+      if (authUser.sockets.length < 2) {
+        authUsers.splice(authUsers.findIndex(u => u.username === socket.username))
+      } else {
+        authUser.sockets.splice(authUser.sockets.findIndex(s => s.id === socket.id), 1)
+      }
+    }
+  }
+  io.emit('NBUSERS_CHANGE', getUsersNb())
+}
+
+io.on('connection', function(socket) {
+  nbVisitors++
+  socket.on('IDENTIFY_USER', function(user) {
+    console.log('IDENTIFY_USER', user)
+    authUser(socket, user)
+  })
+
+  // Reception d'un message de login
+  socket.on('AUTH_LOGIN', function(data) {
+    console.log('AUTH_LOGIN', data)
+    authUser(socket, data)
   })
 
   // Reception d'un message de logout
   socket.on('AUTH_LOGOUT', function(data) {
-    const index = connectedUsers.findIndex(user => user.username === data.username)
-    connectedUsers.splice(index, 1)
-    io.emit('NBUSERS_CHANGE', getUsersNb())
+    console.log('AUTH_LOGOUT', data)
+    disauthUser(socket)
   })
 
   // Test Chat
@@ -87,17 +112,6 @@ io.on('connection', function(socket) {
   // Deconnexion d'un utilisateur
   socket.on('disconnect', function() {
     nbVisitors--
-    let index
-    const connectedUser = connectedUsers.find(user => user.sockets.find(skt => skt.id === socket.id))
-    if (connectedUser) {
-      if (connectedUser.sockets.length === 1) {
-        index = connectedUsers.findIndex(user => user.username === connectedUser.username)
-        connectedUsers.splice(index, 1)
-      } else {
-        index = connectedUsers.sockets.findIndex(skt => skt.id === socket.id)
-        connectedUsers.sockets.splice(index, 1)
-      }
-    }
-    io.emit('NBUSERS_CHANGE', getUsersNb())
+    disauthUser(socket)
   })
 })
