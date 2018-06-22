@@ -70,43 +70,40 @@ io.on('connection', function(socket) {
     disauthUser(socket)
   })
 
-  // Test Chat
+  // Chat Room
   socket.on('CHAT_OPENROOM', function(data) {
+    console.log('CHAT_OPENROOM', data.room._id)
     const { room, usernames } = data
-    console.log('CHAT_OPENROOM', room._id)
-    let sRoom = rooms.find(r => r.id === room._id)
-    if (sRoom) {
-      console.log("Room exists", sRoom)
-      if (!sRoom.users.find(user => user === usernames[0])) {
-        sRoom.users.push(usernames[0])
+    socket.join(data.room._id)
+    let socketRoom = rooms.find(r => r.id === room._id)
+    if (socketRoom) {
+      if (!socketRoom.sockets.find(s => s.id === socket.id)) {
+        socketRoom.sockets.push(socket)
       }
-    } else {
+    }
+    else {
       rooms.push({
         id: room._id,
-        users: [usernames[0]]
+        usernames: usernames,
+        sockets: [socket]
       })
-      sRoom = rooms[rooms.length - 1]
-      console.log("New Room", sRoom)
     }
-    const connectedUser = connectedUsers.find(user => user.username === usernames[0])
-    connectedUser.sockets.forEach(skt => {skt.join(sRoom.id)})
-    console.log("existants rooms", rooms)
-    io.to(sRoom.id).emit('CHAT_OPENROOM', usernames[0])
+    socket.join(room._id)
+    io.to(room._id).emit('CHAT_OPENROOM', socket.username)
   })
 
-  socket.on('CHAT_QUITROOM', function(id, username) {
+  socket.on('CHAT_QUITROOM', function(id) {
     console.log('CHAT_QUITROOM', id)
-    let sRoom = rooms.find(r => r.id === id)
-    const connectedUser = connectedUsers.find(user => user.username === username)
-    connectedUser.sockets.forEach(skt => {skt.leave(sRoom.id)})
-
-    if (sRoom.users.length == 1) {
-      rooms.splice(rooms.findIndex(r => r.id === id), 1)
-    } else {
-      sRoom.users.splice(sRoom.users.findIndex(user => user === usernane), 0)
+    let socketRoom = rooms.find(r => r.id === id)
+    if (socketRoom) {
+      if (socketRoom.sockets.length < 2) {
+        rooms.splice(rooms.findIndex(r => r.id === id), 1)
+      } else {
+        socketRoom.sockets.splice(socketRoom.sockets.findIndex(s => s.id === socket.id), 1)
+      }
     }
-    console.log("existants rooms", rooms)
-    io.to(sRoom.id).emit('CHAT_QUITROOM', username)
+    socket.leave(id)
+    io.to(id).emit('CHAT_QUITROOM', socket.username)
   })
 
   // Deconnexion d'un utilisateur

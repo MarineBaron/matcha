@@ -30,11 +30,10 @@
         .then((response) => {
           console.log(response)
           this.$socket.emit('CHAT_OPENROOM', {
-            room: response.room,
             usernames: response.usernames,
-            user: this.username
+            room: response.room,
+            username: this.username
           })
-          //this.$store.dispatch(CHAT_OPENROOM_SOCKET, response)
         }, (error) => {
           console.log("openChat ERROR", error)
         })

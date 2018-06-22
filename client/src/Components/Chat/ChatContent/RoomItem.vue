@@ -48,7 +48,7 @@
       closeRoom(e) {
         this.$store.dispatch(CHAT_CLOSEROOM, this.room)
         .then((response) => {
-          this.$socket.emit('CHAT_QUITROOM', response, this.username)
+          this.$socket.emit('CHAT_QUITROOM', response.data._id)
         }, (error) => {
           console.log(error)
         })

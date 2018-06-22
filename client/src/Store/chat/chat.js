@@ -3,7 +3,8 @@ import {
   CHAT_OPENROOM_ERROR,
   CHAT_OPENROOM_SUCCESS,
   CHAT_OPENROOM_SOCKET,
-  CHAT_CLOSEROOM
+  CHAT_CLOSEROOM,
+  CHAT_CLOSEALLROOMS,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -30,7 +31,6 @@ const actions = {
       let room = {}
       if (this.rooms && (room = this.rooms.find(room => room.otheruser === usernames[1]))) {
         commit(CHAT_OPENROOM_SUCCESS, usernames[1])
-        //dispatch(CHAT_OPENROOM_SOCKET, room)
         resolve(room)
       } else {
         const data = {
@@ -38,9 +38,8 @@ const actions = {
           username2: usernames[1],
         }
         callApi({url: 'chat/room', data: data, method: 'POST'})
-        .then((resp) =>{
+        .then((resp) => {
           commit(CHAT_OPENROOM_SUCCESS, resp.data.data)
-          //dispatch(CHAT_OPENROOM_SOCKET, resp.room)
           resolve(resp.data.data)
         }, (error) => {
           commit(CHAT_OPENROOM_ERROR)
@@ -54,7 +53,10 @@ const actions = {
   },
   [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSEROOM, room.otheruser)
-    return(room._id)
+    return(room)
+  },
+  [CHAT_CLOSEALLROOMS]: ({commit, dispatch}) => {
+    commit(CHAT_CLOSEALLROOMS)
   }
 }
 
@@ -65,10 +67,10 @@ const mutations = {
   [CHAT_OPENROOM_SUCCESS]: (state, data) => {
     state.status = 'success'
     const otheruser = data.usernames[1]
-    const rooms = state.rooms.filter(room => room.otheruser === otheruser)
-    if (rooms.length) {
-      rooms[0].status = 'actived'
-      rooms[0].data = data.room
+    let room = state.rooms.find(room => room.otheruser === otheruser)
+    if (room) {
+      room.status = 'actived'
+      room.data = data.room
     }
     else {
       state.rooms.push({
@@ -82,8 +84,12 @@ const mutations = {
     state.status = 'error'
   },
   [CHAT_CLOSEROOM]: (state, otheruser) => {
-    state.rooms.splice(state.rooms.findIndex(room => room.otheruser === otheruser), 1)
     state.status = 'success'
+    state.rooms.splice(state.rooms.findIndex(room => room.otheruser === otheruser), 1)
+  },
+  [CHAT_CLOSEALLROOMS]: (state) => {
+    state.status = 'success'
+    state.rooms = []
   },
 }
 
