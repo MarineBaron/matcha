@@ -33,6 +33,7 @@ function authUser(socket, user) {
     }
     socket.join(user.username)
   }
+  console.log('ROOMS:', rooms)
   io.emit('NBUSERS_CHANGE', getUsersNb())
 }
 
@@ -47,6 +48,7 @@ function disauthUser(socket) {
         authUser.sockets.splice(authUser.sockets.findIndex(s => s.id === socket.id), 1)
       }
     }
+    delete socket.username
   }
   io.emit('NBUSERS_CHANGE', getUsersNb())
 }
@@ -72,7 +74,8 @@ io.on('connection', function(socket) {
 
   // Chat Room
   socket.on('CHAT_OPENROOM', function(data) {
-    console.log('CHAT_OPENROOM', data.room._id)
+    console.log('CHAT_OPENROOM', data.room._id, socket.username)
+    console.log('ROOMS:', rooms)
     const { room, usernames } = data
     socket.join(data.room._id)
     let socketRoom = rooms.find(r => r.id === room._id)
@@ -89,11 +92,12 @@ io.on('connection', function(socket) {
       })
     }
     socket.join(room._id)
-    io.to(room._id).emit('CHAT_OPENROOM', socket.username)
+    console.log('ROOMS:', rooms)
+    io.to(room._id).emit('CHAT_OPENROOM', room._id, socket.username)
   })
 
   socket.on('CHAT_QUITROOM', function(id) {
-    console.log('CHAT_QUITROOM', id)
+    console.log('CHAT_QUITROOM', id, socket.username)
     let socketRoom = rooms.find(r => r.id === id)
     if (socketRoom) {
       if (socketRoom.sockets.length < 2) {
@@ -103,7 +107,7 @@ io.on('connection', function(socket) {
       }
     }
     socket.leave(id)
-    io.to(id).emit('CHAT_QUITROOM', socket.username)
+    io.to(id).emit('CHAT_QUITROOM', id, socket.username)
   })
 
   // Deconnexion d'un utilisateur

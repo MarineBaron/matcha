@@ -55,7 +55,8 @@ module.exports = {
         callback(err, null)
         return
       }
-      ChatRoom.findOne({users: users.user1._id, users: users.user2._id}, function (err, room) {
+      ChatRoom.findOne({$and: [{users: users.user1._id}, {users: users.user2._id}]})
+        .exec(function (err, room) {
         if (err) {
           callback(err, null)
           return

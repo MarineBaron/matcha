@@ -29,19 +29,23 @@
       }
     },
     mounted() {
-      this.$socket.on('CHAT_OPENROOM', (username) => {
+      this.$socket.on('CHAT_OPENROOM', (id, username) => {
         console.log('CHAT_OPENROOM')
-        const message = username === this.username
-          ? 'Bienvenue ' + username + ' !'
-          : username + ' rejoint le chat.'
-          this.messages = [...this.messages, {username: 'server', message: message}]
+        if (id === this.room.data._id) {
+          const message = username === this.username
+            ? 'Bienvenue ' + username + ' !'
+            : username + ' rejoint le chat.'
+            this.messages = [...this.messages, {username: 'server', message: message}]
+        }
       })
-      this.$socket.on('CHAT_QUITROOM', (username) => {
+      this.$socket.on('CHAT_QUITROOM', (id, username) => {
         console.log('CHAT_QUITROOM')
-        const message = username === this.username
-          ? 'Au revoir ' + username + ' !'
-          : username + ' quitte le chat.'
-          this.messages = [...this.messages, {username: 'server', message: message}]
+        if (this.room && id === this.room.data._id) {
+          const message = username === this.username
+            ? 'Au revoir ' + username + ' !'
+            : username + ' quitte le chat.'
+            this.messages = [...this.messages, {username: 'server', message: message}]
+        }
       })
     },
     methods: {
