@@ -1,5 +1,5 @@
 <template>
-  <b-nav-item @click="logout">Déconnexion</b-nav-item>
+  <b-nav-item @click.prevent="logout">Déconnexion</b-nav-item>
 </template>
 
 <script>
@@ -13,7 +13,6 @@
     },
     methods: {
       logout(e) {
-        e.preventDefault()
         const username = this.getProfile.username
         this.$store.dispatch(AUTH_LOGOUT)
           .then(() => {

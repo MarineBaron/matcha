@@ -13,38 +13,44 @@
 
 <script>
   import { mapState } from 'vuex'
-  import { CHAT_CLOSEROOM } from '../../../Store/chat/mutation-types'
+  import { CHAT_CLOSEROOM, CHAT_ADDMESSAGE } from '../../../Store/chat/mutation-types'
 
   export default {
     props: {
       room: {
         type: Object,
         required: true
+      },
+      messages: {
+        type: Array
       }
     },
     data() {
       return {
-        title: 'Chat with ' + this.room.otheruser,
-        messages: []
+        title: 'Chat with ' + this.room.otheruser
       }
     },
     mounted() {
       this.$socket.on('CHAT_OPENROOM', (id, username) => {
-        console.log('CHAT_OPENROOM')
         if (id === this.room.data._id) {
-          const message = username === this.username
-            ? 'Bienvenue ' + username + ' !'
-            : username + ' rejoint le chat.'
-            this.messages = [...this.messages, {username: 'server', message: message}]
+          const message = {
+            username: 'server',
+            message : username === this.username
+              ? 'Bienvenue ' + username + ' !'
+              : username + ' rejoint le chat.'
+          }
+          this.$store.dispatch('CHAT_ADDMESSAGE', {id: id, message: message})
         }
       })
       this.$socket.on('CHAT_QUITROOM', (id, username) => {
-        console.log('CHAT_QUITROOM')
-        if (this.room && id === this.room.data._id) {
-          const message = username === this.username
-            ? 'Au revoir ' + username + ' !'
-            : username + ' quitte le chat.'
-            this.messages = [...this.messages, {username: 'server', message: message}]
+        if (id === this.room.data._id) {
+          const message = {
+            username: 'server',
+            message : username === this.username
+              ? 'Au revoir ' + username + ' !'
+              : username + ' quitte le chat.'
+          }
+          this.$store.dispatch(CHAT_ADDMESSAGE, id, message)
         }
       })
     },
@@ -56,11 +62,17 @@
         }, (error) => {
           console.log(error)
         })
+      },
+      addMessage(message) {
+        //this.messages.push(message)
       }
     },
     computed: {
+      // messages:  function() {
+      //   return this.room.data.messages
+      // },
       ...mapState({
-        username: state => state.auth.profile.username,
+        username: state => state.auth.profile.username
       })
     },
   }

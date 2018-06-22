@@ -5,6 +5,7 @@ import {
   CHAT_OPENROOM_SOCKET,
   CHAT_CLOSEROOM,
   CHAT_CLOSEALLROOMS,
+  CHAT_ADDMESSAGE,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -16,12 +17,6 @@ const state = {
 
 const getters = {
   getActiveRooms: state => state.rooms
-  // getActiveRooms: state => {
-  //   //console.log(state.rooms)
-  //   return
-  //   //!state.rooms ? {} : Object.keys(state.rooms).filter(key => state.rooms[key].status === 'actived')
-  //   state.rooms
-  // }
 }
 
 const actions = {
@@ -48,15 +43,19 @@ const actions = {
       }
     })
   },
-  [CHAT_OPENROOM_SOCKET]: ({commit, dispatch}, usernames) => {
-    console.log('CHAT_OPENROOM_SOCKET')
-  },
+  // [CHAT_OPENROOM_SOCKET]: ({commit, dispatch}, usernames) => {
+  //   console.log('CHAT_OPENROOM_SOCKET')
+  // },
   [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSEROOM, room.otheruser)
     return(room)
   },
   [CHAT_CLOSEALLROOMS]: ({commit, dispatch}) => {
     commit(CHAT_CLOSEALLROOMS)
+  },
+  [CHAT_ADDMESSAGE]: ({commit, dispatch}, data) => {
+    console.log('action CHAT_ADDMESSAGE ', data)
+    commit(CHAT_ADDMESSAGE, data)
   }
 }
 
@@ -90,6 +89,17 @@ const mutations = {
   [CHAT_CLOSEALLROOMS]: (state) => {
     state.status = 'success'
     state.rooms = []
+  },
+  [CHAT_ADDMESSAGE]: (state, data) => {
+    state.status = 'success'
+    let index = state.rooms.findIndex(r => r.data._id === data.id)
+    console.log(index)
+    if (index !== null) {
+      if (!state.rooms[index].data.messages) {
+        Vue.set(state.rooms[index].data, 'messages', [])
+      }
+      Vue.set(state.rooms[index].data.messages, state.rooms[index].data.messages.length, data.message)
+    }
   },
 }
 

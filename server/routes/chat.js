@@ -40,7 +40,6 @@ router.post('/room', verifyToken, function(req, res, next) {
     {username: req.body.username1},
     {username: req.body.username2},
   ]
-  console.log(users)
   roomController.create(users, function (err, result) {
     if (err) {
       console.log(err)
@@ -50,6 +49,7 @@ router.post('/room', verifyToken, function(req, res, next) {
       })
       return
     }
+    console.log(result)
     res.status(200).json(result)
   })
 })

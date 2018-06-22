@@ -2,6 +2,7 @@ const async = require('async')
 const ChatMessage = require('../../models/chat/message')
 const ChatRoom = require('../../models/chat/room')
 const User = require('../../models/user')
+const messageController = require('./messageController')
 
 module.exports = {
   getOne: function(id, callback) {
@@ -67,10 +68,25 @@ module.exports = {
             success: 1,
             data: {
               usernames : [users.user1.username, users.user2.username],
-              room: room
+              room: room,
             }
           })
           return
+          // messageController.getAllByRoom(room._id, function (err, messages) {
+          //   if (err) {
+          //     callback(err, null)
+          //     return
+          //   }
+          //   callback(null, {
+          //     success: 1,
+          //     data: {
+          //       usernames : [users.user1.username, users.user2.username],
+          //       room: room,
+          //       messages : messages ? messages : []
+          //     }
+          //   })
+          //   return
+          // })
         }
         console.log('new room is created')
         const newRoom = new ChatRoom({

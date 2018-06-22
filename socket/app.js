@@ -33,13 +33,24 @@ function authUser(socket, user) {
     }
     socket.join(user.username)
   }
-  console.log('ROOMS:', rooms)
   io.emit('NBUSERS_CHANGE', getUsersNb())
 }
 
 // Si l'utilisateur est authentifie (sur client), suppression de la liste des authentifies
 function disauthUser(socket) {
   if (socket.username) {
+    // Enleve l'utilisateur des rooms
+    const socketRooms = rooms.filter(r => r.sockets.find(s => s.id === socket.id))
+    if (socketRooms) {
+      socketRooms.forEach(r => {
+        if (r.sockets.length < 2) {
+          rooms.splice(rooms.findIndex(r2 => r2.id === r.id), 1)
+        } else {
+          r.sockets.splice(r.sockets.findIndex(s => s.id === socket.id), 1)
+        }
+      })
+    }
+    // Enleve l'utilisateur des utilisteurs connectes
     const authUser = authUsers.find(u => u.username === socket.username)
     if (authUser) {
       if (authUser.sockets.length < 2) {
@@ -75,7 +86,6 @@ io.on('connection', function(socket) {
   // Chat Room
   socket.on('CHAT_OPENROOM', function(data) {
     console.log('CHAT_OPENROOM', data.room._id, socket.username)
-    console.log('ROOMS:', rooms)
     const { room, usernames } = data
     socket.join(data.room._id)
     let socketRoom = rooms.find(r => r.id === room._id)
@@ -92,7 +102,6 @@ io.on('connection', function(socket) {
       })
     }
     socket.join(room._id)
-    console.log('ROOMS:', rooms)
     io.to(room._id).emit('CHAT_OPENROOM', room._id, socket.username)
   })
 
