@@ -4,6 +4,18 @@ const jwt = require('jsonwebtoken')
 const mailController = require('./mailController')
 
 module.exports = {
+  findAll: function(callback){
+    User.find(function(err, users) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1,
+        data: users
+      })
+    })
+  },
   findById: function(id, callback) {
     User.findById(id, function (err, user) {
       if (err) {

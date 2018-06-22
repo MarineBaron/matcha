@@ -23,14 +23,31 @@
 </template>
 
 <script>
+import {mapGetters, mapState} from 'vuex'
 import Navigation from './Navigation/Navigation.vue'
 import Counter from './Counter/Counter.vue'
+import callApi from '../Api/callApi'
 
 export default {
   name: 'app',
   components: {
     Navigation,
     Counter
+  },
+  created() {
+    this.setAxiosAuthorization()
+  },
+  methods: {
+    setAxiosAuthorization() {
+      if (this.token && this.token !== '') {
+        callApi.defaults.headers.common['Authorization'] = this.token
+      }
+    },
+  },
+  computed: {
+    ...mapState({
+      token: state => state.auth.token
+    })
   }
 }
 </script>

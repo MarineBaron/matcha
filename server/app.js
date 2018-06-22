@@ -35,12 +35,14 @@ app.get('/', function(req, res) {
   res.json({message: 'Matcha API'})
 });
 
-const authRouter = require('./routes/auth');
-const userRouter = require('./routes/user');
+const authRouter = require('./routes/auth')
+const userRouter = require('./routes/user')
+const chatRouter = require('./routes/chat')
 // var tagRouter = require('./routes/tag');
 // var chatRouter = require('./routes/chat');
 app.use('/auth', authRouter)
 app.use('/user', userRouter)
+app.use('/chat', chatRouter)
 // app.use('/tag', tagRouter);
 // app.use('/chat', chatRouter);
 

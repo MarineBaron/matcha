@@ -31,7 +31,7 @@ io.on('connection', function(socket) {
         io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
     })
 
-    // Reception d'un mesage de logout
+    // Reception d'un message de logout
     socket.on('AUTH_LOGOUT', function(data) {
         //suppression de la propriete username sur tous les visiteurs associes
         visitorsData.filter(visitor => (
