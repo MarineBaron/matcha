@@ -56,13 +56,25 @@ module.exports = {
       }
     })
   },
-  findAllByUsername: function(username, callback) {
+  findCompleteByUsername: function(username, callback) {
     
     User.findOne({username: username})
-    .populate('friends')
-    .populate('avatar')
+    // .populate({
+    //   path: 'friends',
+    //   populate: {
+    //     path: 'avatar.image'
+    //   }
+    // })
+    // .populate('friends')
+    // .populate: {
+    //   path: 'avatar.image'
+    // }
+    .populate({
+      path: 'avatar.image'
+    })
       .exec(function (err, user) {
       if (err) {
+        // console.log(err)
         callback(err, null)
         return
       }
@@ -71,23 +83,49 @@ module.exports = {
           success: 0
         })
       } else {
-        console.log(`Et ? ... ${user}`)
-        Image.findById(user.avatar.image, function (err, image){
-          if (err) {
-            callback(err, null)
-            return
-          }
-          user.avatar.image = image
-          delete user.password
-          callback(null, {
-            success: 1,
-            data: user
-            
-        })
+        // console.log(`Et ? ... ${user}`)
+        callback(null, {
+          success: 1,
+          data: user
         })
       }
     })
   },
+
+
+
+  findFriendsByUsername: function(username, callback){
+console.log('Coucou !')
+    User.findOne({username: username})
+    .populate({
+        path: 'friends',
+        populate: {
+          path: 'avatar.image'
+        }
+      })
+      .exec(function (err, user) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        if (!user){
+          callback(null, {
+            success: 0
+          })
+        } else {
+            data: user
+            console.log('A y est !', user.friends )
+          callback(null, {
+            success: 1,
+            data: user.friends
+          })
+        }
+      })
+
+  },
+
+
+
   create: function (username, email, password, callback) {
     User.findOne({username: username}, function (err, user) {
       if (err) {

@@ -4,7 +4,6 @@ const Gender = require('./gender.js')
 const Hobbie = require('./hobbie.js')
 const Preference = require('./preference.js')
 const Image = require('./image.js')
-const Gallery = require('./gallery.js')
 
 const SALT_WORK_FACTOR = 10
 

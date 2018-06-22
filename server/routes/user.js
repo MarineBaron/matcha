@@ -22,23 +22,24 @@ router.post('/create', function(req, res, next) {
 router.get('/profile', verifyToken, function(req, res, next) {
   controller.findById(req.user._id, function (err, result) {
     if (err) {
-      console.log(err)
+      console.log('Route KO : /profile L25', err)
       res.status(500).json({
         success: 0,
         error: err
       })
       return
     }
+    console.log('Route OK : /profile L32', result)
     res.status(200).json(result)
   })
 })
 
 /* GET user */
 router.get('/user/:username', function(req, res, next) {
-  console.log('ici')
-  controller.findAllByUsername(req.params.username, function (err, result) {
+  // console.log('/user/:username')
+  controller.findCompleteByUsername(req.params.username, function (err, result) {
     if (err) {
-      console.log(err)
+      // console.log(err)
       res.status(500).json({
         success: 0,
         error: err
@@ -53,7 +54,23 @@ router.get('/user/:username', function(req, res, next) {
 router.get('/users', function(req, res, next) {
   controller.findAll(function (err, result) {
     if (err) {
-      console.log(err)
+      // console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
+/* GET User Friends */
+router.get('/friends/:username', function(req, res, next) {
+  console.log('Nouvel methode !!!')
+  controller.findFriendsByUsername(req.params.username, function (err, result) {
+    if (err){
+      console.log('Routes/user.js L73 :' + err)
       res.status(500).json({
         success: 0,
         error: err

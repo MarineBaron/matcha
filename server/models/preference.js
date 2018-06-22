@@ -9,4 +9,4 @@ const PrefSchema = new mongoose.Schema({
 })
 
 
-module.exports = mongoose.model('Image', PrefSchema)
+// module.exports = mongoose.model('User', PrefSchema)

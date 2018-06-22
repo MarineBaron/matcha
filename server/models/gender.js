@@ -7,4 +7,4 @@ const GenderSchema = new mongoose.Schema({
       index: {unique: true}
     }
 })
-module.exports = mongoose.model('Image', GenderSchema)
+module.exports = mongoose.model('Gender', GenderSchema)

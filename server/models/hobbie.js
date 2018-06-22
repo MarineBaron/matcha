@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
-const HobbiSchema = new mongoose.Schema({
+const HobbySchema = new mongoose.Schema({
     name: {
       type: String,
       index: {unique: true}
     }
-})
- module.exports = mongoose.model('Image', HobbiSchema)
+}, {collection: 'hobbies'})
+ module.exports = mongoose.model('Hobby', HobbySchema)
