@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const Image = require('../models/image')
 const jwt = require('jsonwebtoken')
 const mailController = require('./mailController')
 
@@ -55,12 +56,25 @@ module.exports = {
       }
     })
   },
-  findAllByUsername: function(username, callback) {
+  findCompleteByUsername: function(username, callback) {
     
     User.findOne({username: username})
-      .populate('friends')
+    // .populate({
+    //   path: 'friends',
+    //   populate: {
+    //     path: 'avatar.image'
+    //   }
+    // })
+    // .populate('friends')
+    // .populate: {
+    //   path: 'avatar.image'
+    // }
+    .populate({
+      path: 'avatar.image'
+    })
       .exec(function (err, user) {
       if (err) {
+        // console.log(err)
         callback(err, null)
         return
       }
@@ -69,16 +83,49 @@ module.exports = {
           success: 0
         })
       } else {
-        // console.log(`Et ? ... ${user.users['role']}`)
-          delete user.password
-          callback(null, {
-            success: 1,
-            data: user
-            
+        // console.log(`Et ? ... ${user}`)
+        callback(null, {
+          success: 1,
+          data: user
         })
       }
     })
   },
+
+
+
+  findFriendsByUsername: function(username, callback){
+console.log('Coucou !')
+    User.findOne({username: username})
+    .populate({
+        path: 'friends',
+        populate: {
+          path: 'avatar.image'
+        }
+      })
+      .exec(function (err, user) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        if (!user){
+          callback(null, {
+            success: 0
+          })
+        } else {
+            data: user
+            console.log('A y est !', user.friends )
+          callback(null, {
+            success: 1,
+            data: user.friends
+          })
+        }
+      })
+
+  },
+
+
+
   create: function (username, email, password, callback) {
     User.findOne({username: username}, function (err, user) {
       if (err) {

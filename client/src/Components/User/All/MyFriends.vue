@@ -1,37 +1,38 @@
 <template>
    
     <b-card class="card my-4">
-        <h5 class="card-header">{{ title }}</h5>
+        <h5 class="card-header">{{ title }} {{ username.toUpperCase() }}</h5>
         <div class="card-body">
             <b-row>
 
-                <div class="col-sm-4" v-for="user in users">
+                <div class="col-sm-6" v-for="user in users">
 
-                   
                     <b-link :to="{path: '/user/' + user.username}" title="">
-                    {{user.username}}
-                     
+                    {{user.username}}                     
+                    <b-img v-if="user.avatar.image" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
                     </b-link> 
-                    <b-img src="http://localhost:5000/public/images/00.png" fluid alt="image" />
                 </div>
                
             </b-row>
         </div>
     </b-card>
+    
 </template>
 <script>
-  import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
+  import { USER_FRIENDS_REQUEST } from '../../../Store/user/mutation-types'
   import { mapGetters, mapState } from 'vuex'
+
   export default {
-    components: { },
+    components: {},
     data() {
       return {
         mode: 'view',
-        title: 'Vos Amis',
+        title: 'Les Amis de ',
         users: {},
         error: ''
       }
     },
+    
     methods: {
 
       onClick(e) {
@@ -44,14 +45,15 @@
       })
     },
     mounted() {
-        console.log(`Username : ${this.username}`)
-      //this.$store.dispatch(USER_USER_REQUEST, localStorage.getItem('username'))
-      this.$store.dispatch(USER_USER_REQUEST, this.username)
+         console.log(`(MyFriends.vue L46) Username : ${this.username}`)
+      this.$store.dispatch(USER_FRIENDS_REQUEST, this.username)
       .then((response) => {
-          console.log(`La reponse : ${response['friends']}`)
-          this.users = response['friends']
+          console.log('La reponse : ', response)
+          
+          this.users = response
+          // this.users = []
       }, (error) => {
-          console.log(`L'erreur : ${error}`)
+          // console.log(`L'erreur : ${error}`)
         this.error = "Non non non ! Pascal ! :("  
       })
     }

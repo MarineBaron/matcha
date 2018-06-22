@@ -11,12 +11,15 @@ import App from './Components/App.vue'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-vue/dist/bootstrap-vue.css"
 import "vue-flash-message/dist/vue-flash-message.min.css"
+import 'vue-awesome/icons'
+import Icon from 'vue-awesome/components/Icon.vue'
 
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 Vue.use(Vuex)
 Vue.use(Vuelidate)
 Vue.use(VueFlashMessage)
+Vue.component('icon', Icon)
 
 import router from './Router/router'
 import store from './Store/store'
