@@ -2,19 +2,17 @@
    
     <b-card class="card my-4">
         <h5 class="card-header">{{ title }} {{ username.toUpperCase() }}</h5>
-        <div class="card-body">
-            <b-row>
-
-                <div class="col-sm-6" v-for="user in users">
+        
+            <b-row class="text-center">
+                <b-col md="6" class="p-4" v-for="user in users" >
 
                     <b-link :to="{path: '/user/' + user.username}" title="">
-                    {{user.username}}                     
+                    {{user.username}}   </b-link>                   
                     <b-img v-if="user.avatar.image" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
-                    </b-link> 
-                </div>
-               
+                    
+                </b-col>               
             </b-row>
-        </div>
+       
     </b-card>
     
 </template>
