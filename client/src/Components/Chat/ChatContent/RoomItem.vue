@@ -3,7 +3,7 @@
     :header="title"
   >
   <div>
-      <p v-for="message in messages">
+      <p v-for="message in room.data.messages">
         <b>{{message.username}} : </b>{{message.message}}
       </p>
   </div>
@@ -20,9 +20,6 @@
       room: {
         type: Object,
         required: true
-      },
-      messages: {
-        type: Array
       }
     },
     data() {
@@ -62,15 +59,9 @@
         }, (error) => {
           console.log(error)
         })
-      },
-      addMessage(message) {
-        //this.messages.push(message)
       }
     },
     computed: {
-      // messages:  function() {
-      //   return this.room.data.messages
-      // },
       ...mapState({
         username: state => state.auth.profile.username
       })

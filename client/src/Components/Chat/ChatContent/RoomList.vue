@@ -6,7 +6,6 @@
       v-for="room in getActiveRooms"
       :key="room.data._id"
       :room="room"
-      :messages="room.data.messages"
     ></RoomItem>
     </b-card-group></div>
 </template>
