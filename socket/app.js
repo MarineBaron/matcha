@@ -127,6 +127,11 @@ io.on('connection', function(socket) {
     io.to(id).emit('CHAT_QUITROOM', data)
   })
 
+  socket.on('CHAT_SENDMESSAGE', function(data) {
+    console.log('CHAT_SENDMESSAGE', data.room, socket.username)
+    socket.broadcast.to(data.room).emit('CHAT_RECEIVEMESSAGE', data)
+  })
+
   // Deconnexion d'un utilisateur
   socket.on('disconnect', function() {
     nbVisitors--

@@ -24,7 +24,9 @@ module.exports = {
     })
   },
   getAllByRoom: function(id, callback) {
-    ChatMessage.find({room: id}, function(err, messages) {
+    ChatMessage.find({room: id})
+    .populate('user', 'username')
+    .exec(function(err, messages) {
       if (err) {
         callback(err, null)
         return
@@ -41,9 +43,9 @@ module.exports = {
         callback(err, null)
         return
       }
-      const message = new ChatMessage({
-        room: {_id: body.room},
-        user: user,
+      let message = new ChatMessage({
+        room: {_id: body.roomId},
+        user: {_id: user._id},
         message: body.message
       })
       message.save(function(err, message) {
@@ -65,7 +67,7 @@ module.exports = {
         return
       }
       message.message = body.message
-      message.save(function(err, massage) {
+      message.save(function(err, message) {
         if (err) {
           callback(err, null)
           return

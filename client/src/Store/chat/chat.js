@@ -2,7 +2,9 @@ import {
   CHAT_OPENROOM_REQUEST,
   CHAT_OPENROOM_ERROR,
   CHAT_OPENROOM_SUCCESS,
-  CHAT_OPENROOM_SOCKET,
+  CHAT_SENDMESSAGE_REQUEST,
+  CHAT_SENDMESSAGE_ERROR,
+  CHAT_SENDMESSAGE_SUCCESS,
   CHAT_CLOSEROOM,
   CHAT_CLOSEALLROOMS,
   CHAT_ADDMESSAGE,
@@ -43,6 +45,20 @@ const actions = {
       }
     })
   },
+  [CHAT_SENDMESSAGE_REQUEST]: ({commit, dispatch}, data) => {
+    return new Promise((resolve, reject) => {
+      commit(CHAT_SENDMESSAGE_REQUEST)
+      callApi({url: 'chat/message', data: data, method: 'POST'})
+      .then((resp) => {
+        resp.data.data.username = data.username
+        commit(CHAT_SENDMESSAGE_SUCCESS, resp.data.data)
+        resolve(resp.data.data)
+      }, (error) => {
+        commit(CHAT_SENDMESSAGE_ERROR)
+        reject(error)
+      })
+    })
+  },
   [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSEROOM, room.otheruser)
     return(room)
@@ -76,6 +92,23 @@ const mutations = {
     }
   },
   [CHAT_OPENROOM_ERROR]: (state) => {
+    state.status = 'error'
+  },
+  [CHAT_SENDMESSAGE_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [CHAT_SENDMESSAGE_SUCCESS]: (state, data) => {
+    let index = state.rooms.findIndex(r => r.data._id === data.room)
+    if(!state.rooms[index].data.messages) {
+      Vue.set(state.rooms[index].data, 'messages', [])
+    }
+    Vue.set(state.rooms[index].data.messages, state.rooms[index].data.messages.length, {
+      username: data.username,
+      message: data.message
+    })
+    state.status = 'success'
+  },
+  [CHAT_SENDMESSAGE_ERROR]: (state) => {
     state.status = 'error'
   },
   [CHAT_CLOSEROOM]: (state, otheruser) => {

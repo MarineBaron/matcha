@@ -64,29 +64,39 @@ module.exports = {
         }
         if (room && room.users) {
           console.log('room exists')
-          callback(null, {
-            success: 1,
-            data: {
-              usernames : [users.user1.username, users.user2.username],
-              room: room,
+          let newRoom =  {
+            _id: room._id,
+            users: room.users,
+            messages: []
+          }
+          messageController.getAllByRoom(room._id, function(err, result) {
+            if (err) {
+              callback(err, null)
+              return
             }
+            console.log(result.data)
+            if (result && result.success && result.data) {
+              result.data.forEach(m => {
+                newRoom.messages.push(
+                  {
+                    room: room._id,
+                    username: m.user.username,
+                    message: m.message
+                  }
+                )
+              })
+            }
+            console.log('ChatRoom.findOne')
+            console.log(newRoom)
+            callback(null, {
+              success: 1,
+              data: {
+                usernames : [users.user1.username, users.user2.username],
+                room: newRoom,
+              }
+            })
           })
           return
-          // messageController.getAllByRoom(room._id, function (err, messages) {
-          //   if (err) {
-          //     callback(err, null)
-          //     return
-          //   }
-          //   callback(null, {
-          //     success: 1,
-          //     data: {
-          //       usernames : [users.user1.username, users.user2.username],
-          //       room: room,
-          //       messages : messages ? messages : []
-          //     }
-          //   })
-          //   return
-          // })
         }
         console.log('new room is created')
         const newRoom = new ChatRoom({

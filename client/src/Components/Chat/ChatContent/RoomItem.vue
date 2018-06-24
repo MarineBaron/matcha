@@ -2,11 +2,7 @@
   <b-card
     :header="title"
   >
-  <div>
-      <p v-for="message in room.data.messages">
-        <b>{{message.username}} : </b>{{message.message}}
-      </p>
-  </div>
+  <MessageContainer :room="room" />
   <b-button @click.prevent="closeRoom">Quitter</b-button>
   </b-card>
 </template>
@@ -14,8 +10,12 @@
 <script>
   import { mapState } from 'vuex'
   import { CHAT_CLOSEROOM, CHAT_ADDMESSAGE } from '../../../Store/chat/mutation-types'
+  import MessageContainer from './Message/MessageContainer.vue'
 
   export default {
+    components: {
+      MessageContainer
+    },
     props: {
       room: {
         type: Object,
@@ -66,7 +66,17 @@
           }
           this.$store.dispatch(CHAT_ADDMESSAGE, {id: id, message: message})
         }
-      }
+      },
+      CHAT_RECEIVEMESSAGE: function(data) {
+        const {room, username, message} = data
+        if (room === this.room.data._id) {
+          const newMessage = {
+            username: username,
+            message : message
+          }
+          this.$store.dispatch(CHAT_ADDMESSAGE, {id: room, message: newMessage})
+        }
+      },
     }
   }
 </script>
