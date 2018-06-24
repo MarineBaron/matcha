@@ -7,12 +7,6 @@ const state = {
   error: ''
 }
 
-const actions = {
-  [SOCKET_CHAT_ADDMESSAGE]: ({commit, dispatch}, id, message) => {
-    console.log('le furet')
-  }
-}
-
 const mutations = {
   [SOCKET_CONNECT]: (state) => {
     console.log(SOCKET_CONNECT)
@@ -28,6 +22,5 @@ const mutations = {
 
 export default {
   state,
-  actions,
   mutations
 }

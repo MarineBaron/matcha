@@ -27,30 +27,6 @@
         title: 'Chat with ' + this.room.otheruser
       }
     },
-    mounted() {
-      this.$socket.on('CHAT_OPENROOM', (id, username) => {
-        if (id === this.room.data._id) {
-          const message = {
-            username: 'server',
-            message : username === this.username
-              ? 'Bienvenue ' + username + ' !'
-              : username + ' rejoint le chat.'
-          }
-          this.$store.dispatch('CHAT_ADDMESSAGE', {id: id, message: message})
-        }
-      })
-      this.$socket.on('CHAT_QUITROOM', (id, username) => {
-        if (id === this.room.data._id) {
-          const message = {
-            username: 'server',
-            message : username === this.username
-              ? 'Au revoir ' + username + ' !'
-              : username + ' quitte le chat.'
-          }
-          this.$store.dispatch(CHAT_ADDMESSAGE, id, message)
-        }
-      })
-    },
     methods: {
       closeRoom(e) {
         this.$store.dispatch(CHAT_CLOSEROOM, this.room)
@@ -66,5 +42,31 @@
         username: state => state.auth.profile.username
       })
     },
+    sockets: {
+      CHAT_OPENROOM: function(data) {
+        const {id, username} = data
+        if (id === this.room.data._id) {
+          const message = {
+            username: 'server',
+            message : username === this.username
+              ? 'Bienvenue ' + username + ' !'
+              : username + ' rejoint le chat.'
+          }
+          this.$store.dispatch(CHAT_ADDMESSAGE, {id: id, message: message})
+        }
+      },
+      CHAT_QUITROOM: function(data) {
+        const {id, username} = data
+        if (id === this.room.data._id) {
+          const message = {
+            username: 'server',
+            message : username === this.username
+              ? 'Au revoir ' + username + ' !'
+              : username + ' quitte le chat.'
+          }
+          this.$store.dispatch(CHAT_ADDMESSAGE, {id: id, message: message})
+        }
+      }
+    }
   }
 </script>

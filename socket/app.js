@@ -102,7 +102,11 @@ io.on('connection', function(socket) {
       })
     }
     socket.join(room._id)
-    io.to(room._id).emit('CHAT_OPENROOM', room._id, socket.username)
+    data = {
+      id: room._id,
+      username: socket.username
+    }
+    io.to(room._id).emit('CHAT_OPENROOM', data)
   })
 
   socket.on('CHAT_QUITROOM', function(id) {
@@ -116,7 +120,11 @@ io.on('connection', function(socket) {
       }
     }
     socket.leave(id)
-    io.to(id).emit('CHAT_QUITROOM', id, socket.username)
+    const data = {
+      id: id,
+      username: socket.username
+    }
+    io.to(id).emit('CHAT_QUITROOM', data)
   })
 
   // Deconnexion d'un utilisateur

@@ -43,9 +43,6 @@ const actions = {
       }
     })
   },
-  // [CHAT_OPENROOM_SOCKET]: ({commit, dispatch}, usernames) => {
-  //   console.log('CHAT_OPENROOM_SOCKET')
-  // },
   [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSEROOM, room.otheruser)
     return(room)
@@ -54,7 +51,6 @@ const actions = {
     commit(CHAT_CLOSEALLROOMS)
   },
   [CHAT_ADDMESSAGE]: ({commit, dispatch}, data) => {
-    console.log('action CHAT_ADDMESSAGE ', data)
     commit(CHAT_ADDMESSAGE, data)
   }
 }
@@ -88,12 +84,11 @@ const mutations = {
   },
   [CHAT_CLOSEALLROOMS]: (state) => {
     state.status = 'success'
-    state.rooms = []
+    Vue.set(state, 'rooms', [])
   },
   [CHAT_ADDMESSAGE]: (state, data) => {
     state.status = 'success'
     let index = state.rooms.findIndex(r => r.data._id === data.id)
-    console.log(index)
     if (index !== null) {
       if (!state.rooms[index].data.messages) {
         Vue.set(state.rooms[index].data, 'messages', [])
