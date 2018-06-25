@@ -11,6 +11,7 @@
   import { mapState } from 'vuex'
   import { CHAT_CLOSEROOM, CHAT_ADDMESSAGE } from '../../../Store/chat/mutation-types'
   import MessageContainer from './Message/MessageContainer.vue'
+  import callApi from '../../../Api/callApi'
 
   export default {
     components: {
@@ -77,6 +78,14 @@
           this.$store.dispatch(CHAT_ADDMESSAGE, {id: room, message: newMessage})
         }
       },
+      CHAT_SENDNOTIFICATION: function(data) {
+        callApi({url: 'notification/notification', data: data, method: 'POST'})
+        .then((response) => {
+          console.log("NOTIFICATION OK", response)
+        }, (error) => {
+          console.log("NOTIFICATION KO", error)
+        })
+      }
     }
   }
 </script>

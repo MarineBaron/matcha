@@ -1,7 +1,7 @@
 <template>
   <div>
     <MessageList :messages="room.data.messages" />
-    <MessageInput :roomId="room.data._id" />
+    <MessageInput :room="room" />
   </div>
 </template>
 

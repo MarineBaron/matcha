@@ -12,9 +12,10 @@
 <script>
   import { mapGetters, mapState } from 'vuex'
   import { CHAT_SENDMESSAGE_REQUEST} from '../../../../Store/chat/mutation-types'
+  import callApi from '../../../../Api/callApi'
 
   export default {
-    props: ['roomId'],
+    props: ['room'],
     data() {
       return {
         message: ''
@@ -24,7 +25,7 @@
       checkKey(e) {
         if(this.message.trim().length && e.keyCode === 13) {
           const data = {
-            roomId: this.roomId,
+            roomId: this.room.data._id,
             username: this.getProfile.username,
             message: this.message.trim()
           }

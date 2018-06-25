@@ -52,6 +52,11 @@ export default {
     ...mapState({
       token: state => state.auth.token
     })
+  },
+  sockets: {
+    NOTIFICATION_RECEIVE: function(data) {
+      console.log('NOTIFICATION_RECEIVE', data)
+    }
   }
 }
 </script>

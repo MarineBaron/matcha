@@ -129,6 +129,31 @@ io.on('connection', function(socket) {
 
   socket.on('CHAT_SENDMESSAGE', function(data) {
     console.log('CHAT_SENDMESSAGE', data.room, socket.username)
+    const socketRoom = rooms.find(r => r.id = data.room)
+    const { usernames } = socketRoom
+    const otheruserName = usernames[0] === socket.username ? usernames[1] : usernames[0]
+    const otheruser = authUsers.find(u => u.username === otheruserName)
+    // otheruser n'est pas connecte : on cree une notification en BDD
+    if (!otheruser) {
+      console.log('emit CHAT_SENDNOTIFICATION', socket)
+      socket.emit('CHAT_SENDNOTIFICATION', {
+        username: otheruserName,
+        message: "Vous avez reçu un message de " + socket.username
+      })
+    // otheruser est connecte
+    } else {
+      // on recherche les sockets sur lesquels il n'est pas connecte au chat pour envoyer une notification immediate
+      otheruser.sockets.forEach(os => {
+        if (!socketRoom.sockets.find(rs => rs === os)) {
+          console.log('emit NOTIFICATION_RECEIVE')
+          socket.to(os.id).emit('NOTIFICATION_RECEIVE', {
+            username: otheruserName,
+            message: "Vous avez reçu un message de " + socket.username
+          })
+        }
+      })
+    }
+    // on envoie le message aux utilisateurs connectes au chat (autre que l'emetteeur)
     socket.broadcast.to(data.room).emit('CHAT_RECEIVEMESSAGE', data)
   })
 
