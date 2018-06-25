@@ -9,10 +9,10 @@ const ChatRoomSchema = new mongoose.Schema({
   }]
 }, { collection: 'chatrooms' })
 
-ChatRoomSchema.virtual('messages', {
+ChatRoomSchema.virtual('messages', [{
   ref: 'ChatMessage',
   localField: '_id',
   foreignField: 'room'
-})
+}])
 
 module.exports = mongoose.model('ChatRoom', ChatRoomSchema)

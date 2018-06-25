@@ -6,71 +6,135 @@ const server = app.listen(3001, function() {
 });
 
 const io = require('socket.io')(server)
-let connectedUsers = []
-let visitorsData = []
-let nbUsers = 0
-let nbConnectedUsers = 0
-io.on('connection', function(socket) {
-    nbUsers++
-    // envoi du nombre de connectes a tout nouvel utilisateur
-    io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
-    // creation d'un objet null pour cet utilisateur
-    visitorsData[socket.id] = {}
+let nbVisitors = 0
+let authUsers = []
+let rooms = []
 
-    // Reception d'un mesage de login
-    socket.on('AUTH_LOGIN', function(data) {
-        //affectation du username au visiteur
-        visitorsData[socket.id].username = data.username
-        //ajout ou creation de la propriete connected
-        if (!connectedUsers[data.username]) {
-          connectedUsers[data.username] = {connected: true}
-          nbConnectedUsers++
+function getUsersNb() {
+  return {
+    nbVisitors: nbVisitors,
+    nbAuthUsers: authUsers.length
+  }
+}
+
+// Si l'utilisateur est authentifie (sur client), ajout a la liste des authentifies
+function authUser(socket, user) {
+  if (user.username) {
+    socket.username = user.username
+    const authUser = authUsers.find(u => u.username === user.username)
+    if (authUser) {
+      authUser.sockets.push(socket)
+    } else {
+      authUsers.push({
+          username: user.username,
+          sockets: [socket]
+        }
+      )
+    }
+    socket.join(user.username)
+  }
+  io.emit('NBUSERS_CHANGE', getUsersNb())
+}
+
+// Si l'utilisateur est authentifie (sur client), suppression de la liste des authentifies
+function disauthUser(socket) {
+  if (socket.username) {
+    // Enleve l'utilisateur des rooms
+    const socketRooms = rooms.filter(r => r.sockets.find(s => s.id === socket.id))
+    if (socketRooms) {
+      socketRooms.forEach(r => {
+        if (r.sockets.length < 2) {
+          rooms.splice(rooms.findIndex(r2 => r2.id === r.id), 1)
         } else {
-          connectedUsers[data.username].connected = true
+          r.sockets.splice(r.sockets.findIndex(s => s.id === socket.id), 1)
         }
-        io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
-    })
-
-    // Reception d'un message de logout
-    socket.on('AUTH_LOGOUT', function(data) {
-        //suppression de la propriete username sur tous les visiteurs associes
-        visitorsData.filter(visitor => (
-            visitor && visitor.username === data.username
-          )).forEach((visitor) => {
-            delete visitor.username
-          })
-        //suppression de l'utilisateur connecte
-        if (connectedUsers[data.username]) {
-          delete connectedUsers[data.username]
-          nbConnectedUsers--
-        }
-        io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
-    })
-
-    // Test Chat
-    socket.on('SEND_MESSAGE', function(data) {
-        io.emit('MESSAGE', data)
-    })
-
-    // Deconnexion d'un utilisateur
-    socket.on('disconnect', function() {
-      nbUsers--;
-      // Suppression de l'utilisateur connecte associe,
-      // s'il n'y a qu'une seule instance de visiteur associe a ce username
-      if (visitorsData[socket.id].username) {
-        const username = visitorsData[socket.id].username
-        if (visitorsData.filter(visitor => (
-            visitor && visitor.username === username
-          )).length === 1) {
-            if (connectedUsers[data.username]) {
-              delete connectedUsers[data.username]
-              nbConnectedUsers--
-            }
-
-          io.emit('BYEBYE', data.username)
-        }
+      })
+    }
+    // Enleve l'utilisateur des utilisteurs connectes
+    const authUser = authUsers.find(u => u.username === socket.username)
+    if (authUser) {
+      if (authUser.sockets.length < 2) {
+        authUsers.splice(authUsers.findIndex(u => u.username === socket.username))
+      } else {
+        authUser.sockets.splice(authUser.sockets.findIndex(s => s.id === socket.id), 1)
       }
-      delete visitorsData[socket.id]
-      io.emit('NBUSERS_CHANGE', {nbUsers: nbUsers, nbConnectedUsers: nbConnectedUsers})
-    })
+    }
+    delete socket.username
+  }
+  io.emit('NBUSERS_CHANGE', getUsersNb())
+}
+
+io.on('connection', function(socket) {
+  nbVisitors++
+  socket.on('IDENTIFY_USER', function(user) {
+    console.log('IDENTIFY_USER', user)
+    authUser(socket, user)
+  })
+
+  // Reception d'un message de login
+  socket.on('AUTH_LOGIN', function(data) {
+    console.log('AUTH_LOGIN', data)
+    authUser(socket, data)
+  })
+
+  // Reception d'un message de logout
+  socket.on('AUTH_LOGOUT', function(data) {
+    console.log('AUTH_LOGOUT', data)
+    disauthUser(socket)
+  })
+
+  // Chat Room
+  socket.on('CHAT_OPENROOM', function(data) {
+    console.log('CHAT_OPENROOM', data.room._id, socket.username)
+    const { room, usernames } = data
+    socket.join(data.room._id)
+    let socketRoom = rooms.find(r => r.id === room._id)
+    if (socketRoom) {
+      if (!socketRoom.sockets.find(s => s.id === socket.id)) {
+        socketRoom.sockets.push(socket)
+      }
+    }
+    else {
+      rooms.push({
+        id: room._id,
+        usernames: usernames,
+        sockets: [socket]
+      })
+    }
+    socket.join(room._id)
+    data = {
+      id: room._id,
+      username: socket.username
+    }
+    io.to(room._id).emit('CHAT_OPENROOM', data)
+  })
+
+  socket.on('CHAT_QUITROOM', function(id) {
+    console.log('CHAT_QUITROOM', id, socket.username)
+    let socketRoom = rooms.find(r => r.id === id)
+    if (socketRoom) {
+      if (socketRoom.sockets.length < 2) {
+        rooms.splice(rooms.findIndex(r => r.id === id), 1)
+      } else {
+        socketRoom.sockets.splice(socketRoom.sockets.findIndex(s => s.id === socket.id), 1)
+      }
+    }
+    socket.leave(id)
+    const data = {
+      id: id,
+      username: socket.username
+    }
+    io.to(id).emit('CHAT_QUITROOM', data)
+  })
+
+  socket.on('CHAT_SENDMESSAGE', function(data) {
+    console.log('CHAT_SENDMESSAGE', data.room, socket.username)
+    socket.broadcast.to(data.room).emit('CHAT_RECEIVEMESSAGE', data)
+  })
+
+  // Deconnexion d'un utilisateur
+  socket.on('disconnect', function() {
+    nbVisitors--
+    disauthUser(socket)
+  })
 })

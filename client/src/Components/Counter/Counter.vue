@@ -5,8 +5,8 @@
               <h3>Nb Users</h3>
           </div>
           <div class="card-body">
-            <p>Visiteurs : {{nbUsers}}</p>
-            <p>Connectés : {{nbConnectedUsers}}</p>
+            <p>Visiteurs : {{nbVisitors}}</p>
+            <p>Connectés : {{nbAuthUsers}}</p>
           </div>
       </div>
   </div>
@@ -17,14 +17,14 @@
 export default {
     data() {
         return {
-            nbUsers: 0,
-            nbConnectedUsers: 0
+            nbVisitors: 0,
+            nbAuthUsers: 0
         }
     },
     sockets: {
       NBUSERS_CHANGE(data) {
-        this.nbUsers = data.nbUsers
-        this.nbConnectedUsers = data.nbConnectedUsers
+        this.nbVisitors = data.nbVisitors
+        this.nbAuthUsers = data.nbAuthUsers
       }
     },
 }

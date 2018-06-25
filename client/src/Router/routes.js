@@ -89,6 +89,7 @@ export default [
   {
     path: '/chat',
     component: Chat,
-    meta: {}
+    meta: {},
+    beforeEnter: ifAuthenticated
   }
 ]

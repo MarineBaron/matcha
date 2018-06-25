@@ -3,6 +3,9 @@ import {
   USER_REGISTER_SUCCESS,
   USER_REGISTER_ERROR,
   USER_USER_REQUEST,
+  USER_FRIENDS_REQUEST,
+  USER_FRIENDS_ERROR,
+  USER_FRIENDS_SUCCESS,
   USER_USER_ERROR,
   USER_USER_SUCCESS,
   USER_USERS_REQUEST,
@@ -52,7 +55,7 @@ const actions = {
           commit(USER_USER_ERROR)
           reject(resp.data.message)
         } else {
-          console.log('action USER_USER_REQUEST',resp.data)
+          console.log('action USER_USER_REQUEST',resp.data.data)
           commit(USER_USER_SUCCESS)
           resolve(resp.data.data)
         }
@@ -81,7 +84,31 @@ const actions = {
         reject(err)
       })
     })
+  },
+
+  [USER_FRIENDS_REQUEST]: ({commit, dispatch}, username) => {
+    console.log('-> USER_FRIENDS_REQUEST')
+    return new Promise((resolve, reject) => {
+      console.log('--> USER_FRIENDS_REQUEST')
+      commit(USER_FRIENDS_REQUEST)
+      console.log('---> USER_FRIENDS_REQUEST')
+      callApi({url: 'user/friends/' + username})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          commit(USER_FRIENDS_ERROR)
+          reject(resp.data.message)
+        } else {
+          commit(USER_FRIENDS_SUCCESS, resp.data.data)
+          resolve(resp.data.data)
+        }
+      })
+      .catch(err => {
+        commit(USER_FRIENDS_ERROR)
+        reject(err)
+      })
+    })
   }
+
 }
 
 const mutations = {
@@ -116,6 +143,19 @@ const mutations = {
     state.status = 'error',
     state.users = []
   },
+  [USER_FRIENDS_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [USER_FRIENDS_SUCCESS]: (state, data) => {
+    state.status = 'success'
+    state.users = data
+  },
+  [USER_FRIENDS_ERROR]: (state) => {
+    state.status = 'error',
+    state.users = []
+  },
+
+
 }
 
 export default {

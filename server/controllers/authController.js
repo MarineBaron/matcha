@@ -51,12 +51,34 @@ module.exports = {
     })
   },
 
+  profile: function(id, callback) {
+    User.findById(id, function (err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(null, {
+          success: 0
+        })
+      } else {
+          callback(null, {
+            success: 1,
+            data: {
+              username: user.username,
+              role: user.role,
+            }
+        })
+      }
+    })
+  },
+
   logout: function(token) {
   },
 
   confirm: function(username, token, callback) {
     jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
-      
+
       if (err) {
         callback(null, {
           success: 0,
@@ -89,7 +111,7 @@ module.exports = {
       })
     })
   },
-  
+
   ask: function(type, email, callback) {
     User.findOne({email: email}, function(err, user) {
       if (err) {
@@ -134,7 +156,7 @@ module.exports = {
       })
     })
   },
-  
+
   passwordreset: function(username, token, password, callback) {
     jwt.verify(token, process.env.JWTSECRET, function(err, decoded) {
       if (err) {

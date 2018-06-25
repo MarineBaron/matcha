@@ -71,7 +71,7 @@ const actions = {
   },
   [AUTH_PROFILE_REQUEST]: ({commit, dispatch}) => {
     commit(AUTH_PROFILE_REQUEST)
-    callApi({url: 'user/profile'})
+    callApi({url: 'auth/profile'})
       .then(resp => {
         const data = resp.data.data
         localStorage.setItem('profile', JSON.stringify(data))

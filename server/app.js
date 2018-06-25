@@ -12,7 +12,7 @@ const app = express();
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use('/images', express.static ('images'));
+app.use('/images', express.static ('public/images'));
 /* Base de données & ORM */
 const mongoose = require('mongoose')
 const dbURL = process.env.MONGO_DB_URL
@@ -38,13 +38,12 @@ app.get('/', function(req, res) {
 const authRouter = require('./routes/auth')
 const userRouter = require('./routes/user')
 const chatRouter = require('./routes/chat')
-// var tagRouter = require('./routes/tag');
-// var chatRouter = require('./routes/chat');
+const notificationRouter = require('./routes/notification')
+
 app.use('/auth', authRouter)
 app.use('/user', userRouter)
 app.use('/chat', chatRouter)
-// app.use('/tag', tagRouter);
-// app.use('/chat', chatRouter);
+app.use('/notification', notificationRouter)
 
 app.use(function(req, res, next) {
   next(createError(404));

@@ -2,6 +2,7 @@ const async = require('async')
 const ChatMessage = require('../../models/chat/message')
 const ChatRoom = require('../../models/chat/room')
 const User = require('../../models/user')
+const messageController = require('./messageController')
 
 module.exports = {
   getOne: function(id, callback) {
@@ -55,16 +56,44 @@ module.exports = {
         callback(err, null)
         return
       }
-      ChatRoom.findOne({users: users.user1._id, users: users.user2._id}, function (err, room) {
+      ChatRoom.findOne({$and: [{users: users.user1._id}, {users: users.user2._id}]})
+        .exec(function (err, room) {
         if (err) {
           callback(err, null)
           return
         }
         if (room && room.users) {
           console.log('room exists')
-          callback(null, {
-            success: 1,
-            data: room
+          let newRoom =  {
+            _id: room._id,
+            users: room.users,
+            messages: []
+          }
+          messageController.getAllByRoom(room._id, function(err, result) {
+            if (err) {
+              callback(err, null)
+              return
+            }
+            if (result && result.success && result.data) {
+              result.data.forEach(m => {
+                newRoom.messages.push(
+                  {
+                    id: m._id,
+                    room: room._id,
+                    created: m.created,
+                    username: m.user.username,
+                    message: m.message,
+                  }
+                )
+              })
+            }
+            callback(null, {
+              success: 1,
+              data: {
+                usernames : [users.user1.username, users.user2.username],
+                room: newRoom,
+              }
+            })
           })
           return
         }
@@ -82,7 +111,10 @@ module.exports = {
           }
           callback(null, {
               success: 1,
-              data: newRoom
+              data: {
+                usernames : [users.user1.username, users.user2.username],
+                room: newRoom
+              }
           })
         })
       })
