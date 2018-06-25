@@ -1,9 +1,9 @@
 <template>
 <div>
-    <profile-view-image-grande :images="images" />
-    <profile-view-image-liste :images="images" />
-  {{ images[0].name }}
-  <b-img :src="getUrl(images[0].name)" fluid alt="Responsive image" />
+    <profile-view-image-grande v-if="image" :image="image" />
+    <profile-view-image-liste :images="images" @change-image="changeImage"/>
+  <h2>{{ image }}</h2>
+ 
 
 </div>
    
@@ -14,11 +14,16 @@
   import ProfileViewImageGrande from './ProfileViewImageGrande.vue'
   import ProfileViewImageListe from './ProfileViewImageListe.vue'
   export default {
+      data() {
+      return {
+        image: {}
+      }
+    },
     props: {
-        
         images: {
             type: Array
-        }
+        },
+       
     },
      components: {
         ProfileViewImageGrande,
@@ -27,6 +32,9 @@
     methods: {
         getUrl(name){
             return ('http://localhost:5000/images/' + name)
+        },
+        changeImage(image) {
+            this.image = image
         }
     }
    

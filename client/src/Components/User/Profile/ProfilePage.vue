@@ -4,8 +4,8 @@
       <b-row>
         <b-col sm="8">
           <b-button @click.prevent="onClick">{{buttonText}}</b-button>
-          <profile-view v-if="user&&mode=='view'" :user="user" />
-          <profile-form v-if="user&&mode=='edit'" :user="user" />
+          <profile-view v-if="loadingSuccess&&mode=='view'" :user="user" />
+          <profile-form v-if="loadingSuccess&&mode=='edit'" :user="user" />
         </b-col>
         <b-col sm="4"><my-friends></my-friends></b-col>
     </b-row>
@@ -42,7 +42,8 @@
     },
     computed: {
       ...mapState({
-        username: state => `${state.auth.profile.username}`
+        username: state => state.auth.profile.username,
+        loadingSuccess: state => state.user.status === 'success' ? true : false,
       })
     },
     mounted() {

@@ -14,6 +14,9 @@
         ProfileViewInfos,
         ProfileViewImages
     },
+    methods: {
+
+    },
     computed: {
         getImages() {
             let images = []
@@ -22,23 +25,14 @@
                     name: this.user.avatar.image.name,
                     alt: this.user.avatar.alt,
                 })
-                images.push({
-                    name: '02.png',
-                    alt: 'ALT sur la deuxieme image',
-                })
-                images.push({
-                    name: '03.png',
-                    alt: 'ALT sur la troisieme image',
-                })
-                images.push({
-                    name: '04.png',
-                    alt: 'ALT sur la deuxieme image',
-                })
-                images.push({
-                    name: '05.png',
-                    alt: 'ALT sur la deuxieme image',
-                })
             }
+            if (this.user.gallery) {
+                this.user.gallery.forEach(i => images.push({
+                    name: i.image.name,
+                    alt: i.alt,
+                }))
+            }
+            
             return images
         }
     }
