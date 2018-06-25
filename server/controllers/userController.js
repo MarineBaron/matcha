@@ -2,6 +2,7 @@ const User = require('../models/user')
 const Image = require('../models/image')
 const jwt = require('jsonwebtoken')
 const mailController = require('./mailController')
+//const userController = require('./userController')
 
 module.exports = {
   findAll: function(callback){
@@ -57,7 +58,7 @@ module.exports = {
     })
   },
   findCompleteByUsername: function(username, callback) {
-    
+
     User.findOne({username: username})
     // .populate({
     //   path: 'friends',
@@ -127,6 +128,7 @@ console.log('Coucou !')
 
 
   create: function (username, email, password, callback) {
+    const self = this
     User.findOne({username: username}, function (err, user) {
       if (err) {
           callback(err, null)
@@ -160,7 +162,7 @@ console.log('Coucou !')
           return
         }
         const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
-        this.sendEmailConfirmation(user, authToken)
+        self.sendEmailConfirmation(user, authToken)
         callback(null, {
           success: 1,
           token: authToken
