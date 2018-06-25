@@ -18,7 +18,7 @@ router.post('/create', function(req, res, next) {
   })
 })
 
-/* GET profile */
+/* GET profile - Accès aux données complètes de l'utilisateur connecté. */
 router.get('/profile', verifyToken, function(req, res, next) {
   controller.findById(req.user._id, function (err, result) {
     if (err) {
@@ -34,7 +34,23 @@ router.get('/profile', verifyToken, function(req, res, next) {
   })
 })
 
-/* GET user */
+/* GET User - Friends Tous les amis de "username"*/
+router.get('/friends/:username', function(req, res, next) {
+  console.log('Nouvel methode !!!')
+  controller.findFriendsByUsername(req.params.username, function (err, result) {
+    if (err){
+      console.log('Routes/user.js L73 :' + err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
+/* GET user - Accès aux données d'un user lambda*/
 router.get('/user/:username', function(req, res, next) {
   // console.log('/user/:username')
   controller.findCompleteByUsername(req.params.username, function (err, result) {
@@ -50,7 +66,7 @@ router.get('/user/:username', function(req, res, next) {
   })
 })
 
-/* GET user */
+/* GET user Accès à tous les users */
 router.get('/users', function(req, res, next) {
   controller.findAll(function (err, result) {
     if (err) {
@@ -65,20 +81,8 @@ router.get('/users', function(req, res, next) {
   })
 })
 
-/* GET User Friends */
-router.get('/friends/:username', function(req, res, next) {
-  console.log('Nouvel methode !!!')
-  controller.findFriendsByUsername(req.params.username, function (err, result) {
-    if (err){
-      console.log('Routes/user.js L73 :' + err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    res.status(200).json(result)
-  })
-})
+
+
+
 
 module.exports = router;

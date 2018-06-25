@@ -26,11 +26,80 @@
 
           <b-row>
        <b-col sm="8">
+ 
+       <b-col sm="4">
+<div>
+    <b-carousel id="carousel1"
+                style="text-shadow: 1px 1px 2px #333;"
+                controls
+                background="#ababab"
+                :interval="0"
+                img-width="100"
+                img-height="100"
+                v-model="slide"
+                @sliding-start="onSlideStart"
+                @sliding-end="onSlideEnd"
+    >
 
-          <b-jumbotron header="Bootstrap Vue" lead="Bootstrap 4 Components for Vue.js 2" >
-  <p>For more information visit website</p>
-  <b-btn variant="primary" href="#">More Info</b-btn>
-</b-jumbotron>
+      <!-- Text slides with image -->
+      <b-carousel-slide 
+                        id="Slide00"
+                        img-src="http://localhost:5000/images/00.png"
+      ></b-carousel-slide>
+
+  <!-- Text slides with image -->
+      <b-carousel-slide 
+                        id="Slide00"
+                        img-src="http://localhost:5000/images/01.png"
+      ></b-carousel-slide>
+
+      <!-- Text slides with image -->
+      <b-carousel-slide 
+                        id="Slide00"                       
+                        img-src="http://localhost:5000/images/02.png"
+      ></b-carousel-slide>
+
+      <!-- Text slides with image -->
+      <b-carousel-slide 
+                        id="Slide00"                        
+                        img-src="http://localhost:5000/images/03.png"
+      ></b-carousel-slide>
+
+      <!-- Text slides with image -->
+      <b-carousel-slide                         
+                        id="Slide00"
+                        img-src="http://localhost:5000/images/04.png"
+      ></b-carousel-slide>
+
+    </b-carousel>
+
+   <b-img center src="http://localhost:5000/images/00.png" id="00" width="50" height="50" alt="center image" v-on:click="SeeSlide('00')"/>
+   <b-img center src="http://localhost:5000/images/01.png" id="01" width="50" height="50" alt="center image" v-on:click="SeeSlide('01')" />
+   <b-img center src="http://localhost:5000/images/02.png" id="02" width="50" height="50" alt="center image" v-on:click="SeeSlide('02')" />
+
+
+  
+  </div>
+ </b-col>
+     <b-col sm="4">
+
+ </b-col>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         </b-col>
         <b-col sm="4"><my-friends></my-friends></b-col>
@@ -57,14 +126,25 @@
         buttonText: 'Editer',
         resume: 'toto',
         user: {},
-        error: ''
+        error: '',
+        slide: 0,
+        sliding: null
       }
     },
     methods: {
-
+      SeeSlide: function(e){
+        console.log("slide"+e)
+        document.getElementById('Slide' + e).style.display = block;
+      }, 
       onClick(e) {
-        this.mode = this.mode === 'edit' ? 'view' : 'edit'
-        this.buttonText = this.mode === 'edit' ? 'Voir' : 'Editer'
+        // this.mode = this.mode === 'edit' ? 'view' : 'edit'
+        // this.buttonText = this.mode === 'edit' ? 'Voir' : 'Editer'
+      },
+      onSlideStart (slide) {
+        this.sliding = true
+      },
+      onSlideEnd (slide) {
+        this.sliding = false
       }
     },
     computed: {
