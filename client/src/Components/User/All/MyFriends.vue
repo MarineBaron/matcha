@@ -4,7 +4,7 @@
         <h5 class="card-header">{{ title }} {{ username.toUpperCase() }}</h5>
         
             <b-row class="text-center">
-                <b-col md="6" class="p-4" v-for="user in users" >
+                <b-col md="6" class="p-4" v-for="user in users" :key="user.username">
 
                     <b-link :to="{path: '/user/' + user.username}" title="">
                     {{user.username}}   </b-link>                   

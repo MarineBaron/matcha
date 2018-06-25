@@ -72,6 +72,9 @@ module.exports = {
     .populate({
       path: 'avatar.image'
     })
+    .populate({
+      path: 'gallery.image'
+    })
       .exec(function (err, user) {
       if (err) {
         // console.log(err)
