@@ -74,20 +74,19 @@ module.exports = {
               callback(err, null)
               return
             }
-            console.log(result.data)
             if (result && result.success && result.data) {
               result.data.forEach(m => {
                 newRoom.messages.push(
                   {
+                    id: m._id,
                     room: room._id,
+                    created: m.created,
                     username: m.user.username,
-                    message: m.message
+                    message: m.message,
                   }
                 )
               })
             }
-            console.log('ChatRoom.findOne')
-            console.log(newRoom)
             callback(null, {
               success: 1,
               data: {
