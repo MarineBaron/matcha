@@ -5,6 +5,8 @@ import Vuelidate from 'vuelidate'
 import VueFlashMessage from 'vue-flash-message'
 import VueSocketio from 'vue-socket.io'
 import BootstrapVue from 'bootstrap-vue'
+import VueLodash from 'vue-lodash'
+
 
 import App from './Components/App.vue'
 

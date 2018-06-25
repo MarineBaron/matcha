@@ -28,14 +28,13 @@
       openChat(e) {
         this.$store.dispatch(CHAT_OPENROOM_REQUEST, [this.username, this.user.username])
         .then((response) => {
-          console.log(response)
           this.$socket.emit('CHAT_OPENROOM', {
             usernames: response.usernames,
             room: response.room,
             username: this.username
           })
         }, (error) => {
-          console.log("openChat ERROR", error)
+          console.log("UserItem.vue openChat ERROR", error)
         })
       }
     },
