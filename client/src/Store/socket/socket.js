@@ -1,5 +1,4 @@
-import { SOCKET_CONNECT, SOCKET_DISCONNECT, SOCKET_ERROR, SOCKET_CHAT_ADDMESSAGE } from './mutation-types'
-import { CHAT_ADDMESSAGE } from '../chat/mutation-types'
+import { SOCKET_CONNECT, SOCKET_DISCONNECT, SOCKET_ERROR } from './mutation-types'
 import Vue from 'vue'
 
 const state = {

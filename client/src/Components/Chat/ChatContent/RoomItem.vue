@@ -9,7 +9,7 @@
 
 <script>
   import { mapState } from 'vuex'
-  import { CHAT_CLOSEROOM, CHAT_ADDMESSAGE } from '../../../Store/chat/mutation-types'
+  import { CHAT_CLOSE_ROOM, CHAT_ADD_MESSAGE } from '../../../Store/chat/mutation-types'
   import MessageContainer from './Message/MessageContainer.vue'
   import callApi from '../../../Api/callApi'
 
@@ -30,9 +30,9 @@
     },
     methods: {
       closeRoom(e) {
-        this.$store.dispatch(CHAT_CLOSEROOM, this.room)
+        this.$store.dispatch(CHAT_CLOSE_ROOM, this.room)
         .then((response) => {
-          this.$socket.emit('CHAT_QUITROOM', response.data._id)
+          this.$socket.emit('CHAT_QUIT_ROOM', response.data._id)
         }, (error) => {
           console.log(error)
         })
@@ -44,7 +44,7 @@
       })
     },
     sockets: {
-      CHAT_OPENROOM: function(data) {
+      CHAT_OPEN_ROOM: function(data) {
         const {id, username} = data
         if (id === this.room.data._id) {
           const message = {
@@ -53,10 +53,10 @@
               ? 'Bienvenue ' + username + ' !'
               : username + ' rejoint le chat.'
           }
-          this.$store.dispatch(CHAT_ADDMESSAGE, {id: id, message: message})
+          this.$store.dispatch(CHAT_ADD_MESSAGE, {id: id, message: message})
         }
       },
-      CHAT_QUITROOM: function(data) {
+      CHAT_QUIT_ROOM: function(data) {
         const {id, username} = data
         if (id === this.room.data._id) {
           const message = {
@@ -65,20 +65,20 @@
               ? 'Au revoir ' + username + ' !'
               : username + ' quitte le chat.'
           }
-          this.$store.dispatch(CHAT_ADDMESSAGE, {id: id, message: message})
+          this.$store.dispatch(CHAT_ADD_MESSAGE, {id: id, message: message})
         }
       },
-      CHAT_RECEIVEMESSAGE: function(data) {
+      CHAT_RECEIVE_MESSAGE: function(data) {
         const {room, username, message} = data
         if (room === this.room.data._id) {
           const newMessage = {
             username: username,
             message : message
           }
-          this.$store.dispatch(CHAT_ADDMESSAGE, {id: room, message: newMessage})
+          this.$store.dispatch(CHAT_ADD_MESSAGE, {id: room, message: newMessage})
         }
       },
-      CHAT_SENDNOTIFICATION: function(data) {
+      CHAT_SEND_NOTIFICATION: function(data) {
         callApi({url: 'notification/notification', data: data, method: 'POST'})
         .then((response) => {
           console.log("NOTIFICATION OK", response)

@@ -43,9 +43,17 @@ module.exports = {
           return
         }
         const authToken = jwt.sign({username: user.username, _id: user._id}, process.env.JWTSECRET)
-        callback(null, {
-          success: 1,
-          token: authToken
+        const date = new Date()
+        user.last_login = date
+        user.save(function(err, user) {
+          if (err) {
+            callback(err, null)
+            return
+          }
+          callback(null, {
+            success: 1,
+            token: authToken
+          })
         })
       })
     })
@@ -73,7 +81,30 @@ module.exports = {
     })
   },
 
-  logout: function(token) {
+  logout: function(username, callback) {
+    User.findOne({username: username}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(null, {
+          success: 0
+        })
+        return
+      }
+      const date = new Date()
+      user.last_logout = date
+      user.save(function(err, user) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        callback(null, {
+          success: 1
+        })
+      })
+    })
   },
 
   confirm: function(username, token, callback) {

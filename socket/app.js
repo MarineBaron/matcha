@@ -43,6 +43,12 @@ function disauthUser(socket) {
     const socketRooms = rooms.filter(r => r.sockets.find(s => s.id === socket.id))
     if (socketRooms) {
       socketRooms.forEach(r => {
+        const data = {
+          id: r.id,
+          username: socket.username
+        }
+        io.to(r.id).emit('CHAT_QUIT_ROOM', data)
+        socket.leave(r.id)
         if (r.sockets.length < 2) {
           rooms.splice(rooms.findIndex(r2 => r2.id === r.id), 1)
         } else {
@@ -71,6 +77,13 @@ io.on('connection', function(socket) {
     authUser(socket, user)
   })
 
+  socket.on('UNLOAD_USER', function(user) {
+    console.log('UNLOAD_USER', user)
+    if (user.username) {
+      disauthUser(socket)
+    }
+  })
+
   // Reception d'un message de login
   socket.on('AUTH_LOGIN', function(data) {
     console.log('AUTH_LOGIN', data)
@@ -84,10 +97,10 @@ io.on('connection', function(socket) {
   })
 
   // Chat Room
-  socket.on('CHAT_OPENROOM', function(data) {
-    console.log('CHAT_OPENROOM', data.room._id, socket.username)
+  socket.on('CHAT_OPEN_ROOM', function(data) {
     const { room, usernames } = data
-    socket.join(data.room._id)
+    console.log('CHAT_OPEN_ROOM', room._id, socket.username)
+    socket.join(room._id)
     let socketRoom = rooms.find(r => r.id === room._id)
     if (socketRoom) {
       if (!socketRoom.sockets.find(s => s.id === socket.id)) {
@@ -106,11 +119,11 @@ io.on('connection', function(socket) {
       id: room._id,
       username: socket.username
     }
-    io.to(room._id).emit('CHAT_OPENROOM', data)
+    io.to(room._id).emit('CHAT_OPEN_ROOM', data)
   })
 
-  socket.on('CHAT_QUITROOM', function(id) {
-    console.log('CHAT_QUITROOM', id, socket.username)
+  socket.on('CHAT_QUIT_ROOM', function(id) {
+    console.log('CHAT_QUIT_ROOM', id, socket.username)
     let socketRoom = rooms.find(r => r.id === id)
     if (socketRoom) {
       if (socketRoom.sockets.length < 2) {
@@ -118,16 +131,16 @@ io.on('connection', function(socket) {
       } else {
         socketRoom.sockets.splice(socketRoom.sockets.findIndex(s => s.id === socket.id), 1)
       }
+      const data = {
+        id: id,
+        username: socket.username
+      }
+      io.to(id).emit('CHAT_QUIT_ROOM', data)
+      socket.leave(id)
     }
-    socket.leave(id)
-    const data = {
-      id: id,
-      username: socket.username
-    }
-    io.to(id).emit('CHAT_QUITROOM', data)
   })
 
-  socket.on('CHAT_SENDMESSAGE', function(data) {
+  socket.on('CHAT_SEND_MESSAGE', function(data) {
     console.log('CHAT_SENDMESSAGE', data.room, socket.username)
     const socketRoom = rooms.find(r => r.id = data.room)
     const { usernames } = socketRoom
@@ -135,8 +148,8 @@ io.on('connection', function(socket) {
     const otheruser = authUsers.find(u => u.username === otheruserName)
     // otheruser n'est pas connecte : on cree une notification en BDD
     if (!otheruser) {
-      console.log('emit CHAT_SENDNOTIFICATION', socket)
-      socket.emit('CHAT_SENDNOTIFICATION', {
+      console.log('emit CHAT_SEND_NOTIFICATION', socket)
+      socket.emit('CHAT_SEND_NOTIFICATION', {
         username: otheruserName,
         message: "Vous avez reçu un message de " + socket.username
       })
@@ -154,7 +167,7 @@ io.on('connection', function(socket) {
       })
     }
     // on envoie le message aux utilisateurs connectes au chat (autre que l'emetteeur)
-    socket.broadcast.to(data.room).emit('CHAT_RECEIVEMESSAGE', data)
+    socket.broadcast.to(data.room).emit('CHAT_RECEIVE_MESSAGE', data)
   })
 
   // Deconnexion d'un utilisateur

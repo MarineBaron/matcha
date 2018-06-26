@@ -11,7 +11,7 @@
 
 <script>
   import { mapGetters, mapState } from 'vuex'
-  import { CHAT_SENDMESSAGE_REQUEST} from '../../../../Store/chat/mutation-types'
+  import { CHAT_SEND_MESSAGE_REQUEST} from '../../../../Store/chat/mutation-types'
   import callApi from '../../../../Api/callApi'
 
   export default {
@@ -30,9 +30,9 @@
             message: this.message.trim()
           }
           this.message = ''
-          this.$store.dispatch('CHAT_SENDMESSAGE_REQUEST', data)
+          this.$store.dispatch('CHAT_SEND_MESSAGE_REQUEST', data)
           .then((response) => {
-            this.$socket.emit('CHAT_SENDMESSAGE', response)
+            this.$socket.emit('CHAT_SEND_MESSAGE', response)
           }, (error) => {
             console.log('MessageInput.vue ERROR', error)
           })

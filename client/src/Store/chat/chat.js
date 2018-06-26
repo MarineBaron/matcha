@@ -1,13 +1,17 @@
 import {
-  CHAT_OPENROOM_REQUEST,
-  CHAT_OPENROOM_ERROR,
-  CHAT_OPENROOM_SUCCESS,
-  CHAT_SENDMESSAGE_REQUEST,
-  CHAT_SENDMESSAGE_ERROR,
-  CHAT_SENDMESSAGE_SUCCESS,
-  CHAT_CLOSEROOM,
-  CHAT_CLOSEALLROOMS,
-  CHAT_ADDMESSAGE,
+  CHAT_OPEN_ROOM_REQUEST,
+  CHAT_OPEN_ROOM_ERROR,
+  CHAT_OPEN_ROOM_SUCCESS,
+  CHAT_SEND_MESSAGE_REQUEST,
+  CHAT_SEND_MESSAGE_ERROR,
+  CHAT_SEND_MESSAGE_SUCCESS,
+  CHAT_CLOSE_ROOM,
+  CHAT_CLOSE_ALLROOMS,
+  CHAT_WATCH_ROOM,
+  CHAT_WATCH_ALLROOMS,
+  CHAT_UNWATCH_ROOM,
+  CHAT_UNWATCH_ALLROOMS,
+  CHAT_ADD_MESSAGE,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -18,16 +22,17 @@ const state = {
 }
 
 const getters = {
-  getActiveRooms: state => state.rooms
+  getRooms: state => state.rooms,
+  getActiveRooms: state => state.rooms.filter(r => r.status === 'actived')
 }
 
 const actions = {
-  [CHAT_OPENROOM_REQUEST]: ({commit, dispatch}, usernames) => {
+  [CHAT_OPEN_ROOM_REQUEST]: ({commit, dispatch}, usernames) => {
     return new Promise((resolve, reject) => {
-      commit(CHAT_OPENROOM_REQUEST)
+      commit(CHAT_OPEN_ROOM_REQUEST)
       let room = {}
       if (this.rooms && (room = this.rooms.find(room => room.otheruser === usernames[1]))) {
-        commit(CHAT_OPENROOM_SUCCESS, usernames[1])
+        commit(CHAT_OPEN_ROOM_SUCCESS, usernames[1])
         resolve(room)
       } else {
         const data = {
@@ -36,46 +41,60 @@ const actions = {
         }
         callApi({url: 'chat/room', data: data, method: 'POST'})
         .then((resp) => {
-          commit(CHAT_OPENROOM_SUCCESS, resp.data.data)
+          commit(CHAT_OPEN_ROOM_SUCCESS, resp.data.data)
           resolve(resp.data.data)
         }, (error) => {
-          commit(CHAT_OPENROOM_ERROR)
+          commit(CHAT_OPEN_ROOM_ERROR)
           reject(error)
         })
       }
     })
   },
-  [CHAT_SENDMESSAGE_REQUEST]: ({commit, dispatch}, data) => {
+  [CHAT_SEND_MESSAGE_REQUEST]: ({commit, dispatch}, data) => {
     return new Promise((resolve, reject) => {
-      commit(CHAT_SENDMESSAGE_REQUEST)
+      commit(CHAT_SEND_MESSAGE_REQUEST)
       callApi({url: 'chat/message', data: data, method: 'POST'})
       .then((resp) => {
         resp.data.data.username = data.username
-        commit(CHAT_SENDMESSAGE_SUCCESS, resp.data.data)
+        commit(CHAT_SEND_MESSAGE_SUCCESS, resp.data.data)
         resolve(resp.data.data)
       }, (error) => {
-        commit(CHAT_SENDMESSAGE_ERROR)
+        commit(CHAT_SEND_MESSAGE_ERROR)
         reject(error)
       })
     })
   },
-  [CHAT_CLOSEROOM]: ({commit, dispatch}, room) => {
-    commit(CHAT_CLOSEROOM, room.otheruser)
+  [CHAT_WATCH_ALLROOMS]: ({commit, dispatch}) => {
+    commit(CHAT_WATCH_ALLROOMS)
+    console.log('CHAT_WATCH_ALLROOMS')
+  },
+  [CHAT_UNWATCH_ALLROOMS]: ({commit, dispatch}) => {
+    console.log('CHAT_UNWATCH_ALLROOMS')
+  },
+  [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
+    commit(CHAT_CLOSE_ROOM, room.otheruser)
     return(room)
   },
-  [CHAT_CLOSEALLROOMS]: ({commit, dispatch}) => {
-    commit(CHAT_CLOSEALLROOMS)
+  [CHAT_CLOSE_ALLROOMS]: ({commit, dispatch}) => {
+    commit(CHAT_CLOSE_ALLROOMS)
   },
-  [CHAT_ADDMESSAGE]: ({commit, dispatch}, data) => {
-    commit(CHAT_ADDMESSAGE, data)
+  [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
+    commit(CHAT_CLOSE_ROOM, room.otheruser)
+    return(room)
+  },
+  [CHAT_CLOSE_ALLROOMS]: ({commit, dispatch}) => {
+    commit(CHAT_CLOSE_ALLROOMS)
+  },
+  [CHAT_ADD_MESSAGE]: ({commit, dispatch}, data) => {
+    commit(CHAT_ADD_MESSAGE, data)
   }
 }
 
 const mutations = {
-  [CHAT_OPENROOM_REQUEST]: (state) => {
+  [CHAT_OPEN_ROOM_REQUEST]: (state) => {
     state.status = 'loading'
   },
-  [CHAT_OPENROOM_SUCCESS]: (state, data) => {
+  [CHAT_OPEN_ROOM_SUCCESS]: (state, data) => {
     state.status = 'success'
     const otheruser = data.usernames[1]
     let room = state.rooms.find(room => room.otheruser === otheruser)
@@ -91,13 +110,13 @@ const mutations = {
       })
     }
   },
-  [CHAT_OPENROOM_ERROR]: (state) => {
+  [CHAT_OPEN_ROOM_ERROR]: (state) => {
     state.status = 'error'
   },
-  [CHAT_SENDMESSAGE_REQUEST]: (state) => {
+  [CHAT_SEND_MESSAGE_REQUEST]: (state) => {
     state.status = 'loading'
   },
-  [CHAT_SENDMESSAGE_SUCCESS]: (state, data) => {
+  [CHAT_SEND_MESSAGE_SUCCESS]: (state, data) => {
     let index = state.rooms.findIndex(r => r.data._id === data.room)
     if(!state.rooms[index].data.messages) {
       Vue.set(state.rooms[index].data, 'messages', [])
@@ -108,18 +127,24 @@ const mutations = {
     })
     state.status = 'success'
   },
-  [CHAT_SENDMESSAGE_ERROR]: (state) => {
+  [CHAT_SEND_MESSAGE_ERROR]: (state) => {
     state.status = 'error'
   },
-  [CHAT_CLOSEROOM]: (state, otheruser) => {
+  [CHAT_WATCH_ALLROOMS]: (state, otheruser) => {
+    state.rooms.forEach(r => {r.status = 'actived'})
+  },
+  [CHAT_UNWATCH_ALLROOMS]: (state, otheruser) => {
+    state.rooms.forEach(r => {r.status = 'closed'})
+  },
+  [CHAT_CLOSE_ROOM]: (state, otheruser) => {
     state.status = 'success'
     state.rooms.splice(state.rooms.findIndex(room => room.otheruser === otheruser), 1)
   },
-  [CHAT_CLOSEALLROOMS]: (state) => {
+  [CHAT_CLOSE_ALLROOMS]: (state) => {
     state.status = 'success'
     Vue.set(state, 'rooms', [])
   },
-  [CHAT_ADDMESSAGE]: (state, data) => {
+  [CHAT_ADD_MESSAGE]: (state, data) => {
     state.status = 'success'
     let index = state.rooms.findIndex(r => r.data._id === data.id)
     if (index !== null) {

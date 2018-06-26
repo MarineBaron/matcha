@@ -14,13 +14,21 @@ router.post('/login', function(req, res, next) {
       })
       return
     }
-    if (result) {
-      res.status(200).json(result)
-    } else {
-      res.status(200).json({
-        success: 0
+    res.status(200).json(result)
+  })
+})
+
+router.post('/logout', function(req, res, next) {
+  controller.logout(req.body.username, function(err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
       })
+      return
     }
+    res.status(200).json(result)
   })
 })
 

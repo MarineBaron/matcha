@@ -30,12 +30,22 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: new Date()
   },
+  last_login: {
+    type: Date,
+    required: true,
+    default: new Date()
+  },
+  last_logout: {
+    type: Date,
+    required: true,
+    default: new Date()
+  },
   firstname: String,
   lastname: String,
-  age:{ 
-      type: Number, 
-      min: 18, 
-      max: 250 
+  age:{
+      type: Number,
+      min: 18,
+      max: 250
   },
   resume: String,
   city: String,
@@ -44,12 +54,9 @@ const UserSchema = new mongoose.Schema({
   visibility: {
       type: String,
       enum: ["LoggedOut", "LoggedIn", "Absent", "Buzy" ]
-  }, 
+  },
   latitude: Number,
   longitude: Number,
-  // friends: [{
-  //     type: String,
-  // }],
   avatar: {
     image: {
       type: mongoose.Schema.Types.ObjectId,
@@ -72,11 +79,11 @@ const UserSchema = new mongoose.Schema({
   hobbies: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Hobbie'
-  }], 
+  }],
   preferences: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Preference'
-  }], 
+  }],
   gallery: [{
     image: {
       type: mongoose.Schema.Types.ObjectId,

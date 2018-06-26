@@ -61,12 +61,17 @@ const actions = {
       })
     })
   },
-  [AUTH_LOGOUT]: ({commit, dispatch}) => {
+  [AUTH_LOGOUT]: ({commit, dispatch}, username) => {
     return new Promise((resolve, reject) => {
-      commit(AUTH_LOGOUT)
-      localStorage.removeItem('user-token')
-      localStorage.removeItem('profile')
-      resolve()
+      callApi({url: '/auth/logout', data: {username: username}, method: 'POST'})
+      .then((resp) => {
+        commit(AUTH_LOGOUT)
+        localStorage.removeItem('user-token')
+        localStorage.removeItem('profile')
+        resolve()
+      }, (err) => {
+        reject()
+      })
     })
   },
   [AUTH_PROFILE_REQUEST]: ({commit, dispatch}) => {

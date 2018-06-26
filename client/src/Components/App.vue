@@ -24,6 +24,7 @@
 
 <script>
 import {mapGetters, mapState} from 'vuex'
+import { AUTH_LOGOUT } from '../Store/auth/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
 import Counter from './Counter/Counter.vue'
 import callApi from '../Api/callApi'
@@ -37,6 +38,8 @@ export default {
   created() {
     this.setAxiosAuthorization()
     this.$socket.emit('IDENTIFY_USER', this.getProfile)
+
+    window.addEventListener('beforeunload', this.unload)
   },
   methods: {
     setAxiosAuthorization() {
@@ -44,6 +47,19 @@ export default {
         callApi.defaults.headers.common['Authorization'] = this.token
       }
     },
+    unload(event) {
+      event.preventDefault()
+      if (this.token) {
+        this.$socket.emit('AUTH_LOGOUT', {username: this.getProfile.username})
+        this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
+        this.$store.dispatch(AUTH_LOGOUT, this.getProfile.username)
+        // .then((response) => {
+        //   event.returnValue = false
+        // }, (error) => {
+        //   console.log('Error in unload')
+        // })
+      }
+    }
   },
   computed: {
     ...mapGetters([
@@ -57,7 +73,7 @@ export default {
     NOTIFICATION_RECEIVE: function(data) {
       console.log('NOTIFICATION_RECEIVE', data)
     }
-  }
+  },
 }
 </script>
 
