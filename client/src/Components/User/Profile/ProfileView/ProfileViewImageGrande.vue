@@ -12,7 +12,6 @@
         }
     },
      components: {
-       
     },
     methods: {
         getUrl(image){

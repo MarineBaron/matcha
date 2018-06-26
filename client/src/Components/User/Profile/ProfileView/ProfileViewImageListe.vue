@@ -1,14 +1,13 @@
 <template>
-    <div> 
-       <ul id="example-1">
+
+
+       <ul id="ulthumb">
             <li v-for="image in images " :key="image._id">
                 <b-link v-on:click="onClick(image)" >
-                     <b-img :src="getUrl(image)"  alt="Responsive image" width="40px" />
-                </b-link>
-               
+                     <b-img :src="getUrl(image)"  alt="Responsive image" width="35px" />
+                </b-link>               
             </li>
         </ul>
-    </div>
 </template>
 <script>
 
@@ -42,3 +41,4 @@
    
   }
 </script>
+

@@ -2,9 +2,6 @@
 <div>
     <profile-view-image-grande v-if="image" :image="image" />
     <profile-view-image-liste :images="images" @change-image="changeImage"/>
-  <h2>{{ image }}</h2>
- 
-
 </div>
    
 </template>
@@ -14,9 +11,9 @@
   import ProfileViewImageGrande from './ProfileViewImageGrande.vue'
   import ProfileViewImageListe from './ProfileViewImageListe.vue'
   export default {
-      data() {
+    data() {
       return {
-        image: {}
+      image: {}
       }
     },
     props: {
