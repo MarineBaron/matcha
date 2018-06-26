@@ -1,6 +1,6 @@
 <template>
 <div>
-     <p><span class="font-weight-bold">{{field.name}} : </span>{{field.value}}</p>
+     <p style="text-align:justify;"><span class="font-weight-bold">{{field.name}} : </span>{{field.value}}</p>
      </div>
 </template>
 <script>

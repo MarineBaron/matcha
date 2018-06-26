@@ -1,10 +1,10 @@
 <template>
 
 <b-row>
-    <b-col cols="4">
+    <b-col cols="6">
         <profile-view-images :images="getImages" />
     </b-col>
-    <b-col cols="8">
+    <b-col cols="6">
         <profile-view-infos :user="user" />
        
     </b-col>       
