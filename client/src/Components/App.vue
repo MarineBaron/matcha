@@ -2,6 +2,7 @@
   <div id="app">
     <header>
       <navigation />
+      <dashboard v-if="isAuthenticated"/>
     </header>
     <b-container fluid>
       <flash-message class="flash-message"></flash-message>
@@ -26,6 +27,7 @@
 import {mapGetters, mapState} from 'vuex'
 import { AUTH_LOGOUT } from '../Store/auth/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
+import Dashboard from './Dashboard/Dashboard.vue'
 import Counter from './Counter/Counter.vue'
 import callApi from '../Api/callApi'
 
@@ -33,12 +35,12 @@ export default {
   name: 'app',
   components: {
     Navigation,
+    Dashboard,
     Counter
   },
   created() {
     this.setAxiosAuthorization()
     this.$socket.emit('IDENTIFY_USER', this.getProfile)
-
     window.addEventListener('beforeunload', this.unload)
   },
   methods: {
@@ -53,17 +55,13 @@ export default {
         this.$socket.emit('AUTH_LOGOUT', {username: this.getProfile.username})
         this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
         this.$store.dispatch(AUTH_LOGOUT, this.getProfile.username)
-        // .then((response) => {
-        //   event.returnValue = false
-        // }, (error) => {
-        //   console.log('Error in unload')
-        // })
       }
     }
   },
   computed: {
     ...mapGetters([
-      'getProfile'
+      'getProfile',
+      'isAuthenticated'
     ]),
     ...mapState({
       token: state => state.auth.token
