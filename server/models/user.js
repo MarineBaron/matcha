@@ -40,6 +40,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: new Date()
   },
+  is_completed: {
+    type: Boolean,
+    default: false
+  },
   firstname: String,
   lastname: String,
   age:{

@@ -78,9 +78,12 @@ const actions = {
     commit(AUTH_PROFILE_REQUEST)
     callApi({url: 'auth/profile'})
       .then(resp => {
-        const data = resp.data.data
-        localStorage.setItem('profile', JSON.stringify(data))
-        commit(AUTH_PROFILE_SUCCESS, data)
+        const localProfile = {
+          username: resp.data.data.username,
+          role: resp.data.data.role
+        }
+        localStorage.setItem('profile', JSON.stringify(localProfile))
+        commit(AUTH_PROFILE_SUCCESS, resp.data.data)
       })
       .catch(err => {
         commit(AUTH_PROFILE_ERROR)

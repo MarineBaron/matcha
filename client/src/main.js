@@ -6,6 +6,7 @@ import VueFlashMessage from 'vue-flash-message'
 import VueSocketio from 'vue-socket.io'
 import BootstrapVue from 'bootstrap-vue'
 import VueLodash from 'vue-lodash'
+import VueMoment from 'vue-moment'
 
 
 import App from './Components/App.vue'
@@ -21,6 +22,7 @@ Vue.use(VueRouter)
 Vue.use(Vuex)
 Vue.use(Vuelidate)
 Vue.use(VueFlashMessage)
+Vue.use(VueMoment)
 Vue.component('icon', Icon)
 
 import router from './Router/router'

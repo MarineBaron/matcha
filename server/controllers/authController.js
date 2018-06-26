@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const userController = require('./userController')
+const notificationController = require('./notification/notificationController')
 
 module.exports = {
   login: function(username, password, callback) {
@@ -60,7 +61,17 @@ module.exports = {
   },
 
   profile: function(id, callback) {
-    User.findById(id, function (err, user) {
+    User.findById(id)
+    .populate({
+      path: 'friends',
+      populate: {
+        path: 'avatar.image'
+      }
+    })
+    .populate({
+      path: 'avatar.image'
+    })
+    .exec(function (err, user) {
       if (err) {
         callback(err, null)
         return
@@ -70,12 +81,22 @@ module.exports = {
           success: 0
         })
       } else {
+        notificationController.getAllByUser(user.username, function (err, result) {
+          if (err) {
+            callback(err, null)
+            return
+          }
           callback(null, {
             success: 1,
             data: {
               username: user.username,
               role: user.role,
+              avatar: user.avatar,
+              is_completed: user.is_completed,
+              friends: user.friends,
+              notifications: result.data.filter(n => !n.read)
             }
+          })
         })
       }
     })
