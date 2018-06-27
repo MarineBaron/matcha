@@ -42,6 +42,7 @@ export default {
     window.addEventListener('beforeunload', this.unload)
     this.$store.dispatch('AUTH_CHECKAUTH_REQUEST')
     .then((response) => {
+      console.log('IDENTIFY_USER', this.getProfile.username)
       this.$socket.emit('IDENTIFY_USER', this.getProfile.username)
     }, (error) => {
       console.log("Une erreur est survenue au chargement de l'application.")

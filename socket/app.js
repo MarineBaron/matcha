@@ -72,6 +72,7 @@ function disauthUser(socket) {
 
 io.on('connection', function(socket) {
   nbVisitors++
+  
   socket.on('IDENTIFY_USER', function(username) {
     authUser(socket, username)
   })
