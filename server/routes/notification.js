@@ -64,6 +64,21 @@ router.post('/notification', verifyToken, function(req, res, next) {
   })
 })
 
+/* GET delete one notification */
+router.get('/notification/delete/:id', verifyToken, function(req, res, next) {
+  notificationController.delete(req.params.id, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
 /* GET one notification = create one notification */
 router.get('/notification/:id/:read', verifyToken, function(req, res, next) {
   notificationController.setRead(req.params.id, req.params.read, function (err, result) {
@@ -80,20 +95,7 @@ router.get('/notification/:id/:read', verifyToken, function(req, res, next) {
   })
 })
 
-/* GET delete one notification */
-router.get('/notification/delete/:id', verifyToken, function(req, res, next) {
-  notificationController.delete(req.params.id, function (err, result) {
-    if (err) {
-      console.log(err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    res.status(200).json(result)
-  })
-})
+
 
 /* GET delete all notifications by user */
 router.get('/notifications/delete/:username', verifyToken, function(req, res, next) {

@@ -25,7 +25,7 @@
 
 <script>
 import {mapGetters, mapState} from 'vuex'
-import { AUTH_LOGOUT } from '../Store/auth/mutation-types'
+import { AUTH_LOGOUT, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Counter from './Counter/Counter.vue'
@@ -39,9 +39,13 @@ export default {
     Counter
   },
   created() {
-    this.setAxiosAuthorization()
-    this.$socket.emit('IDENTIFY_USER', this.getProfile)
-    window.addEventListener('beforeunload', this.unload)
+    this.$store.dispatch('AUTH_CHECKAUTH_REQUEST')
+    .then((response) => {
+      window.addEventListener('beforeunload', this.unload)
+      this.$socket.emit('IDENTIFY_USER', this.getProfile)
+    }, (error) => {
+      console.log("Une erreur est survenue au chargement de l'application.")
+    })
   },
   methods: {
     setAxiosAuthorization() {

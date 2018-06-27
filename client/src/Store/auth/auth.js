@@ -1,4 +1,7 @@
 import {
+  AUTH_CHECKAUTH_REQUEST,
+  AUTH_CHECKAUTH_ERROR,
+  AUTH_CHECKAUTH_SUCCESS,
   AUTH_LOGIN_REQUEST,
   AUTH_LOGIN_ERROR,
   AUTH_LOGIN_SUCCESS,
@@ -15,17 +18,33 @@ import {
   AUTH_PASSWORD_RESET_REQUEST,
   AUTH_PASSWORD_RESET_ERROR,
   AUTH_PASSWORD_RESET_SUCCESS,
-
+  AUTH_NOTIFICATION_DELETE
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
 
+function removeLocalStorage() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('username')
+}
+
+function removeSessionStorage() {
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('username')
+}
+
+function removeStorage() {
+  removeLocalStorage()
+  removeSessionStorage()
+}
+
 const state = {
   status: '',
-  token: localStorage.getItem('user-token') ? localStorage.getItem('user-token') : '',
-  profile: localStorage.getItem('profile') ? JSON.parse(localStorage.getItem('profile')) : {},
-  hasLoadedOnce: localStorage.getItem('user-token') ? true : false,
+  token: '',
+  username: '',
+  profile: {},
+  hasLoadedOnce: sessionStorage.getItem('token') ? true : false,
 }
 
 const getters = {
@@ -36,18 +55,48 @@ const getters = {
 }
 
 const actions = {
+  [AUTH_CHECKAUTH_REQUEST]: ({commit, dispatch}) => {
+    return new Promise((resolve, reject) => {
+      commit(AUTH_CHECKAUTH_REQUEST)
+      // si l'utilisateur a un token, on tente de récupérer son profil
+      if (state.token) {
+        callApi.defaults.headers.common['Authorization'] = state.token
+        dispatch(AUTH_PROFILE_REQUEST)
+        .then((resp) => {
+          commit(AUTH_CHECKAUTH_SUCCESS)
+          resolve()
+        }, (error) => {
+          commit(AUTH_CHECKAUTH_ERROR)
+          reject()
+        })
+      }
+      resolve()
+    })
+  },
   [AUTH_LOGIN_REQUEST]: ({commit, dispatch}, user) => {
     return new Promise((resolve, reject) => {
       commit(AUTH_LOGIN_REQUEST)
+      // enregistrement du remember_me en localStorage
+      if (user.remember_me) {
+        localStorage.setItem('remember_me', true)
+      } else {
+        localStorage.removeItem('remember_me')
+        removeLocalStorage()
+      }
       callApi({url: 'auth/login', data: user, method: 'POST'})
       .then((resp, err) => {
         if (!resp.data.success) {
           commit(AUTH_LOGIN_ERROR)
-          localStorage.removeItem('user-token')
+          // suppression des variables dans les storages
+          removeStorage()
           reject(resp.data.message)
         } else {
           const data = resp.data
-          localStorage.setItem('user-token', data.token)
+          // enregistrement des variables dans les storages
+          sessionStorage.setItem('token', data.token)
+          if (localStorage.getItem('remember_me')) {
+            localStorage.setItem('token', data.token)
+          }
           callApi.defaults.headers.common['Authorization'] = data.token
           commit(AUTH_LOGIN_SUCCESS, data.token)
           dispatch(AUTH_PROFILE_REQUEST)
@@ -56,7 +105,8 @@ const actions = {
       })
       .catch((err) => {
         commit(AUTH_LOGIN_ERROR)
-        localStorage.removeItem('user-token')
+        // suppression des variables dans les storages
+        removeStorage()
         reject(err)
       })
     })
@@ -66,8 +116,8 @@ const actions = {
       callApi({url: '/auth/logout', data: {username: username}, method: 'POST'})
       .then((resp) => {
         commit(AUTH_LOGOUT)
-        localStorage.removeItem('user-token')
-        localStorage.removeItem('profile')
+        // suppression des variables dans les storages
+        removeStorage()
         resolve()
       }, (err) => {
         reject()
@@ -78,15 +128,18 @@ const actions = {
     commit(AUTH_PROFILE_REQUEST)
     callApi({url: 'auth/profile'})
       .then(resp => {
-        const localProfile = {
-          username: resp.data.data.username,
-          role: resp.data.data.role
+        // enregistrement des variables dans les storages
+        const username = resp.data.data.username
+        sessionStorage.setItem('username', username)
+        if (localStorage.getItem('remember_me')) {
+          localStorage.setItem('username', username)
         }
-        localStorage.setItem('profile', JSON.stringify(localProfile))
         commit(AUTH_PROFILE_SUCCESS, resp.data.data)
       })
       .catch(err => {
         commit(AUTH_PROFILE_ERROR)
+        // suppression des variables dans les storages
+        removeStorage()
         dispatch(AUTH_LOGOUT)
       })
   },
@@ -172,6 +225,24 @@ const actions = {
 }
 
 const mutations = {
+  [AUTH_CHECKAUTH_REQUEST]: (state) => {
+    state.status = 'loading'
+    Vue.set(state, 'token', sessionStorage.getItem('token')
+        ? sessionStorage.getItem('token')
+        : (localStorage.getItem('token') ? localStorage.getItem('token') : ''))
+    Vue.set(state, 'username', sessionStorage.getItem('username')
+        ? sessionStorage.getItem('username')
+        : (localStorage.getItem('username') ? localStorage.getItem('username') : ''))
+  },
+  [AUTH_CHECKAUTH_SUCCESS]: (state) => {
+    state.status = 'success'
+    //Vue.set(state, 'token', token)
+    state.hasLoadedOnce = true
+  },
+  [AUTH_CHECKAUTH_ERROR]: (state) => {
+    state.status = 'error'
+    state.hasLoadedOnce = true
+  },
   [AUTH_LOGIN_REQUEST]: (state) => {
     state.status = 'loading'
   },
@@ -225,6 +296,9 @@ const mutations = {
   [AUTH_PASSWORD_RESET_ERROR]: (state) => {
     state.status = 'error'
   },
+  [AUTH_NOTIFICATION_DELETE]: (state, id) => {
+    state.profile.notifications.splice(state.profile.notifications.findIndex(n => n._id === id), 1)
+  }
 }
 
 export default {

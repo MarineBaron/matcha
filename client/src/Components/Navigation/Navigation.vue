@@ -4,7 +4,7 @@
     <b-navbar-brand :to="{path: '/'}">Matcha</b-navbar-brand>
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav v-for="link in links" :key="links.url">
-        <b-nav-item v-if="!link.needAutehnticated||isAuthenticated" :to="{path: link.path}">{{link.text}}</b-nav-item>
+        <b-nav-item v-if="!link.needAuthenticated||isAuthenticated" :to="{path: link.path}">{{link.text}}</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <login-link v-if="!isAuthenticated"></login-link>
@@ -37,7 +37,7 @@ export default {
     return {
       links: [
         {text: 'Recherche', path: '/search'},
-        {text: 'Chat', path: '/chat', needAutehnticated: true},
+        {text: 'Chat', path: '/chat', needAuthenticated: true},
         {text: 'Forum', path: '/forum'},
         {text: 'A propos', path: '/about'}
       ]
@@ -51,7 +51,7 @@ export default {
     ]),
     ...mapState({
       authLoading: state => state.auth.status === 'loading',
-      username: state => isProfileLoaded ? `${state.auth.profile.username}` : ''
+      username: state => isProfileLoaded ? state.auth.profile.username : ''
     })
   }
 }

@@ -38,13 +38,19 @@
           Ce champs est requis et doit contenir entre 3 et 20 caractères.
         </b-form-invalid-feedback>
       </b-form-group>
+      <b-form-group id="remember_meGroup">
+        <b-form-checkbox id="remember_me" plain
+                       v-model="form.remember_me"
+                       :state="null">
+        Se souvenir de moi
+        </b-form-checkbox>
+      </b-form-group>
       <b-button
         type="submit"
         variant="primary"
         :disabled="$v.form.$invalid">
         Connexion
       </b-button>
-      </b-form-group>
     </b-form>
   </div>
 </template>
@@ -60,7 +66,8 @@
       return {
         form: {
           username: '',
-          password: ''
+          password: '',
+          remember_me: localStorage.remember_me ? true : false
         },
         showError: false,
         errors: []
@@ -91,8 +98,8 @@
         return !fieldState.$invalid
       },
       onSubmit(e) {
-        const { username, password } = this.form
-        this.$store.dispatch(AUTH_LOGIN_REQUEST, {username, password})
+        const { username } = this.form
+        this.$store.dispatch(AUTH_LOGIN_REQUEST, this.form)
         .then((response) => {
           this.$socket.emit('AUTH_LOGIN', {username: username})
           this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 5000})

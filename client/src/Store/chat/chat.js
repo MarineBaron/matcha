@@ -66,10 +66,8 @@ const actions = {
   },
   [CHAT_WATCH_ALLROOMS]: ({commit, dispatch}) => {
     commit(CHAT_WATCH_ALLROOMS)
-    console.log('CHAT_WATCH_ALLROOMS')
   },
   [CHAT_UNWATCH_ALLROOMS]: ({commit, dispatch}) => {
-    console.log('CHAT_UNWATCH_ALLROOMS')
   },
   [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSE_ROOM, room.otheruser)
