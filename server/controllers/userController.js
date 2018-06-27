@@ -57,7 +57,7 @@ module.exports = {
     })
   },
   findCompleteByUsername: function(username, callback) {
-    
+
     User.findOne({username: username})
     // .populate({
     //   path: 'friends',
@@ -95,7 +95,6 @@ module.exports = {
 
 
   findFriendsByUsername: function(username, callback){
-console.log('Coucou !')
     User.findOne({username: username})
     .populate({
         path: 'friends',
@@ -168,6 +167,23 @@ console.log('Coucou !')
       })
     })
   },
+
+  update: function (user, callback){
+    console.log('userControler update:', user)
+    User.findOneAndUpdate({username: user.username}, user, function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1,
+        data: user
+      })
+    })
+  },
+
+
+
   sendEmailConfirmation: function(user, authToken) {
     const url = encodeURI(process.env.URL_CLIENT + '/confirmation/' + user.username + '/' + authToken)
     const text = 'Bonjour,\nVous devez confirmer votre inscription en copiant cette url dans votre navigateur: '

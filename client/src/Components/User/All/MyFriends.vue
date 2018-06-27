@@ -1,20 +1,20 @@
 <template>
-   
+
     <b-card class="card my-4">
         <h5 class="card-header">{{ title }} {{ username.toUpperCase() }}</h5>
-        
+
             <b-row class="text-center">
-                <b-col md="6" class="p-4" v-for="user in users" >
+                <b-col md="6" class="p-4" v-for="user in users" :key="user.username" >
 
                     <b-link :to="{path: '/user/' + user.username}" title="">
-                    {{user.username}}   </b-link>                   
+                    {{user.username}}   </b-link>
                     <b-img v-if="user.avatar.image" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
-                    
-                </b-col>               
+
+                </b-col>
             </b-row>
-       
+
     </b-card>
-    
+
 </template>
 <script>
   import { USER_FRIENDS_REQUEST } from '../../../Store/user/mutation-types'
@@ -30,7 +30,7 @@
         error: ''
       }
     },
-    
+
     methods: {
 
       onClick(e) {
@@ -47,12 +47,12 @@
       this.$store.dispatch(USER_FRIENDS_REQUEST, this.username)
       .then((response) => {
           console.log('La reponse : ', response)
-          
+
           this.users = response
           // this.users = []
       }, (error) => {
           // console.log(`L'erreur : ${error}`)
-        this.error = "Non non non ! Pascal ! :("  
+        this.error = "Non non non ! Pascal ! :("
       })
     }
   }
