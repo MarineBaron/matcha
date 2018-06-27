@@ -1,13 +1,19 @@
 <template>
    <b-container>
     <h2>{{title}}</h2>
+          <b-link @click.prevent="onClick" class="edit">{{buttonText}}</b-link>
       <b-row>
         <b-col sm="8">
-          <b-button @click.prevent="onClick">{{buttonText}}</b-button>
-          <profile-view v-if="loadingSuccess&&mode=='view'" :user="user" />
-          <profile-form v-if="loadingSuccess&&mode=='edit'" :user="user" />
+
+          <b-container>
+            <profile-view v-if="loadingSuccess&&mode=='view'" :user="user" />
+            <profile-form v-if="loadingSuccess&&mode=='edit'" :user="user" />
+          </b-container>
         </b-col>
-        <b-col sm="4"><my-friends></my-friends></b-col>
+        <b-col sm="4">
+          <profile-view-interest :user="user"/>
+          <my-friends></my-friends>
+          </b-col>
     </b-row>
   </b-container>
 
@@ -16,14 +22,17 @@
 <script>
   import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
   import ProfileView from './ProfileView/ProfileView.vue'
-  import ProfileForm from './ProfileForm/ProfileForm.vue'
+  import ProfileViewInterest from './ProfileView/ProfileViewInterest.vue'
+  import ProfileForm from './ProfileForm.vue'
   import MyFriends from '../All/MyFriends.vue'
+  // import ProfileViewUserPseudo from './ProfileView/ProfileViewUserPseudo.vue'
   import { mapGetters, mapState } from 'vuex'
   export default {
     components: {
       ProfileView,
       MyFriends,
       ProfileForm,
+      ProfileViewInterest
     },
     data() {
       return {
@@ -58,3 +67,19 @@
     }
   }
 </script>
+<style>
+.edit {
+  float:right;
+  margin-top: -40px;
+  line-height: 25px;
+}
+#barreEdit {
+  width: auto;
+  background-color: aqua;
+  padding: 12px 10px 1px 10px;
+  border-radius: 5px;
+
+
+
+}
+</style>

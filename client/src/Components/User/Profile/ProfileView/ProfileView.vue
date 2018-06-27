@@ -1,18 +1,29 @@
 <template>
-    <div>
-        <profile-view-infos :user="user" />
+
+<b-row>
+    <b-col cols="6">
         <profile-view-images :images="getImages" />
-    </div>
+    </b-col>
+    <b-col cols="6">
+        <profile-view-infos :user="user" />
+       
+    </b-col>       
+        <profile-view-field :field="{name: 'Annonce', value: user.resume}" />
+</b-row>
 </template>
 
 <script>
-    import ProfileViewInfos from './ProfileViewInfos.vue'
+    //  import ProfileViewInfos from './ProfileViewInfos.vue'
     import ProfileViewImages from './ProfileViewImages.vue'
-  export default {
+    import ProfileViewInfos from './ProfileViewInfos.vue'
+    import ProfileViewField from './ProfileViewField.vue'
+export default {
     props: ['user'],
     components: {
+        //ProfileViewInfos,
+        ProfileViewImages,
         ProfileViewInfos,
-        ProfileViewImages
+        ProfileViewField
     },
     methods: {
 
@@ -38,3 +49,5 @@
     }
   }
 </script>
+
+

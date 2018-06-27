@@ -80,18 +80,9 @@ const UserSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
   }],
-  genders: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Gender'
-  }],
-  hobbies: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hobbie'
-  }],
-  preferences: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Preference'
-  }],
+  gender: String,
+  orientation: String,
+  interest: String,
   gallery: [{
     image: {
       type: mongoose.Schema.Types.ObjectId,

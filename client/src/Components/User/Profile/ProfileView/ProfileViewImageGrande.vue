@@ -1,5 +1,5 @@
 <template>
-     <b-img v-if="image.name !== undefined" :src="getUrl(image)" fluid alt="Responsive image" width="150px" />
+     <b-img rounded v-if="image.name !== undefined" :src="getUrl(image)" fluid alt="Responsive image" width="250px" />
 </template>
 <script>
 
@@ -12,7 +12,6 @@
         }
     },
      components: {
-       
     },
     methods: {
         getUrl(image){
