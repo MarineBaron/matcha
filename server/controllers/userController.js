@@ -187,6 +187,18 @@ module.exports = {
     })
   },
 
+  addVisit: function(username, callback) {
+    User.findOneAndUpdate({username: username}, {$inc: {visited: 1}}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1
+      })
+    })
+  },
+
 
 
   sendEmailConfirmation: function(user, authToken) {
