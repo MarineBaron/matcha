@@ -18,21 +18,20 @@ function getUsersNb() {
 }
 
 // Si l'utilisateur est authentifie (sur client), ajout a la liste des authentifies
-function authUser(socket, user) {
-  if (user.username) {
-    socket.username = user.username
-    const authUser = authUsers.find(u => u.username === user.username)
+function authUser(socket, username) {
+  if (username) {
+    socket.username = username
+    const authUser = authUsers.find(u => u.username === username)
     if (authUser) {
       authUser.sockets.push(socket)
     } else {
       authUsers.push({
-          username: user.username,
+          username: username,
           sockets: [socket]
         }
       )
     }
-    console.log('authUser', user.username)
-    socket.join(user.username)
+    socket.join(username)
   }
   io.emit('NBUSERS_CHANGE', getUsersNb())
 }
@@ -73,9 +72,8 @@ function disauthUser(socket) {
 
 io.on('connection', function(socket) {
   nbVisitors++
-  socket.on('IDENTIFY_USER', function(user) {
-    console.log('IDENTIFY_USER', user)
-    authUser(socket, user)
+  socket.on('IDENTIFY_USER', function(username) {
+    authUser(socket, username)
   })
 
   socket.on('UNLOAD_USER', function(user) {
@@ -87,8 +85,8 @@ io.on('connection', function(socket) {
 
   // Reception d'un message de login
   socket.on('AUTH_LOGIN', function(data) {
-    console.log('AUTH_LOGIN', data)
-    authUser(socket, data)
+    console.log('AUTH_LOGIN', data.username)
+    authUser(socket, data.username)
   })
 
   // Reception d'un message de logout

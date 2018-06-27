@@ -70,8 +70,9 @@ const actions = {
           commit(AUTH_CHECKAUTH_ERROR)
           reject()
         })
+      } else {
+        resolve()
       }
-      resolve()
     })
   },
   [AUTH_LOGIN_REQUEST]: ({commit, dispatch}, user) => {
@@ -127,7 +128,8 @@ const actions = {
   },
   [AUTH_PROFILE_REQUEST]: ({commit, dispatch}) => {
     commit(AUTH_PROFILE_REQUEST)
-    callApi({url: 'auth/profile'})
+    return new Promise((resolve, reject) => {
+      callApi({url: 'auth/profile'})
       .then(resp => {
         // enregistrement des variables dans les storages
         const username = resp.data.data.username
@@ -136,13 +138,15 @@ const actions = {
           localStorage.setItem('username', username)
         }
         commit(AUTH_PROFILE_SUCCESS, resp.data.data)
-      })
-      .catch(err => {
+        resolve()
+      }, err => {
         commit(AUTH_PROFILE_ERROR)
         // suppression des variables dans les storages
         removeStorage()
         dispatch(AUTH_LOGOUT)
+        reject()
       })
+    })
   },
   [AUTH_CONFIRM_REQUEST]: ({commit, dispatch}, data) => {
     return new Promise((resolve, reject) => {
@@ -228,12 +232,12 @@ const actions = {
 const mutations = {
   [AUTH_CHECKAUTH_REQUEST]: (state) => {
     state.status = 'loading'
-    Vue.set(state, 'token', sessionStorage.getItem('token')
+    state.token = sessionStorage.getItem('token')
         ? sessionStorage.getItem('token')
-        : (localStorage.getItem('token') ? localStorage.getItem('token') : ''))
-    Vue.set(state, 'username', sessionStorage.getItem('username')
+        : (localStorage.getItem('token') ? localStorage.getItem('token') : '')
+    state.username = sessionStorage.getItem('username')
         ? sessionStorage.getItem('username')
-        : (localStorage.getItem('username') ? localStorage.getItem('username') : ''))
+        : (localStorage.getItem('username') ? localStorage.getItem('username') : '')
   },
   [AUTH_CHECKAUTH_SUCCESS]: (state) => {
     state.status = 'success'

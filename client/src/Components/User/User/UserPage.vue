@@ -10,8 +10,12 @@
   export default {
     beforeRouteEnter: function(to, from, next) {
       callApi({url: '/user/addvisit/' + to.params.username})
-      Vue.prototype.$socket.emit('USER_VISITADD', to.params.username)
-      next()
+      .then((resp) => {
+        Vue.prototype.$socket.emit('USER_VISITADD', to.params.username)
+        next()
+      }, (err) => {
+        console.log(err)
+      })
     }
   }
 </script>

@@ -39,10 +39,10 @@ export default {
     Counter
   },
   created() {
+    window.addEventListener('beforeunload', this.unload)
     this.$store.dispatch('AUTH_CHECKAUTH_REQUEST')
     .then((response) => {
-      window.addEventListener('beforeunload', this.unload)
-      this.$socket.emit('IDENTIFY_USER', this.getProfile)
+      this.$socket.emit('IDENTIFY_USER', this.getProfile.username)
     }, (error) => {
       console.log("Une erreur est survenue au chargement de l'application.")
     })
