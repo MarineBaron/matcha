@@ -23,7 +23,7 @@
   import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
   import ProfileView from './ProfileView/ProfileView.vue'
   import ProfileViewInterest from './ProfileView/ProfileViewInterest.vue'
-  import ProfileForm from './ProfileForm.vue'
+  import ProfileForm from './ProfileForm/ProfileForm.vue'
   import MyFriends from '../All/MyFriends.vue'
   // import ProfileViewUserPseudo from './ProfileView/ProfileViewUserPseudo.vue'
   import { mapGetters, mapState } from 'vuex'
