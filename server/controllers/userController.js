@@ -99,7 +99,6 @@ module.exports = {
 
 
   findFriendsByUsername: function(username, callback){
-console.log('Coucou !')
     User.findOne({username: username})
     .populate({
         path: 'friends',
@@ -174,17 +173,21 @@ console.log('Coucou !')
     })
   },
 
-  addVisit: function(username, callback) {
-    User.findOneAndUpdate({username: username}, {$inc: {visited: 1}}, function(err, user) {
-      if (err) {
+  update: function (user, callback){
+    console.log('userControler update:', user)
+    User.findOneAndUpdate({username: user.username}, user, function(err, user) {
+      if (err){
         callback(err, null)
         return
       }
       callback(null, {
-        success: 1
+        success: 1,
+        data: user
       })
     })
   },
+
+
 
   sendEmailConfirmation: function(user, authToken) {
     const url = encodeURI(process.env.URL_CLIENT + '/confirmation/' + user.username + '/' + authToken)
