@@ -10,7 +10,10 @@ import {
   USER_USER_SUCCESS,
   USER_USERS_REQUEST,
   USER_USERS_ERROR,
-  USER_USERS_SUCCESS
+  USER_USERS_SUCCESS,
+  USER_ACCOUNT_REQUEST,
+  USER_ACCOUNT_SUCCESS,
+  USER_ACCOUNT_ERROR
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -106,6 +109,28 @@ const actions = {
     })
   },
 
+  [USER_ACCOUNT_REQUEST]: ({commit, dispatch}, user) => {
+    console.log('store/user/user.js callApi')
+    return new Promise((resolve, reject) => {
+      commit(USER_ACCOUNT_REQUEST)
+      callApi({url: 'user/update', data: user, method: 'POST'})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+          commit(USER_ACCOUNT_ERROR)
+          reject(resp.data.message)
+        } else {
+          commit(USER_ACCOUNT_SUCCESS)
+          console.log(USER_ACCOUNT_SUCCESS, resp)
+          resolve(resp)
+        }
+      })
+      .catch(err => {
+        commit(USER_ACCOUNT_ERROR)
+        reject(err)
+      })
+    })
+  },
+
 }
 
 const mutations = {
@@ -151,7 +176,15 @@ const mutations = {
     state.status = 'error',
     state.users = []
   },
-
+  [USER_ACCOUNT_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [USER_ACCOUNT_SUCCESS]: (state) => {
+    state.status = 'success'
+  },
+  [USER_ACCOUNT_ERROR]: (state) => {
+    state.status = 'error'
+  },
 
 }
 
