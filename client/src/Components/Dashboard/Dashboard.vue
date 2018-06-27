@@ -10,6 +10,7 @@
 <script>
   import DashboardElement from './DashboardElement.vue'
   import DashboardList from './DashboardList.vue'
+  import { mapState } from 'vuex'
 
   export default {
     components: {
@@ -34,7 +35,7 @@
             color: 'info',
             title: 'Notifications',
             icon: 'bell',
-            value: 10
+            value: this.nbNotifications
           },
           {
             name: 'visits',
@@ -62,10 +63,14 @@
             color: 'info',
             title: 'Matchs',
             icon: 'user',
-            value: 10
+            value: this.nbFriends
           },
         ]
-      }
+      },
+      ...mapState({
+        nbNotifs: state => state.auth.profile.notifications.length,
+        nbFriends: state => state.auth.profile.friends.length,
+      })
     }
   }
 </script>
