@@ -40,6 +40,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: new Date()
   },
+  visited: {
+    type: Number,
+    default: 0
+  },
   is_completed: {
     type: Boolean,
     default: false

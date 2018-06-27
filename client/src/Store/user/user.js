@@ -87,11 +87,8 @@ const actions = {
   },
 
   [USER_FRIENDS_REQUEST]: ({commit, dispatch}, username) => {
-    console.log('-> USER_FRIENDS_REQUEST')
     return new Promise((resolve, reject) => {
-      console.log('--> USER_FRIENDS_REQUEST')
       commit(USER_FRIENDS_REQUEST)
-      console.log('---> USER_FRIENDS_REQUEST')
       callApi({url: 'user/friends/' + username})
       .then((resp, err) => {
         if (!resp.data.success) {
@@ -107,7 +104,7 @@ const actions = {
         reject(err)
       })
     })
-  }
+  },
 
 }
 

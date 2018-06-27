@@ -17,7 +17,6 @@
     methods: {
       deleteMessage() {
         this.$store.dispatch(NOTIFICATION_DELETE_REQUEST, this.item._id)
-        console.log('deleteMessage', this.item._id)
       }
     }
   }

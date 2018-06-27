@@ -66,6 +66,22 @@ router.get('/user/:username', function(req, res, next) {
   })
 })
 
+/* GET user Add One visit */
+router.get('/addvisit/:username', function(req, res, next) {
+  // console.log('/user/:username')
+  controller.addVisit(req.params.username, function (err, result) {
+    if (err) {
+      // console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
 /* GET user Accès à tous les users */
 router.get('/users', function(req, res, next) {
   controller.findAll(function (err, result) {

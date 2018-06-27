@@ -68,8 +68,8 @@
         ]
       },
       ...mapState({
-        nbNotifs: state => state.auth.profile.notifications.length,
-        nbFriends: state => state.auth.profile.friends.length,
+        nbNotifs: state => state.auth.profile.notifications ? state.auth.profile.notifications.length : 0,
+        nbFriends: state => state.auth.profile.friends ? state.auth.profile.friends.length : 0,
       })
     }
   }

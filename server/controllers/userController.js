@@ -173,6 +173,19 @@ console.log('Coucou !')
       })
     })
   },
+
+  addVisit: function(username, callback) {
+    User.findOneAndUpdate({username: username}, {$inc: {visited: 1}}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1
+      })
+    })
+  },
+
   sendEmailConfirmation: function(user, authToken) {
     const url = encodeURI(process.env.URL_CLIENT + '/confirmation/' + user.username + '/' + authToken)
     const text = 'Bonjour,\nVous devez confirmer votre inscription en copiant cette url dans votre navigateur: '

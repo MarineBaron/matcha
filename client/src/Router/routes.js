@@ -5,6 +5,7 @@ import RegisterPage from '../Components/Authentification/Register/RegisterPage.v
 import ConfirmationPage from '../Components/Authentification/Confirmation/ConfirmationPage.vue'
 import PasswordResetPage from '../Components/Authentification/PasswordReset/PasswordResetPage.vue'
 import ProfilePage from '../Components/User/Profile/ProfilePage.vue'
+import UserPage from '../Components/User/User/UserPage.vue'
 import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
 import ForumContent from '../Components/Forum/ForumContent.vue'
@@ -91,5 +92,10 @@ export default [
     component: Chat,
     meta: {},
     beforeEnter: ifAuthenticated
+  },
+  {
+    path: '/user/:username',
+    component: UserPage,
+    meta: {}
   }
 ]
