@@ -10,6 +10,7 @@
 <script>
   import DashboardElement from './DashboardElement.vue'
   import DashboardList from './DashboardList.vue'
+  import { AUTH_VISITADD } from '../../Store/auth/mutation-types'
   import { mapState } from 'vuex'
 
   export default {
@@ -42,7 +43,7 @@
             color: 'info',
             title: 'Visites',
             icon: 'eye',
-            value: 10
+            value: this.nbVisited
           },
           {
             name: 'messages',
@@ -70,7 +71,14 @@
       ...mapState({
         nbNotifs: state => state.auth.profile.notifications ? state.auth.profile.notifications.length : 0,
         nbFriends: state => state.auth.profile.friends ? state.auth.profile.friends.length : 0,
+        nbVisited: state => state.auth.profile.visited ? state.auth.profile.visited : 0,
       })
+    },
+    sockets: {
+      AUTH_VISITADD: function() {
+        console.log('AUTH_VISITADD')
+        this.$store.commit(AUTH_VISITADD)
+      }
     }
   }
 </script>

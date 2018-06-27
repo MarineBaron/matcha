@@ -31,6 +31,7 @@ function authUser(socket, user) {
         }
       )
     }
+    console.log('authUser', user.username)
     socket.join(user.username)
   }
   io.emit('NBUSERS_CHANGE', getUsersNb())
@@ -168,6 +169,11 @@ io.on('connection', function(socket) {
     }
     // on envoie le message aux utilisateurs connectes au chat (autre que l'emetteeur)
     socket.broadcast.to(data.room).emit('CHAT_RECEIVE_MESSAGE', data)
+  })
+
+  socket.on('USER_VISITADD', function(username) {
+    console.log('USER_VISITADD', username)
+    io.to(username).emit('AUTH_VISITADD')
   })
 
   // Deconnexion d'un utilisateur

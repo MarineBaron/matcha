@@ -94,7 +94,8 @@ module.exports = {
               avatar: user.avatar,
               is_completed: user.is_completed,
               friends: user.friends,
-              notifications: result.data.filter(n => !n.read)
+              notifications: result.data.filter(n => !n.read),
+              visited: user.visited,
             }
           })
         })

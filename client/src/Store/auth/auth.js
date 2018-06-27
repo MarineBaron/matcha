@@ -18,7 +18,8 @@ import {
   AUTH_PASSWORD_RESET_REQUEST,
   AUTH_PASSWORD_RESET_ERROR,
   AUTH_PASSWORD_RESET_SUCCESS,
-  AUTH_NOTIFICATION_DELETE
+  AUTH_NOTIFICATION_DELETE,
+  AUTH_VISITADD
 } from './mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
@@ -298,6 +299,9 @@ const mutations = {
   },
   [AUTH_NOTIFICATION_DELETE]: (state, id) => {
     state.profile.notifications.splice(state.profile.notifications.findIndex(n => n._id === id), 1)
+  },
+  [AUTH_VISITADD]: (state) => {
+    state.profile.visited++
   }
 }
 
