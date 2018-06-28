@@ -3,7 +3,7 @@
     <profile-view-image-grande v-if="image" :image="image" />
     <profile-view-image-liste :images="images" @change-image="changeImage"/>
 </div>
-   
+
 </template>
 
 <script>
@@ -13,14 +13,14 @@
   export default {
     data() {
       return {
-      image: {}
+      image: this.images.length ? this.images[0] : {}
       }
     },
     props: {
         images: {
             type: Array
         },
-       
+
     },
      components: {
         ProfileViewImageGrande,
@@ -34,6 +34,6 @@
             this.image = image
         }
     }
-   
+
   }
 </script>

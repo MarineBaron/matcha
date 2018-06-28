@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+
 const Gender = require('./gender.js')
-const Hobbie = require('./hobbie.js')
-const Preference = require('./preference.js')
+const Interest = require('./interest.js')
 const Image = require('./image.js')
 const Like = require('./likes.js')
 const Blocked = require('./blocked.js')
@@ -60,7 +60,6 @@ const UserSchema = new mongoose.Schema({
   resume: String,
   city: String,
   zip: Number,
-  tel: [String],
   visibility: {
       type: String,
       enum: ["LoggedOut", "LoggedIn", "Absent", "Buzy" ]
@@ -74,17 +73,18 @@ const UserSchema = new mongoose.Schema({
     },
     alt: String
   },
-//   friends: [{
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'User'
-// }],
-  // likes: [{
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: 'User'
-  // }],
-  gender: String,
-  orientation: String,
-  interest: String,
+  gender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Gender'
+  },
+  orientation: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Gender'
+  }],
+  interests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Interest'
+  }],
   gallery: [{
     image: {
       type: mongoose.Schema.Types.ObjectId,

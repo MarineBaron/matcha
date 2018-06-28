@@ -12,7 +12,7 @@
         </b-col>
         <b-col sm="4">
           <profile-view-interest :user="user"/>
-          <my-friends></my-friends>
+          <my-friends v-if="user.username" :username="user.username"></my-friends>
           </b-col>
     </b-row>
   </b-container>
@@ -25,7 +25,6 @@
   import ProfileViewInterest from './ProfileView/ProfileViewInterest.vue'
   import ProfileForm from './ProfileForm/ProfileForm.vue'
   import MyFriends from '../All/MyFriends.vue'
-  // import ProfileViewUserPseudo from './ProfileView/ProfileViewUserPseudo.vue'
   import { mapGetters, mapState } from 'vuex'
   export default {
     components: {
@@ -39,7 +38,6 @@
         mode: 'view',
         title: 'Votre Interface',
         buttonText: 'Editer',
-        user: {},
         error: ''
       }
     },
@@ -51,20 +49,10 @@
     },
     computed: {
       ...mapState({
-        username: state => state.auth.profile.username,
+        user: state => state.user.user,
         loadingSuccess: state => state.user.status === 'success' ? true : false,
       })
     },
-    mounted() {
-      //this.$store.dispatch(USER_USER_REQUEST, localStorage.getItem('username'))
-      this.$store.dispatch(USER_USER_REQUEST, this.username)
-      .then((response) => {
-        console.log("USR", response)
-        this.user = response
-      }, (error) => {
-        this.error = "Une erreur est survenue lors de la confirmation de votre inscription."
-      })
-    }
   }
 </script>
 <style>

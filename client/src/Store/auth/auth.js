@@ -21,6 +21,9 @@ import {
   AUTH_NOTIFICATION_DELETE,
   AUTH_VISITADD
 } from './mutation-types'
+import {
+  USER_USER_SUCCESS
+} from '../user/mutation-types'
 import mockApi from '../../Api/mockApi'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -138,6 +141,7 @@ const actions = {
           localStorage.setItem('username', username)
         }
         commit(AUTH_PROFILE_SUCCESS, resp.data.data)
+        commit(USER_USER_SUCCESS, resp.data.data)
         resolve()
       }, err => {
         commit(AUTH_PROFILE_ERROR)
@@ -268,7 +272,17 @@ const mutations = {
   },
   [AUTH_PROFILE_SUCCESS]: (state, data) => {
     state.status = 'success'
-    Vue.set(state, 'profile', data)
+    Vue.set(state, 'profile', {
+      username: data.username,
+      role: data.role,
+      visited: data.visited,
+      is_completed: data.is_completed,
+      //visibility: data.visibility,
+      likes: data.likes,
+      likesr: data.likers,
+      friends: data.friends,
+      notifications: data.notifications
+    })
   },
   [AUTH_PROFILE_ERROR]: (state) => {
     state.status = 'error'

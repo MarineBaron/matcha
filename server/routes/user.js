@@ -53,10 +53,8 @@ router.get('/profile', verifyToken, function(req, res, next) {
 
 /* GET User - Friends Tous les amis de "username"*/
 router.get('/friends/:username', function(req, res, next) {
-  console.log('Nouvel methode !!!')
   controller.findFriendsByUsername(req.params.username, function (err, result) {
     if (err){
-      console.log('Routes/user.js L73 :' + err)
       res.status(500).json({
         success: 0,
         error: err

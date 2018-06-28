@@ -1,8 +1,10 @@
+const async = require('async')
+const jwt = require('jsonwebtoken')
+const lodash = require('lodash')
+
 const User = require('../models/user')
 const Image = require('../models/image')
-const jwt = require('jsonwebtoken')
 const mailController = require('./mailController')
-//const userController = require('./userController')
 
 module.exports = {
   findAll: function(callback){
@@ -100,12 +102,6 @@ module.exports = {
 
   findFriendsByUsername: function(username, callback){
     User.findOne({username: username})
-    .populate({
-        path: 'friends',
-        populate: {
-          path: 'avatar.image'
-        }
-      })
       .exec(function (err, user) {
         if (err){
           callback(err, null)
@@ -116,11 +112,23 @@ module.exports = {
             success: 0
           })
         } else {
-            data: user
-            console.log('A y est !', user.friends )
-          callback(null, {
-            success: 1,
-            data: user.friends
+          async.parallel({
+            likes: (callback) => {
+              user.getLikes(user._id, callback)
+            },
+            likers: (callback) => {
+              user.getLikers(user._id, callback)
+            },
+          }, function(err, results) {
+            if (err) {
+              callback(err, null)
+              return
+            }
+            const friends = lodash.intersectionBy([results.likes, results.likers], '_id')
+            callback(null, {
+              success: 1,
+              data: friends ? friends[0] : []
+            })
           })
         }
       })
