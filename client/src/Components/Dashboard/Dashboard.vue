@@ -57,7 +57,7 @@
             color: 'info',
             title: 'Likes',
             icon: 'heart',
-            value: 10
+            value: this.nbLikers
           },
           {
             name: 'friends',
@@ -71,6 +71,7 @@
       ...mapState({
         nbNotifs: state => state.auth.profile.notifications ? state.auth.profile.notifications.length : 0,
         nbFriends: state => state.auth.profile.friends ? state.auth.profile.friends.length : 0,
+        nbLikers: state => state.auth.profile.likers ? state.auth.profile.likers.length : 0,
         nbVisited: state => state.auth.profile.visited ? state.auth.profile.visited : 0,
       })
     },

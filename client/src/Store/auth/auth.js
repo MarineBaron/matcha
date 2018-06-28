@@ -279,7 +279,7 @@ const mutations = {
       is_completed: data.is_completed,
       //visibility: data.visibility,
       likes: data.likes,
-      likesr: data.likers,
+      likers: data.likers,
       friends: data.friends,
       notifications: data.notifications
     })
