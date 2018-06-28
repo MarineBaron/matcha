@@ -80,7 +80,6 @@
             this.showForm = true
             this.showError = false
             this.showUpdate = true
-            this.form.firstname = data.firstname
             console.log("retour de mise à jour", data.firstname)
           }, (error) => {
             let message = ''

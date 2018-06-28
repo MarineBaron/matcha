@@ -193,8 +193,7 @@ const mutations = {
   },
   [USER_ACCOUNT_SUCCESS]: (state, data) => {
     state.status = 'success'
-    Vue.set(state, 'firstname', data.firstname)
-    Vue.set(state, 'lastname', data.lastname)
+    Vue.set(state, 'user', Object.assign(state.user, data))
   },
   [USER_ACCOUNT_ERROR]: (state) => {
     state.status = 'error'
