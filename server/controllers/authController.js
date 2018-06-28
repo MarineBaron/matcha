@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken')
+const async = require('async')
+const lodash = require('lodash')
 const User = require('../models/user')
 const userController = require('./userController')
 const notificationController = require('./notification/notificationController')
@@ -61,13 +63,9 @@ module.exports = {
   },
 
   profile: function(id, callback) {
+    console.log('authController profile')
     User.findById(id)
-    .populate({
-      path: 'friends',
-      populate: {
-        path: 'avatar.image'
-      }
-    })
+    .select('_id username role is_completed visited')
     .populate({
       path: 'avatar.image'
     })
@@ -81,22 +79,35 @@ module.exports = {
           success: 0
         })
       } else {
-        notificationController.getAllByUser(user.username, function (err, result) {
+        async.parallel({
+          notifications: (callback) => {
+            notificationController.getAllByUser(user.username, callback)
+          },
+          likes: (callback) => {
+            user.getLikes(user._id, callback)
+          },
+          likers: (callback) => {
+            user.getLikers(user._id, callback)
+          },
+        }, function(err, results) {
           if (err) {
             callback(err, null)
             return
           }
+          const data = {
+            username: user.username,
+            role: user.role,
+            avatar: user.avatar,
+            is_completed: user.is_completed,
+            likes: results.likes,
+            likers: results.likers,
+            friends: lodash.intersectionBy([results.likes, results.likers], '_id'),
+            notifications: results.notifications.data.filter(n => !n.read),
+            visited: user.visited,
+          }
           callback(null, {
             success: 1,
-            data: {
-              username: user.username,
-              role: user.role,
-              avatar: user.avatar,
-              is_completed: user.is_completed,
-              friends: user.friends,
-              notifications: result.data.filter(n => !n.read),
-              visited: user.visited,
-            }
+            data: data
           })
         })
       }

@@ -4,6 +4,8 @@ const Gender = require('./gender.js')
 const Hobbie = require('./hobbie.js')
 const Preference = require('./preference.js')
 const Image = require('./image.js')
+const Like = require('./likes.js')
+const Blocked = require('./blocked.js')
 
 const SALT_WORK_FACTOR = 10
 
@@ -72,14 +74,14 @@ const UserSchema = new mongoose.Schema({
     },
     alt: String
   },
-  friends: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-}],
-  likes: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-  }],
+//   friends: [{
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'User'
+// }],
+  // likes: [{
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'User'
+  // }],
   gender: String,
   orientation: String,
   interest: String,
@@ -91,7 +93,6 @@ const UserSchema = new mongoose.Schema({
     alt: String
   }],
 })
-
 
 
 UserSchema.methods.comparePassword = function comparePassword(password, callback) {
@@ -130,6 +131,54 @@ UserSchema.methods.hashPassword = function hashPassword(next) {
       this.password = hash
       return next()
     })
+  })
+}
+
+UserSchema.methods.getLikes = function(id, callback) {
+  Like.find({liked: id})
+  .populate({
+    select: 'username',
+    path: 'liker',
+    populate: {
+      path: 'avatar.image'
+    }
+  })
+  .exec(function(err, results) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    let likes = []
+    if (results) {
+      results.forEach(r => {
+        likes.push(r.liker)
+      })
+    }
+    callback(null, likes)
+  })
+}
+
+UserSchema.methods.getLikers = function(id, callback) {
+  Like.find({liker: id})
+  .populate({
+    select: 'username',
+    path: 'liked',
+    populate: {
+      path: 'avatar.image'
+    }
+  })
+  .exec(function(err, results) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    let liked = []
+    if (results) {
+      results.forEach(r => {
+        liked.push(r.liked)
+      })
+    }
+    callback(null, liked)
   })
 }
 
