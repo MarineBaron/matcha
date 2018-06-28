@@ -58,7 +58,6 @@
     },
     methods: {
       onPlusMoi: function (id) {
-      console.log(id)
       this.liked = id
       }
     },

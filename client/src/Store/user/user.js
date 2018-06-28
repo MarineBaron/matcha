@@ -58,7 +58,6 @@ const actions = {
           commit(USER_USER_ERROR)
           reject(resp.data.message)
         } else {
-          console.log('action USER_USER_REQUEST',resp.data.data)
           commit(USER_USER_SUCCESS)
           resolve(resp.data.data)
         }
@@ -114,17 +113,15 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(USER_ACCOUNT_REQUEST)
       callApi({url: 'user/update', data: user, method: 'POST'})
-      .then((resp, err) => {
+      .then((resp) => {
         if (!resp.data.success) {
           commit(USER_ACCOUNT_ERROR)
           reject(resp.data.message)
         } else {
-          commit(USER_ACCOUNT_SUCCESS)
-          console.log(USER_ACCOUNT_SUCCESS, resp)
+          commit(USER_ACCOUNT_SUCCESS, resp.data.data)
           resolve(resp)
         }
-      })
-      .catch(err => {
+      }, (err) => {
         commit(USER_ACCOUNT_ERROR)
         reject(err)
       })
@@ -194,8 +191,10 @@ const mutations = {
   [USER_ACCOUNT_REQUEST]: (state) => {
     state.status = 'loading'
   },
-  [USER_ACCOUNT_SUCCESS]: (state) => {
+  [USER_ACCOUNT_SUCCESS]: (state, data) => {
     state.status = 'success'
+    Vue.set(state, 'firstname', data.firstname)
+    Vue.set(state, 'lastname', data.lastname)
   },
   [USER_ACCOUNT_ERROR]: (state) => {
     state.status = 'error'

@@ -182,15 +182,14 @@ module.exports = {
   },
 
   update: function (user, callback){
-    console.log('userControler update:', user)
-    User.findOneAndUpdate({username: user.username}, user, function(err, user) {
+    User.findOneAndUpdate({username: user.username}, user, {new: true}, function(err, newUser) {
       if (err){
         callback(err, null)
         return
       }
       callback(null, {
         success: 1,
-        data: user
+        data: newUser
       })
     })
   },
