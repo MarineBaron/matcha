@@ -9,16 +9,14 @@
       Tout va bien.
     </b-alert>
     <b-form :show="showForm" @submit.prevent="onSubmit">
-      <b-form-input id=""
+      <b-form-input id="form"
         type="text"
         v-model.trim="form.firstname"
-        required
         placeholder="Votre prénom"
       />
       <b-form-input id="form"
         type="text"
         v-model.trim="form.lastname"
-        required
         placeholder="Votre nom"
       />
       <b-button
@@ -33,14 +31,15 @@
   import { USER_ACCOUNT_REQUEST } from '../../../../Store/user/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength, sameAs } from 'vuelidate/lib/validators'
+  import { mapState } from 'vuex'
 
   export default {
     props: ['user'],
     data() {
       return {
         form: {
-          firstname: '',
-          lastname: '',
+          firstname: this.user.firstname,
+          lastname: this.user.lastname,
         },
         showUpdate: false,
         showForm: true,
@@ -55,11 +54,9 @@
     validations: {
       form: {
         firstname: {
-          required,
           maxLength: maxLength(20),
         },
         lastname: {
-          required,
           maxLength: maxLength(20),
         },
       }
@@ -72,7 +69,6 @@
         return !fieldState.$invalid
       },
       onSubmit(e) {
-        console.log('submit')
         const { firstname, lastname } = this.form
         const data = {
           firstname: firstname,
@@ -81,9 +77,11 @@
         }
         this.$store.dispatch(USER_ACCOUNT_REQUEST, data)
           .then((response) => {
-            this.showForm = false
+            this.showForm = true
             this.showError = false
             this.showUpdate = true
+            this.form.firstname = data.firstname
+            console.log("retour de mise à jour", data.firstname)
           }, (error) => {
             let message = ''
             switch(error) {
@@ -97,7 +95,13 @@
       setError(error) {
         this.showError = true
         this.errors = [error]
-      }
-    }
+      },
+
+    },
+//    computed: {
+//        ...mapState({
+//          user: state => state.user.user
+//        })
+//      }
   }
 </script>

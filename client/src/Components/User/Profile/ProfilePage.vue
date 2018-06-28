@@ -59,7 +59,6 @@
       //this.$store.dispatch(USER_USER_REQUEST, localStorage.getItem('username'))
       this.$store.dispatch(USER_USER_REQUEST, this.username)
       .then((response) => {
-        console.log("USR", response)
         this.user = response
       }, (error) => {
         this.error = "Une erreur est survenue lors de la confirmation de votre inscription."
