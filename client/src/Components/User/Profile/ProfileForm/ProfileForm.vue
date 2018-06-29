@@ -11,17 +11,30 @@
     <b-form :show="showForm" @submit.prevent="onSubmit">
       <b-form-input id="form"
         type="text"
+        required
         v-model.trim="form.firstname"
         placeholder="Votre prénom"
-      />
+        :state="statusField($v.form.firstname)"
+        @input="$v.form.firstname.$touch()"
+        />
+      <b-form-invalid-feedback id="firstnameFeedback">
+          Ce champ est requis et ne doit pas dépasser 20 caractères.
+      </b-form-invalid-feedback>
       <b-form-input id="form"
         type="text"
+        required
         v-model.trim="form.lastname"
         placeholder="Votre nom"
+        :state="statusField($v.form.lastname)"
+        @input="$v.form.lastname.$touch()"
       />
+      <b-form-invalid-feedback id="lastnameFeedback">
+        Ce champ est requis et ne doit pas dépasser 20 caractères.
+      </b-form-invalid-feedback>
       <b-button
         type="submit"
-        variant="primary">
+        variant="primary"
+        :disabled="$v.form.$invalid">
       Valider</b-button>
     </b-form>
   </div>
@@ -40,6 +53,15 @@
         form: {
           firstname: this.user.firstname,
           lastname: this.user.lastname,
+          age: this.user.age,
+          genders: ,
+          orientation: ,
+          interests: ,
+          email: this.user.email,
+          city: this.user.city,
+          zip: this.user.zip,
+
+
         },
         showUpdate: false,
         showForm: true,
@@ -54,9 +76,11 @@
     validations: {
       form: {
         firstname: {
+          minLength: minLength(1),
           maxLength: maxLength(20),
         },
         lastname: {
+          minLength: minLength(1),
           maxLength: maxLength(20),
         },
       }
@@ -68,6 +92,12 @@
         }
         return !fieldState.$invalid
       },
+      mounted: function() {
+        this.callApi({url: 'user/users'})
+          .then(data => {
+            this.genders = data;
+          });
+       },
       onSubmit(e) {
         const { firstname, lastname } = this.form
         const data = {
@@ -80,7 +110,6 @@
             this.showForm = true
             this.showError = false
             this.showUpdate = true
-            console.log("retour de mise à jour", data.firstname)
           }, (error) => {
             let message = ''
             switch(error) {
@@ -95,7 +124,6 @@
         this.showError = true
         this.errors = [error]
       },
-
     },
 //    computed: {
 //        ...mapState({
