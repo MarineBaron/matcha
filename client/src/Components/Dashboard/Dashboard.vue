@@ -76,7 +76,7 @@
         ]
       },
       ...mapState({
-        nbNotifs: state => state.auth.profile.notifications ? state.auth.profile.notifications.length : 0,
+        nbNotifications: state => state.auth.profile.notifications ? state.auth.profile.notifications.length : 0,
         nbFriends: state => state.auth.profile.friends ? state.auth.profile.friends.length : 0,
         nbLikers: state => state.auth.profile.likers ? state.auth.profile.likers.length : 0,
         nbLikes: state => state.auth.profile.likes ? state.auth.profile.likes.length : 0,

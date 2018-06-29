@@ -179,8 +179,21 @@ io.on('connection', function(socket) {
   // action de relation (like/unlike)
   socket.on('AUTH_RELATION', function(data) {
     console.log('AUTH_RELATION', data.action, data.actor.username, data.receptor.username)
-    io.to(data.receptor.username).emit('AUTH_RELATION', data)
+    let message = data.actor.username + ' vous a '
+    message += (data.action === 'unlike') ? 'unliké.' : 'liké.'
+    message += ' Vous êtes amis.'
+    // si l'utilisateur recepteur est connecte
+    if (authUsers.find(u => u.username === data.receptor.username)) {
+      io.to(data.receptor.username).emit('AUTH_RELATION', data)
+    }
   })
+
+  // envoi d'une notification a username
+  socket.on('NOTIFICATION_SEND', function(data) {
+    console.log('NOTIFICATION_RECEIVE', data)
+    io.to(data.username).emit('NOTIFICATION_RECEIVE', data)
+  })
+
 
   // Deconnexion d'un utilisateur
   socket.on('disconnect', function() {

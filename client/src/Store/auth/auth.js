@@ -24,6 +24,7 @@ import {
   AUTH_RELATION_SUCCESS,
   AUTH_RELATION_ERROR,
   AUTH_RELATION_OTHER,
+  AUTH_NOTIFICATION_INSERT,
 } from './mutation-types'
 import {
   USER_USER_SUCCESS
@@ -409,6 +410,9 @@ const mutations = {
   [AUTH_RELATION_ERROR]: (state) => {
     state.status = 'error'
   },
+  [AUTH_NOTIFICATION_INSERT]: (state, data) => {
+    state.profile.notifications.splice(1, 0, data)
+  }
 }
 
 export default {

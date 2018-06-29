@@ -6,6 +6,7 @@
 
 <script>
   import { AUTH_RELATION_REQUEST } from '../../../Store/auth/mutation-types'
+  import callApi from '../../../Api/callApi'
 
   export default {
     props: ['type', 'actor', 'receptor'],
@@ -14,10 +15,33 @@
         switch(this.type) {
           case 'like':
           case 'unlike':
+            // dispatch du like/unlike
             this.$store.dispatch(AUTH_RELATION_REQUEST, this.data)
             .then((response) => {
               if (response.data.success) {
-                this.$socket.emit('AUTH_RELATION', response.data.data)
+                const data = response.data.data
+                // emission de l'info (socket)
+                this.$socket.emit('AUTH_RELATION', data)
+
+                // creation d'un message en BDD
+                let message = data.actor.username + ' vous a '
+                message += (data.action === 'unlike') ? 'unliké.' : 'liké.'
+                if (data.action === 'relike') {
+                  message += ' Vous êtes amis.'
+                }
+                callApi({url: 'notification/notification', data: {
+                  username: data.receptor.username,
+                  message: message
+                }, method: 'POST'})
+                .then((response) => {
+                  if (response.data.success) {
+                    // envoi du message au recepteur via socket
+                    this.$socket.emit('NOTIFICATION_SEND', response.data.data)
+                  }
+                }, (error) => {
+                  console.log("NOTIFICATION KO", error)
+                })
+
               }
             }, (error) => {
                 console.log("UserButtonAction click Error", error)

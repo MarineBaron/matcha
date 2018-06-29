@@ -74,8 +74,8 @@ export default {
   },
   sockets: {
     NOTIFICATION_RECEIVE: function(data) {
-      console.log('NOTIFICATION_RECEIVE', data)
-    }
+      this.$store.commit('AUTH_NOTIFICATION_INSERT', data)
+    },
   },
 }
 </script>

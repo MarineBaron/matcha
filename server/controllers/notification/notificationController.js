@@ -81,7 +81,12 @@ module.exports = {
         }
         callback(null, {
           success: 1,
-          data: notification
+          data: {
+            _id: notification._id,
+            username: body.username,
+            message: notification.message,
+            created: notification.created
+          }
         })
       })
     })
