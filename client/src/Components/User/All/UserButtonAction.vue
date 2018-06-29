@@ -16,9 +16,7 @@
           case 'unlike':
             this.$store.dispatch(AUTH_RELATION_REQUEST, this.data)
             .then((response) => {
-              console.log(AUTH_RELATION_REQUEST, response.data)
               if (response.data.success) {
-                console.log('emit AUTH_RELATION', response.data.data)
                 this.$socket.emit('AUTH_RELATION', response.data.data)
               }
             }, (error) => {

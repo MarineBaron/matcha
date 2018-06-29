@@ -10,7 +10,7 @@
 <script>
   import DashboardElement from './DashboardElement.vue'
   import DashboardList from './DashboardList.vue'
-  import { AUTH_VISITADD, AUTH_RELATION_SUCCESS } from '../../Store/auth/mutation-types'
+  import { AUTH_VISITADD, AUTH_RELATION_OTHER } from '../../Store/auth/mutation-types'
   import { mapState } from 'vuex'
 
   export default {
@@ -88,8 +88,7 @@
         this.$store.commit(AUTH_VISITADD)
       },
       AUTH_RELATION: function(data) {
-        console.log('recept AUTH_RELATION', data)
-        this.$store.commit(AUTH_RELATION_SUCCESS, data)
+        this.$store.commit(AUTH_RELATION_OTHER, data)
       },
     }
   }
