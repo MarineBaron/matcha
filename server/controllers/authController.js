@@ -63,7 +63,6 @@ module.exports = {
   },
 
   profile: function(id, callback) {
-    console.log('authController profile')
     User.findById(id)
     .select('_id username role email visited is_completed firstname lastname age resume city zip visibility')
     .populate({
@@ -100,12 +99,26 @@ module.exports = {
             callback(err, null)
             return
           }
-          let data = user
-          data.likes = results.likes ? results.likes : []
-          data.likers = results.likers ? results.likers : []
-          const friends = lodash.intersectionBy([results.likes, results.likers], '_id')
-          data.friends = friends ? friends[0] : []
-          data.notifications =  results.notifications.data.filter(n => !n.read)
+          const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
+          const data = {
+            _id: user._id,
+            username: user.username,
+            role: user.role,
+            email: user.email,
+            visited: user.visited,
+            is_completed: user.is_completed,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            age: user.age,
+            resume: user.resume,
+            city: user.city,
+            zip: user.zip,
+            visibility: user.visibility,
+            likes: results.likes ? results.likes : [],
+            likers: results.likers ? results.likers : [],
+            friends: friends ? friends : [],
+            notifications: results.notifications.data.filter(n => !n.read)
+          }
           callback(null, {
             success: 1,
             data: data
