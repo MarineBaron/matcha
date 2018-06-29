@@ -348,7 +348,7 @@ const mutations = {
   },
   [AUTH_RELATION_SUCCESS]: (state, data) => {
     state.status = 'success'
-    if (data) {
+    if (data && data.actor.username === state.profile.username) {
       switch(data.action) {
         case 'like':
           state.profile.likes.push(data.receptor)

@@ -72,7 +72,7 @@ function disauthUser(socket) {
 
 io.on('connection', function(socket) {
   nbVisitors++
-  
+
   socket.on('IDENTIFY_USER', function(username) {
     authUser(socket, username)
   })
@@ -170,9 +170,16 @@ io.on('connection', function(socket) {
     socket.broadcast.to(data.room).emit('CHAT_RECEIVE_MESSAGE', data)
   })
 
+  // visite d'un utilisateur sur sa page
   socket.on('USER_VISITADD', function(username) {
     console.log('USER_VISITADD', username)
     io.to(username).emit('AUTH_VISITADD')
+  })
+
+  // action de relation (like/unlike)
+  socket.on('AUTH_RELATION', function(data) {
+    console.log('AUTH_RELATION', data.action, data.actor.username, data.receptor.username)
+    io.to(data.receptor.username).emit('AUTH_RELATION', data)
   })
 
   // Deconnexion d'un utilisateur

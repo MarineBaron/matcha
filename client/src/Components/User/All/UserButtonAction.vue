@@ -14,10 +14,13 @@
         switch(this.type) {
           case 'like':
           case 'unlike':
-            console.log("onClick: ", this.data)
             this.$store.dispatch(AUTH_RELATION_REQUEST, this.data)
             .then((response) => {
-              this.$socket.emit('AUTH_RELATION', this.data)
+              console.log(AUTH_RELATION_REQUEST, response.data)
+              if (response.data.success) {
+                console.log('emit AUTH_RELATION', response.data.data)
+                this.$socket.emit('AUTH_RELATION', response.data.data)
+              }
             }, (error) => {
                 console.log("UserButtonAction click Error", error)
             })
