@@ -55,6 +55,7 @@ const getters = {
   isAuthenticated: state => !!state.token,
   authStatus: state => state.status,
   getProfile: state => state.profile,
+  getUsername: state => !state.profile.username ? '' : state.profile.username,
   isProfileLoaded: state => !!state.profile.username
 }
 

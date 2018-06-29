@@ -14,12 +14,12 @@
     },
     computed: {
       value() {
-        switch('type') {
+        switch(this.type) {
           case 'like':
           case 'relike':
             return 'Like'
           break
-          case 'unlike'
+          case 'unlike':
             return 'Unlike'
           break
           default:
