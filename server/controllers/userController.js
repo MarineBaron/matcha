@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const lodash = require('lodash')
 
 const User = require('../models/user')
+const Like = require('../models/likes')
 const Image = require('../models/image')
 const mailController = require('./mailController')
 
@@ -124,7 +125,7 @@ module.exports = {
               callback(err, null)
               return
             }
-            const friends = lodash.intersectionBy([results.likes, results.likers], '_id')
+            const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
             callback(null, {
               success: 1,
               data: friends ? friends[0] : []
@@ -191,6 +192,97 @@ module.exports = {
         success: 1,
         data: newUser
       })
+    })
+  },
+
+  updateRelation: function (data, callback) {
+    async.parallel({
+      // on recherche les 2 users
+      actor: (callback) => User.getItemByUsername(data.actor, callback),
+      receptor: (callback) => User.getItemByUsername(data.receptor, callback),
+    }, function (err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      const users = {
+        liker: results.actor._id,
+        liked: results.receptor._id
+      }
+      data.actor = results.actor
+      data.receptor = results.receptor
+      switch(data.action) {
+        case 'like':
+          // on recherche si la paire existe
+          Like.findOne(users, function(err, result) {
+            if (err){
+              callback(err, null)
+              return
+            }
+            // La paire existe, on renvoie un message
+            if (result) {
+              callback(null, {
+                success: 0,
+                message: 'ALREADY LIKED'
+              })
+              return
+            }
+            // On cree la paire
+            const like = new Like(users)
+            like.save(function(err, result) {
+              if (err){
+                callback(err, null)
+                return
+              }
+              // On recherche la paire inverse
+              Like.findOne({
+                liker: results.receptor._id,
+                liked: results.actor._id
+              }, function(err, result) {
+                if (err){
+                  callback(err, null)
+                  return
+                }
+                // La paire inverse existe (=> relike)
+                if (result) {
+                  data.action = 'relike'
+                }
+                callback(null, {
+                  success: 1,
+                  data: data
+                })
+                return
+              })
+            })
+          })
+        break
+        case 'unlike':
+          Like.findOne(users, function(err, result) {
+            if (err){
+              callback(err, null)
+              return
+            }
+            if (!result) {
+              callback(null, {
+                success: 0,
+                message: 'NOT LIKED'
+              })
+              return
+            }
+            Like.deleteOne(users, function(err, result) {
+              if (err){
+                callback(err, null)
+                return
+              }
+              callback(null, {
+                success: 1,
+                data: data
+              })
+              return
+            })
+          })
+        break
+      }
     })
   },
 

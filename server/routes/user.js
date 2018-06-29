@@ -35,6 +35,21 @@ router.post('/update', function(req, res, next) {
   })
 })
 
+/* POST update relations */
+router.post('/relation', verifyToken, function(req, res, next) {
+  controller.updateRelation(req.body, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
 /* GET profile - Accès aux données complètes de l'utilisateur connecté. */
 router.get('/profile', verifyToken, function(req, res, next) {
   controller.findById(req.user._id, function (err, result) {

@@ -19,7 +19,10 @@ import {
   AUTH_PASSWORD_RESET_ERROR,
   AUTH_PASSWORD_RESET_SUCCESS,
   AUTH_NOTIFICATION_DELETE,
-  AUTH_VISITADD
+  AUTH_VISITADD,
+  AUTH_RELATION_REQUEST,
+  AUTH_RELATION_SUCCESS,
+  AUTH_RELATION_ERROR,
 } from './mutation-types'
 import {
   USER_USER_SUCCESS
@@ -232,6 +235,24 @@ const actions = {
       })
     })
   },
+  [AUTH_RELATION_REQUEST]: ({commit, dispatch}, data) => {
+    return new Promise((resolve, reject) => {
+      commit(AUTH_RELATION_REQUEST)
+      callApi({url: 'user/relation', data: data, method: 'POST'})
+      .then((resp) => {
+        if (!resp.data.success) {
+          commit(AUTH_RELATION_SUCCESS)
+          reject(resp.data.message)
+        } else {
+          commit(AUTH_RELATION_SUCCESS, resp.data.data)
+          resolve(resp)
+        }
+      }, (err) => {
+        commit(AUTH_RELATION_ERROR)
+        reject(err)
+      })
+    })
+  },
 }
 
 const mutations = {
@@ -321,7 +342,38 @@ const mutations = {
   },
   [AUTH_VISITADD]: (state) => {
     state.profile.visited++
-  }
+  },
+  [AUTH_RELATION_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [AUTH_RELATION_SUCCESS]: (state, data) => {
+    state.status = 'success'
+    if (data) {
+      switch(data.action) {
+        case 'like':
+          state.profile.likes.push(data.receptor)
+        break
+        case 'relike':
+          state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.receptor.username))
+          state.profile.friends.push(data.receptor)
+        break
+        case 'unlike':
+          let index = state.profile.friends.findIndex(u => u.username === data.receptor.username)
+          // s'il est mon ami, on l'enleve des amis, et on le mets dans la liste des likers
+          if (index != -1) {
+            state.profile.friends.splice(index)
+            state.profile.likers.push(data.receptor)
+          // sinon on l'enleve des likes
+          } else {
+            state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.receptor.username))
+          }
+        break
+      }
+    }
+  },
+  [AUTH_RELATION_ERROR]: (state) => {
+    state.status = 'error'
+  },
 }
 
 export default {

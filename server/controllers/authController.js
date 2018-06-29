@@ -99,7 +99,7 @@ module.exports = {
             callback(err, null)
             return
           }
-          const friends = lodash.intersectionBy([results.likes, results.likers], '_id')
+          const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
           const data = {
             _id: user._id,
             username: user.username,
@@ -116,7 +116,7 @@ module.exports = {
             visibility: user.visibility,
             likes: results.likes ? results.likes : [],
             likers: results.likers ? results.likers : [],
-            friends: friends ? friends[0] : [],
+            friends: friends ? friends : [],
             notifications: results.notifications.data.filter(n => !n.read)
           }
           callback(null, {

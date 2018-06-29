@@ -135,10 +135,10 @@ UserSchema.methods.hashPassword = function hashPassword(next) {
 }
 
 UserSchema.methods.getLikes = function(id, callback) {
-  Like.find({liked: id})
+  Like.find({liker: id})
   .populate({
-    select: 'username',
-    path: 'liker',
+    select: 'username avatar',
+    path: 'liked',
     populate: {
       path: 'avatar.image'
     }
@@ -151,7 +151,7 @@ UserSchema.methods.getLikes = function(id, callback) {
     let likes = []
     if (results) {
       results.forEach(r => {
-        likes.push(r.liker)
+        likes.push(r.liked)
       })
     }
     callback(null, likes)
@@ -159,10 +159,10 @@ UserSchema.methods.getLikes = function(id, callback) {
 }
 
 UserSchema.methods.getLikers = function(id, callback) {
-  Like.find({liker: id})
+  Like.find({liked: id})
   .populate({
-    select: 'username',
-    path: 'liked',
+    select: 'username avatar',
+    path: 'liker',
     populate: {
       path: 'avatar.image'
     }
@@ -175,10 +175,25 @@ UserSchema.methods.getLikers = function(id, callback) {
     let liked = []
     if (results) {
       results.forEach(r => {
-        liked.push(r.liked)
+        liked.push(r.liker)
       })
     }
     callback(null, liked)
+  })
+}
+
+UserSchema.statics.getItemByUsername = function(username, callback) {
+  this.findOne({username: username})
+  .select('_id username avatar')
+  .populate({
+    path: 'avatar.image'
+  })
+  .exec(function(err, result) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    callback(null, result)
   })
 }
 
