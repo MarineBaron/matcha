@@ -10,6 +10,7 @@
 <script>
   import DashboardElement from './DashboardElement.vue'
   import DashboardList from './DashboardList.vue'
+  import { CHAT_ADD_MESSAGE } from '../../Store/chat/mutation-types'
   import { AUTH_VISITADD, AUTH_RELATION_OTHER } from '../../Store/auth/mutation-types'
   import { NOTIFICATION_CREATE_REQUEST,  NOTIFICATION_DELETE_REQUEST} from '../../Store/notification/mutation-types'
   import { mapState } from 'vuex'
@@ -86,6 +87,15 @@
       })
     },
     sockets: {
+      // reception d'un message
+      CHAT_RECEIVE_MESSAGE: function(data) {
+        const {room, username, message} = data
+        const newMessage = {
+          username: username,
+          message : message
+        }
+        this.$store.dispatch(CHAT_ADD_MESSAGE, {id: room, message: newMessage})
+      },
       // visite de ma page par un utilisateur
       AUTH_VISITADD: function() {
         this.$store.commit(AUTH_VISITADD)
@@ -106,15 +116,7 @@
         } else {
           this.$store.commit('AUTH_NOTIFICATION_INSERT', data)
         }
-      },
-      // NOTIFICATION_SEND_BDD: function(data) {
-      //   callApi({url: 'notification/notification', data: data, method: 'POST'})
-      //   .then((response) => {
-      //     console.log("NOTIFICATION OK", response)
-      //   }, (error) => {
-      //     console.log("NOTIFICATION KO", error)
-      //   })
-      // }
+      }
     }
   }
 </script>

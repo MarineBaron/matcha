@@ -28,7 +28,7 @@
   import Vue from 'vue'
   import LoginForm from './LoginForm.vue'
   import AskForm from './AskForm.vue'
-  
+
   export default {
     components: {
       LoginForm,
@@ -42,7 +42,6 @@
     },
     methods: {
       changeForm(type) {
-        console.log("one", type)
         this.type = type
       }
     }

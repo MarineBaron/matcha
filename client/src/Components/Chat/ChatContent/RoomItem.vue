@@ -67,16 +67,6 @@
           }
           this.$store.dispatch(CHAT_ADD_MESSAGE, {id: id, message: message})
         }
-      },
-      CHAT_RECEIVE_MESSAGE: function(data) {
-        const {room, username, message} = data
-        if (room === this.room.data._id) {
-          const newMessage = {
-            username: username,
-            message : message
-          }
-          this.$store.dispatch(CHAT_ADD_MESSAGE, {id: room, message: newMessage})
-        }
       }
     }
   }

@@ -25,7 +25,6 @@
     methods: {
       checkKey(e) {
         if(this.message.trim().length && e.keyCode === 13) {
-          console.log(this.room)
           const data = {
             roomId: this.room.data._id,
             otheruser:this.room.otheruser,
@@ -36,7 +35,6 @@
           // creation du message en BDD
           this.$store.dispatch(CHAT_SEND_MESSAGE_REQUEST, data)
           .then((response) => {
-            console.log(CHAT_SEND_MESSAGE_REQUEST, response)
             // envoi du message via socket
             this.$socket.emit('CHAT_SEND_MESSAGE', response)
             // creation de la notification en BDD
@@ -48,7 +46,6 @@
             }
             this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
             .then((response) => {
-              console.log(NOTIFICATION_CREATE_REQUEST, response)
               // envoi de la notification
               this.$socket.emit('NOTIFICATION_SEND', response)
             }, (error) => {

@@ -39,16 +39,16 @@
                     this.$socket.emit('NOTIFICATION_SEND', response.data.data)
                   }
                 }, (error) => {
-                  console.log("NOTIFICATION KO", error)
+                  console.log("UserButtonAction click Error 1: ", error)
                 })
 
               }
             }, (error) => {
-                console.log("UserButtonAction click Error", error)
+                console.log("UserButtonAction click Error 2: ", error)
             })
           break
           default:
-            console.log("onClick: no action")
+            console.log("UserButtonAction onClick: no action")
           break
         }
       }

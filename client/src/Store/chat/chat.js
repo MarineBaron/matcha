@@ -68,6 +68,7 @@ const actions = {
     commit(CHAT_WATCH_ALLROOMS)
   },
   [CHAT_UNWATCH_ALLROOMS]: ({commit, dispatch}) => {
+    commit(CHAT_UNWATCH_ALLROOMS)
   },
   [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSE_ROOM, room.otheruser)
@@ -116,22 +117,24 @@ const mutations = {
   },
   [CHAT_SEND_MESSAGE_SUCCESS]: (state, data) => {
     let index = state.rooms.findIndex(r => r.data._id === data.room)
-    if(!state.rooms[index].data.messages) {
-      Vue.set(state.rooms[index].data, 'messages', [])
+    if (index !== -1) {
+      if(!state.rooms[index].data.messages) {
+        Vue.set(state.rooms[index].data, 'messages', [])
+      }
+      Vue.set(state.rooms[index].data.messages, state.rooms[index].data.messages.length, {
+        username: data.username,
+        message: data.message
+      })
     }
-    Vue.set(state.rooms[index].data.messages, state.rooms[index].data.messages.length, {
-      username: data.username,
-      message: data.message
-    })
     state.status = 'success'
   },
   [CHAT_SEND_MESSAGE_ERROR]: (state) => {
     state.status = 'error'
   },
-  [CHAT_WATCH_ALLROOMS]: (state, otheruser) => {
+  [CHAT_WATCH_ALLROOMS]: (state) => {
     state.rooms.forEach(r => {r.status = 'actived'})
   },
-  [CHAT_UNWATCH_ALLROOMS]: (state, otheruser) => {
+  [CHAT_UNWATCH_ALLROOMS]: (state) => {
     state.rooms.forEach(r => {r.status = 'closed'})
   },
   [CHAT_CLOSE_ROOM]: (state, otheruser) => {
@@ -145,7 +148,7 @@ const mutations = {
   [CHAT_ADD_MESSAGE]: (state, data) => {
     state.status = 'success'
     let index = state.rooms.findIndex(r => r.data._id === data.id)
-    if (index !== null) {
+    if (index !== -1) {
       if (!state.rooms[index].data.messages) {
         Vue.set(state.rooms[index].data, 'messages', [])
       }
