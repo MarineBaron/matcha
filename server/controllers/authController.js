@@ -100,6 +100,8 @@ module.exports = {
             return
           }
           const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
+          const likes = lodash.differenceBy(results.likes, friends, 'username')
+          const likers = lodash.differenceBy(results.likers, friends, 'username')
           const data = {
             _id: user._id,
             username: user.username,
@@ -114,8 +116,8 @@ module.exports = {
             city: user.city,
             zip: user.zip,
             visibility: user.visibility,
-            likes: results.likes ? results.likes : [],
-            likers: results.likers ? results.likers : [],
+            likes: likes ? likes : [],
+            likers: likers ? likers : [],
             friends: friends ? friends : [],
             notifications: results.notifications.data.filter(n => !n.read)
           }

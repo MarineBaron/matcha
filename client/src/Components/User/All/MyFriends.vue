@@ -8,7 +8,7 @@
       </b-row>
       <b-row class="text-center">
         <b-col md="6" class="p-4" v-for="user in friends" :key="user.username">
-          <b-link :to="{path: '/user/' + user.username}" title="">
+          <b-link :to="{path: '/user/' + user.username}">
           {{user.username}}   </b-link>
           <b-img v-if="user.avatar" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
         </b-col>

@@ -30,6 +30,12 @@
           case 'friends':
             return user.friends
           break
+          case 'likes':
+            return user.likes
+          break
+          case 'likers':
+            return user.likers
+          break
           default:
             return []
           break

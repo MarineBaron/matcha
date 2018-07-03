@@ -48,13 +48,6 @@
             value: this.nbVisited
           },
           {
-            name: 'messages',
-            color: 'info',
-            title: 'Messages',
-            icon: 'envelope',
-            value: 10
-          },
-          {
             name: 'likes',
             color: 'info',
             title: 'Je les aime !',

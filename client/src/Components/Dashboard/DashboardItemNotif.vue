@@ -13,7 +13,7 @@
 <script>
   import { NOTIFICATION_DELETE_REQUEST } from '../../Store/notification/mutation-types'
   export default {
-    props: ['item', 'type'],
+    props: ['item'],
     methods: {
       deleteMessage() {
         this.$store.dispatch(NOTIFICATION_DELETE_REQUEST, this.item._id)
