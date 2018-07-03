@@ -2,6 +2,9 @@ import {
   NOTIFICATION_DELETE_REQUEST,
   NOTIFICATION_DELETE_ERROR,
   NOTIFICATION_DELETE_SUCCESS,
+  NOTIFICATION_CREATE_REQUEST,
+  NOTIFICATION_CREATE_ERROR,
+  NOTIFICATION_CREATE_SUCCESS,
 } from './mutation-types'
 import {
   AUTH_NOTIFICATION_DELETE,
@@ -31,16 +34,38 @@ const actions = {
       })
     })
   },
+  [NOTIFICATION_CREATE_REQUEST]: ({commit, dispatch}, data) => {
+    return new Promise((resolve, reject) => {
+      commit(NOTIFICATION_CREATE_REQUEST)
+      callApi({url: '/notification/notification', data: data, method: 'POST'})
+      .then((resp) => {
+        commit(NOTIFICATION_CREATE_SUCCESS)
+        resolve(resp.data.data)
+      }, (error) => {
+        commit(NOTIFICATION_CREATE_ERROR)
+        reject(error)
+      })
+    })
+  },
 }
 
 const mutations = {
   [NOTIFICATION_DELETE_REQUEST]: (state) => {
     state.status = 'loading'
   },
-  [NOTIFICATION_DELETE_SUCCESS]: (state, id) => {
+  [NOTIFICATION_DELETE_SUCCESS]: (state) => {
     state.status = 'success'
   },
   [NOTIFICATION_DELETE_ERROR]: (state) => {
+    state.status = 'error'
+  },
+  [NOTIFICATION_CREATE_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [NOTIFICATION_CREATE_SUCCESS]: (state) => {
+    state.status = 'success'
+  },
+  [NOTIFICATION_CREATE_ERROR]: (state) => {
     state.status = 'error'
   },
 }

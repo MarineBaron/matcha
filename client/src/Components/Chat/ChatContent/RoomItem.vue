@@ -77,14 +77,6 @@
           }
           this.$store.dispatch(CHAT_ADD_MESSAGE, {id: room, message: newMessage})
         }
-      },
-      CHAT_SEND_NOTIFICATION: function(data) {
-        callApi({url: 'notification/notification', data: data, method: 'POST'})
-        .then((response) => {
-          console.log("NOTIFICATION OK", response)
-        }, (error) => {
-          console.log("NOTIFICATION KO", error)
-        })
       }
     }
   }

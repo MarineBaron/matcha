@@ -72,8 +72,12 @@ module.exports = {
       }
       let notification = new Notification({
         user: {_id: user._id},
-        message: body.message
+        message: body.message,
+        type: body.type
       })
+      if (body.type === 'chat') {
+        notification.room = {_id: body.room}
+      }
       notification.save(function(err, notification) {
         if (err) {
           callback(err, null)
@@ -83,6 +87,8 @@ module.exports = {
           success: 1,
           data: {
             _id: notification._id,
+            type: notification.type,
+            room: notification.room,
             username: body.username,
             message: notification.message,
             created: notification.created

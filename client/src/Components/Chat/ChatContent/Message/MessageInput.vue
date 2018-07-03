@@ -11,7 +11,8 @@
 
 <script>
   import { mapGetters, mapState } from 'vuex'
-  import { CHAT_SEND_MESSAGE_REQUEST} from '../../../../Store/chat/mutation-types'
+  import { CHAT_SEND_MESSAGE_REQUEST } from '../../../../Store/chat/mutation-types'
+  import { NOTIFICATION_CREATE_REQUEST } from '../../../../Store/notification/mutation-types'
   import callApi from '../../../../Api/callApi'
 
   export default {
@@ -24,17 +25,37 @@
     methods: {
       checkKey(e) {
         if(this.message.trim().length && e.keyCode === 13) {
+          console.log(this.room)
           const data = {
             roomId: this.room.data._id,
+            otheruser:this.room.otheruser,
             username: this.getProfile.username,
             message: this.message.trim()
           }
           this.message = ''
-          this.$store.dispatch('CHAT_SEND_MESSAGE_REQUEST', data)
+          // creation du message en BDD
+          this.$store.dispatch(CHAT_SEND_MESSAGE_REQUEST, data)
           .then((response) => {
+            console.log(CHAT_SEND_MESSAGE_REQUEST, response)
+            // envoi du message via socket
             this.$socket.emit('CHAT_SEND_MESSAGE', response)
+            // creation de la notification en BDD
+            const notif = {
+              username: data.otheruser,
+              type: 'chat',
+              room: data.roomId,
+              message: data.username + ' vous a envoyé un message.'
+            }
+            this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
+            .then((response) => {
+              console.log(NOTIFICATION_CREATE_REQUEST, response)
+              // envoi de la notification
+              this.$socket.emit('NOTIFICATION_SEND', response)
+            }, (error) => {
+              console.log('MessageInput.vue ERROR: ', error)
+            })
           }, (error) => {
-            console.log('MessageInput.vue ERROR', error)
+            console.log('MessageInput.vue ERROR: ', error)
           })
         }
       }

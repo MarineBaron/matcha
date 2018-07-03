@@ -72,11 +72,6 @@ export default {
       token: state => state.auth.token
     })
   },
-  sockets: {
-    NOTIFICATION_RECEIVE: function(data) {
-      this.$store.commit('AUTH_NOTIFICATION_INSERT', data)
-    },
-  },
 }
 </script>
 

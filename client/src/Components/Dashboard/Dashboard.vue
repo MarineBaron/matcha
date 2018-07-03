@@ -11,6 +11,7 @@
   import DashboardElement from './DashboardElement.vue'
   import DashboardList from './DashboardList.vue'
   import { AUTH_VISITADD, AUTH_RELATION_OTHER } from '../../Store/auth/mutation-types'
+  import { NOTIFICATION_CREATE_REQUEST,  NOTIFICATION_DELETE_REQUEST} from '../../Store/notification/mutation-types'
   import { mapState } from 'vuex'
 
   export default {
@@ -81,15 +82,39 @@
         nbLikers: state => state.auth.profile.likers ? state.auth.profile.likers.length : 0,
         nbLikes: state => state.auth.profile.likes ? state.auth.profile.likes.length : 0,
         nbVisited: state => state.auth.profile.visited ? state.auth.profile.visited : 0,
+        rooms: state => state.chat.rooms ? state.chat.rooms : []
       })
     },
     sockets: {
+      // visite de ma page par un utilisateur
       AUTH_VISITADD: function() {
         this.$store.commit(AUTH_VISITADD)
       },
+      // réecption d'une action de relation d'un autre utilisateur
       AUTH_RELATION: function(data) {
         this.$store.commit(AUTH_RELATION_OTHER, data)
       },
+      // réception d'une nouvelle notification
+      NOTIFICATION_RECEIVE: function(data) {
+        // si l'utilisateur est connecté à la room, on supprime le message en BDD
+        if (data.type
+          && data.type === 'chat'
+          && this.rooms.length
+          && this.rooms.find(r => r.data._id === data.room && r.status === 'actived')) {
+            this.$store.dispatch('NOTIFICATION_DELETE_REQUEST', data._id)
+        // sinon on ajoute le messqge à la liste des messages
+        } else {
+          this.$store.commit('AUTH_NOTIFICATION_INSERT', data)
+        }
+      },
+      // NOTIFICATION_SEND_BDD: function(data) {
+      //   callApi({url: 'notification/notification', data: data, method: 'POST'})
+      //   .then((response) => {
+      //     console.log("NOTIFICATION OK", response)
+      //   }, (error) => {
+      //     console.log("NOTIFICATION KO", error)
+      //   })
+      // }
     }
   }
 </script>
