@@ -30,6 +30,7 @@
                   message += ' Vous êtes amis.'
                 }
                 callApi({url: 'notification/notification', data: {
+                  type: 'relation',
                   username: data.receptor.username,
                   message: message
                 }, method: 'POST'})
