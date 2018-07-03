@@ -97,6 +97,7 @@ const actions = {
           commit(USER_FRIENDS_ERROR)
           reject(resp.data.message)
         } else {
+          console.log(USER_FRIENDS_REQUEST, resp)
           commit(USER_FRIENDS_SUCCESS, resp.data.data)
           resolve(resp.data.data)
         }

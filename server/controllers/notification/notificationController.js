@@ -73,7 +73,8 @@ module.exports = {
       let notification = new Notification({
         user: {_id: user._id},
         message: body.message,
-        type: body.type
+        type: body.type,
+        created: new Date()
       })
       if (body.type === 'chat') {
         notification.room = {_id: body.room}

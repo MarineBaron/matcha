@@ -128,7 +128,7 @@ module.exports = {
             const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
             callback(null, {
               success: 1,
-              data: friends ? friends[0] : []
+              data: friends ? friends : []
             })
           })
         }

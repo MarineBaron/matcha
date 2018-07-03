@@ -6,6 +6,7 @@
 
 <script>
   import { AUTH_RELATION_REQUEST } from '../../../Store/auth/mutation-types'
+  import { NOTIFICATION_CREATE_REQUEST } from '../../../Store/notification/mutation-types'
   import callApi from '../../../Api/callApi'
 
   export default {
@@ -29,16 +30,14 @@
                 if (data.action === 'relike') {
                   message += ' Vous êtes amis.'
                 }
-                callApi({url: 'notification/notification', data: {
-                  type: 'relation',
+                const notif = {
                   username: data.receptor.username,
+                  type: 'relation',
                   message: message
-                }, method: 'POST'})
+                }
+                this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
                 .then((response) => {
-                  if (response.data.success) {
-                    // envoi du message au recepteur via socket
-                    this.$socket.emit('NOTIFICATION_SEND', response.data.data)
-                  }
+                    this.$socket.emit('NOTIFICATION_SEND', response)
                 }, (error) => {
                   console.log("UserButtonAction click Error 1: ", error)
                 })

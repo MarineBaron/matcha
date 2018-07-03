@@ -10,7 +10,7 @@
         <b-col md="6" class="p-4" v-for="user in friends" :key="user.username">
           <b-link :to="{path: '/user/' + user.username}" title="">
           {{user.username}}   </b-link>
-          <b-img v-if="user.avatar.image" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
+          <b-img v-if="user.avatar" :src="'http://localhost:5000/images/' + user.avatar.image.name" fluid alt="user.avatar" />
         </b-col>
       </b-row>
     </b-card>
@@ -26,7 +26,7 @@
     data() {
       return {
         title: 'Les Amis de ',
-        friends: {},
+        friends: [],
         error: '',
       }
     },
@@ -39,7 +39,8 @@
     mounted() {
       this.$store.dispatch(USER_FRIENDS_REQUEST, this.username)
       .then((response) => {
-          this.friends = response
+        console.log(response)
+          this.friends = response ? response : []
       }, (error) => {
           console.log(error)
       })

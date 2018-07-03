@@ -356,18 +356,18 @@ const mutations = {
           state.profile.likes.push(data.receptor)
         break
         case 'relike':
-          state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.receptor.username))
+          state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.receptor.username), 1)
           state.profile.friends.push(data.receptor)
         break
         case 'unlike':
           const index = state.profile.friends.findIndex(u => u.username === data.receptor.username)
           // s'il est mon ami, on l'enleve des amis, et on le mets dans la liste des likers
           if (index != -1) {
-            state.profile.friends.splice(index)
+            state.profile.friends.splice(index,1)
             state.profile.likers.push(data.receptor)
           // sinon on l'enleve des likes
           } else {
-            state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.receptor.username))
+            state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.receptor.username), 1)
           }
         break
       }
@@ -382,7 +382,7 @@ const mutations = {
           index = state.profile.likes.findIndex(u => u.username === data.actor.username)
           // si je l'aimais, il devient mon ami
           if (index != -1) {
-            state.profile.likes.splice(index)
+            state.profile.likes.splice(index, 1)
             state.profile.friends.push(data.actor)
           // sinon, il m'aime
           } else {
@@ -390,18 +390,18 @@ const mutations = {
           }
         break
         case 'relike':
-          state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.actor.username))
+          state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.actor.username), 1)
           state.profile.friends.push(data.actor)
         break
         case 'unlike':
           index = state.profile.friends.findIndex(u => u.username === data.actor.username)
           // s'il est mon ami, on l'enleve des amis, et on le mets dans la liste des likes
           if (index != -1) {
-            state.profile.friends.splice(index)
+            state.profile.friends.splice(index, 1)
             state.profile.likes.push(data.actor)
           // sinon on l'enleve des likers
           } else {
-            state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.actor.username))
+            state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.actor.username), 1)
           }
         break
       }
@@ -411,7 +411,7 @@ const mutations = {
     state.status = 'error'
   },
   [AUTH_NOTIFICATION_INSERT]: (state, data) => {
-    state.profile.notifications.splice(1, 0, data)
+    state.profile.notifications.splice(0, 0, data)
   }
 }
 
