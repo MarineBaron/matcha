@@ -1,3 +1,4 @@
+import config from './Config/config'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
@@ -27,7 +28,7 @@ Vue.component('icon', Icon)
 
 import router from './Router/router'
 import store from './Store/store'
-Vue.use(VueSocketio, 'http://localhost:3001', store)
+Vue.use(VueSocketio, config.SOCKET_URL, store)
 
 new Vue({
   el: '#app',

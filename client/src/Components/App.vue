@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header>
+    <header class="clearfix">
       <navigation />
       <dashboard v-if="isAuthenticated"/>
     </header>

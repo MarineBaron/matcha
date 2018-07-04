@@ -6,11 +6,18 @@
         type="like"
         :actor="getUsername"
         :receptor="userDest"
+        scale="2"
       />
       <user-button-action v-if="isLiked||isFriend"
         type="unlike"
         :actor="getUsername"
         :receptor="userDest"
+        scale="2"
+      /><user-button-action v-if="isFriend"
+        type="chat"
+        :actor="getUsername"
+        :receptor="userDest"
+        scale="2"
       />
     </div>
     UserPage: {{relation}}

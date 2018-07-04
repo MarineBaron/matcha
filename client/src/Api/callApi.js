@@ -1,7 +1,8 @@
 import axios from 'axios'
+import config from '../Config/config'
 
 export default axios.create({
-  baseURL: `http://localhost:5000/`,
+  baseURL: config.SERVER_URL,
   mode: 'cors',
   headers: {
     headers: {
