@@ -1,17 +1,24 @@
 <template>
-   <b-container>
+   <b-container fluid v-if="loadingSuccess">
     <h2>{{title}}</h2>
-    <b-link @click.prevent="onClick" class="edit">{{buttonText}}</b-link>
       <b-row>
-        <b-col sm="8">
+        <b-col md="8">
           <b-container>
-            <profile-view v-if="loadingSuccess&&mode=='view'" :user="user" />
-            <profile-form v-if="loadingSuccess&&mode=='edit'" :user="user" />
+            <profile-view v-if="mode==='view'" :user="user" />
+            <profile-form v-if="mode==='edit'" :user="user" />
           </b-container>
         </b-col>
-        <b-col sm="4">
-          <profile-view-interest :user="user"/>
-          <my-friends v-if="user.username" :username="user.username"></my-friends>
+        <b-col md="4">
+          <profile-page-actions
+            :mode="mode"
+            @toggle-mode="toggleMode"
+          />
+          <profile-view-interest v-if="mode==='view'" :user="user"/>
+          <user-relations
+            :actor="user.username"
+            :relationStatus="relationStatus"
+            :relations="relations"
+          />
         </b-col>
     </b-row>
   </b-container>
@@ -20,17 +27,19 @@
 
 <script>
   import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
+  import ProfilePageActions from './ProfilePageActions.vue'
   import ProfileView from './ProfileView/ProfileView.vue'
   import ProfileViewInterest from './ProfileView/ProfileViewInterest.vue'
   import ProfileForm from './ProfileForm/ProfileForm.vue'
-  import MyFriends from '../All/MyFriends.vue'
+  import UserRelations from '../All/UserRelations.vue'
   import { mapGetters, mapState } from 'vuex'
   export default {
     components: {
+      ProfilePageActions,
       ProfileView,
-      MyFriends,
       ProfileForm,
-      ProfileViewInterest
+      ProfileViewInterest,
+      UserRelations
     },
     data() {
       return {
@@ -38,19 +47,27 @@
         title: 'Votre Interface',
         buttonText: 'Editer',
         error: '',
-        relations: null
+        relationStatus: {
+          isUser: true
+        }
       }
     },
     methods: {
-      onClick(e) {
-        this.mode = this.mode === 'edit' ? 'view' : 'edit'
-        this.buttonText = this.mode === 'edit' ? 'Voir' : 'Editer'
+      toggleMode(mode) {
+        this.mode = (mode === 'edit' ? 'view' : 'edit')
       },
     },
     computed: {
       ...mapState({
         user: state => state.user.user,
         loadingSuccess: state => state.user.status === 'success' ? true : false,
+        relations: state => {
+          return {
+            likes: state.auth.profile.likes ? state.auth.profile.likes : [],
+            likers: state.auth.profile.likers ? state.auth.profile.likers : [],
+            friends: state.auth.profile.friends ? state.auth.profile.friends : [],
+          }
+        }
       })
     },
   }
