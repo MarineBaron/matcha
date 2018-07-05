@@ -1,66 +1,119 @@
 <template>
-
-  <div>
-    <div v-if="isAuthenticated && !isUser" class="float-right">
-      <user-button-action v-if="!isLiked && !isFriend"
-        type="like"
-        :actor="getUsername"
-        :receptor="userDest"
-        scale="2"
-      />
-      <user-button-action v-if="isLiked||isFriend"
-        type="unlike"
-        :actor="getUsername"
-        :receptor="userDest"
-        scale="2"
-      /><user-button-action v-if="isFriend"
-        type="chat"
-        :actor="getUsername"
-        :receptor="userDest"
-        scale="2"
-      />
-    </div>
-    UserPage: {{relation}}
-  </div>
+  <b-container fluid v-if="userPage">
+    <h2>{{relation}}</h2>
+    <b-row>
+      <b-col md="8">
+        <user-view :user="user" />
+      </b-col>
+      <b-col md="4">
+        <user-page-actions v-if="isAuthenticated && !isUser"
+          :actor="getUsername"
+          :receptor="userPage"
+          :relationStatus="relationStatus"
+        />
+        <user-relations
+          :relationStatus="relationStatus"
+          :relations="relations"
+        />
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
-  import callApi from '../../../Api/callApi'
   import Vue from 'vue'
   import store from '../../../Store/store'
+  import { mapState, mapGetters } from 'vuex'
+  import callApi from '../../../Api/callApi'
   import { NOTIFICATION_CREATE_REQUEST } from '../../../Store/notification/mutation-types'
-  import UserButtonAction from '../All/UserButtonAction.vue'
+  import { USER_USER_REQUEST } from '../../../Store/user/mutation-types'
+  import UserPageActions from './UserPageActions.vue'
+  import UserRelations from '../All/UserRelations.vue'
+  import UserView from './UserView.vue'
 
   export default {
     data() {
       return ({
-        userDest: this.$route.params.username
+        error: null,
+        userPage: null,
+        user: null,
+        relations: null
       })
     },
     components: {
-      UserButtonAction
+      UserPageActions,
+      UserRelations,
+      UserView
     },
-    mounted() {
-      callApi({url: '/user/addvisit/' + this.userDest})
-      .then((resp) => {
-        this.$socket.emit('USER_VISITADD', this.userDest)
-        const notif = {
-          username: this.userDest,
-          type: 'visit',
-          message: this.visitor + ' a visité votre profil.'
-        }
-        store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
-        .then((response) => {
-          this.$socket.emit('NOTIFICATION_SEND', response)
-        }, (error) => {
-          console.log('UserPage mounted ERROR: ', error)
-        })
-      }, (err) => {
-        console.log(err)
+    // Pour un user, on n'enregistre pas les données dans le state, donc on appelle l'API directement
+    beforeRouteEnter(to, from, next) {
+      callApi({url: '/user/user/' + to.params.username})
+      .then((resp, error) => {
+        next(vm => vm.setData(resp, error))
       })
     },
+    beforeRouteUpdate(to, from, next) {
+      this.userPage = null
+      this.user = null
+      this.relations = null
+      callApi({url: '/user/user/' + to.params.username})
+      .then((resp, error) => {
+        this.setData(resp, error)
+        next()
+      })
+    },
+    methods: {
+      setData(response, error) {
+        if (error) {
+          // @TODO : redirection page d'erreur
+          console.log('UserPage ERROR in dataFetching', error)
+          return
+        }
+        const resp = response.data.data
+        this.userPage = resp.username
+        const user = {
+          username: resp.username,
+          firstname: resp.firstname,
+          lastname: resp.lastname,
+          age: resp.age,
+          resume: resp.resume,
+          city: resp.city,
+          zip: resp.zip,
+          visibility: resp.visibility,
+          gender: resp.gender,
+          orientation: resp.orientation,
+          interests: resp.interests,
+          avatar: resp.avatar,
+          gallery: resp.gallery
+        }
+        this.user = user
+        const relations = {
+          friends: resp.friends,
+          likes: resp.likes,
+          likers: resp.likers,
+        }
+        this.relations = relations
+        callApi({url: '/user/addvisit/' + this.userPage})
+        .then((resp) => {
+          this.$socket.emit('USER_VISITADD', this.userPage)
+          const notif = {
+            username: this.userPage,
+            type: 'visit',
+            message: this.visitor + ' a visité votre profil.'
+          }
+          this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
+          .then((response) => {
+            this.$socket.emit('NOTIFICATION_SEND', response)
+          }, (error) => {
+            console.log('UserPage mounted ERROR: ', error)
+          })
+        }, (err) => {
+          console.log(err)
+        })
+      },
+    },
     computed: {
+
       ...mapGetters([
         'isAuthenticated',
         'getUsername'
@@ -75,34 +128,42 @@
         return this.isAuthenticated ? this.getUsername : 'Un visiteur anonyme'
       },
       isLiked() {
-        return this.likes.find(u => u.username === this.userDest) ? true : false
+        return this.likes.find(u => u.username === this.userPage) ? true : false
       },
       isLiker() {
-        return this.likers.find(u => u.username === this.userDest) ? true : false
+        return this.likers.find(u => u.username === this.userPage) ? true : false
       },
       isFriend() {
-        return this.friends.find(u => u.username === this.userDest) ? true : false
+        return this.friends.find(u => u.username === this.userPage) ? true : false
       },
       isUser() {
-        return this.username === this.userDest
+        return this.username === this.userPage
+      },
+      relationStatus() {
+        return {
+          isLiked: this.isLiked,
+          isLiker: this.isLiker,
+          isFriend: this.isFriend,
+          isUser: this.isUser,
+        }
       },
       relation() {
-        if (this.isUser === true) {
-          return this.username
+        if (this.username === '') {
+          return this.userPage
         }
-        if (this.username === this.userDest) {
+        if (this.isUser === true) {
           return this.username + " : c'est vous !"
         }
         if (this.isFriend === true) {
-          return this.userDest + ' est votre ami.'
+          return this.userPage + ' est votre ami.'
         }
         if (this.isLiker === true) {
-          return this.userDest + ' aimerait devenir votre ami.'
+          return this.userPage + ' aimerait devenir votre ami.'
         }
         if (this.isLiked === true) {
-          return this.userDest + ', que vous aimez tant !!!'
+          return this.userPage + ', que vous aimez tant !!!'
         }
-        return this.userDest
+        return this.userPage
       }
     }
   }

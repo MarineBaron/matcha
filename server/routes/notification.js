@@ -49,7 +49,7 @@ router.get('/notification/:id', verifyToken, function(req, res, next) {
 })
 
 /* POST one notification = create one notification */
-router.post('/notification', verifyToken, function(req, res, next) {
+router.post('/notification', function(req, res, next) {
   notificationController.create(req.body, function (err, result) {
     if (err) {
       console.log(err)
@@ -59,7 +59,6 @@ router.post('/notification', verifyToken, function(req, res, next) {
       })
       return
     }
-    console.log(result)
     res.status(200).json(result)
   })
 })

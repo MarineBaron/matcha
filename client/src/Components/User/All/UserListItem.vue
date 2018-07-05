@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-between">
+  <div class="user-list-item d-flex justify-content-between">
     <div class="user-avatar">
       <b-img v-if="item.avatar" :src=" IMAGES_URL + '/' + item.avatar.image.name" fluid :alt="item.avatar.alt" />
     </div>
@@ -36,7 +36,7 @@
   .d-flex {
     align-items: center;
   }
-  .d-flex:hover {
+  .user-list-item.d-flex:hover {
     background: #eee;
   }
   .user-avatar {

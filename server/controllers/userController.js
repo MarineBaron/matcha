@@ -61,39 +61,65 @@ module.exports = {
     })
   },
   findCompleteByUsername: function(username, callback) {
-
     User.findOne({username: username})
-    // .populate({
-    //   path: 'friends',
-    //   populate: {
-    //     path: 'avatar.image'
-    //   }
-    // })
-    // .populate('friends')
-    // .populate: {
-    //   path: 'avatar.image'
-    // }
-    .populate({
-      path: 'avatar.image'
-    })
-    .populate({
-      path: 'gallery.image'
-    })
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests')
+      .populate({
+        path: 'avatar.image'
+      })
+      .populate({
+        path: 'gallery.image'
+      })
+      .populate('gender')
+      .populate('orientation')
+      .populate('interests')
       .exec(function (err, user) {
       if (err) {
-        // console.log(err)
         callback(err, null)
         return
       }
       if (!user) {
         callback(null, {
-          success: 0
+          success: 0,
+          message: 'USER NOT FOUND'
         })
       } else {
-        // console.log(`Et ? ... ${user}`)
-        callback(null, {
-          success: 1,
-          data: user
+        async.parallel({
+          likes: (callback) => {
+            user.getLikes(user._id, callback)
+          },
+          likers: (callback) => {
+            user.getLikers(user._id, callback)
+          },
+        }, function(err, results) {
+          if (err) {
+            callback(err, null)
+            return
+          }
+          const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
+          const likes = lodash.differenceBy(results.likes, friends, 'username')
+          const likers = lodash.differenceBy(results.likers, friends, 'username')
+          const data = {
+            _id: user._id,
+            username: user.username,
+            visited: user.visited,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            age: user.age,
+            resume: user.resume,
+            city: user.city,
+            zip: user.zip,
+            visibility: user.visibility,
+            gender: user.gender,
+            orientation: user.orientation,
+            interests: user.interests,
+            likes: likes ? likes : [],
+            likers: likers ? likers : [],
+            friends: friends ? friends : [],
+          }
+          callback(null, {
+            success: 1,
+            data: data
+          })
         })
       }
     })

@@ -145,23 +145,25 @@ const mutations = {
     state.status = 'loading'
   },
   [USER_USER_SUCCESS]: (state, data) => {
-    state.status = 'success',
-    Vue.set(state, 'user', {
-      username: data.username,
-      email: data.email,
-      firstname: data.firstname,
-      lastname: data.lastname,
-      age: data.age,
-      resume: data.resume,
-      city: data.city,
-      zip: data.zip,
-      visibility: data.visibility,
-      gender: data.gender,
-      orientation: data.orientation,
-      interests: data.interests,
-      avatar: data.avatar,
-      gallery: data.gallery
-    })
+    state.status = 'success'
+    if (data) {
+      Vue.set(state, 'user', {
+        username: data.username,
+        email: data.email,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        age: data.age,
+        resume: data.resume,
+        city: data.city,
+        zip: data.zip,
+        visibility: data.visibility,
+        gender: data.gender,
+        orientation: data.orientation,
+        interests: data.interests,
+        avatar: data.avatar,
+        gallery: data.gallery
+      })
+    }
   },
   [USER_USER_ERROR]: (state) => {
     state.status = 'error',

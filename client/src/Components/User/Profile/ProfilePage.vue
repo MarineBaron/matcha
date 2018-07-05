@@ -1,10 +1,9 @@
 <template>
    <b-container>
     <h2>{{title}}</h2>
-          <b-link @click.prevent="onClick" class="edit">{{buttonText}}</b-link>
+    <b-link @click.prevent="onClick" class="edit">{{buttonText}}</b-link>
       <b-row>
         <b-col sm="8">
-
           <b-container>
             <profile-view v-if="loadingSuccess&&mode=='view'" :user="user" />
             <profile-form v-if="loadingSuccess&&mode=='edit'" :user="user" />
@@ -13,7 +12,7 @@
         <b-col sm="4">
           <profile-view-interest :user="user"/>
           <my-friends v-if="user.username" :username="user.username"></my-friends>
-          </b-col>
+        </b-col>
     </b-row>
   </b-container>
 
@@ -38,7 +37,8 @@
         mode: 'view',
         title: 'Votre Interface',
         buttonText: 'Editer',
-        error: ''
+        error: '',
+        relations: null
       }
     },
     methods: {

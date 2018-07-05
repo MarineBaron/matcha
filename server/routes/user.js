@@ -82,10 +82,8 @@ router.get('/friends/:username', function(req, res, next) {
 
 /* GET user - Accès aux données d'un user lambda*/
 router.get('/user/:username', function(req, res, next) {
-  // console.log('/user/:username')
   controller.findCompleteByUsername(req.params.username, function (err, result) {
     if (err) {
-      // console.log(err)
       res.status(500).json({
         success: 0,
         error: err
@@ -98,10 +96,8 @@ router.get('/user/:username', function(req, res, next) {
 
 /* GET user Add One visit */
 router.get('/addvisit/:username', function(req, res, next) {
-  // console.log('/user/:username')
   controller.addVisit(req.params.username, function (err, result) {
     if (err) {
-      // console.log(err)
       res.status(500).json({
         success: 0,
         error: err
