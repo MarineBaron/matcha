@@ -26,6 +26,7 @@
 <script>
 import {mapGetters, mapState} from 'vuex'
 import { AUTH_LOGOUT, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-types'
+import { CHAT_CLOSE_ALLROOMS } from '../Store/chat/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Counter from './Counter/Counter.vue'

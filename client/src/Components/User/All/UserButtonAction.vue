@@ -8,7 +8,7 @@
 <script>
   import Vue from 'vue'
   import { mapState } from 'vuex'
-  import { CHAT_OPEN_ROOM_REQUEST, CHAT_OPEN_ROOM_SOCKET } from '../../../Store/chat/mutation-types'
+  import { CHAT_OPEN_ROOM_REQUEST, CHAT_CLOSE_ROOM } from '../../../Store/chat/mutation-types'
   import { AUTH_RELATION_REQUEST } from '../../../Store/auth/mutation-types'
   import { NOTIFICATION_CREATE_REQUEST } from '../../../Store/notification/mutation-types'
 

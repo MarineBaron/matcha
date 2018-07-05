@@ -142,31 +142,6 @@ io.on('connection', function(socket) {
 
   socket.on('CHAT_SEND_MESSAGE', function(data) {
     console.log('CHAT_SENDMESSAGE', data.room, socket.username)
-    const socketRoom = rooms.find(r => r.id = data.room)
-    const { usernames } = socketRoom
-    const otheruserName = usernames[0] === socket.username ? usernames[1] : usernames[0]
-    const otheruser = authUsers.find(u => u.username === otheruserName)
-    // otheruser n'est pas connecte : on cree une notification en BDD
-    // if (!otheruser) {
-    //   console.log('emit NOTIFICATION_SEND_BDD', socket)
-    //   socket.emit('NOTIFICATION_SEND_BDD', {
-    //     username: otheruserName,
-    //     message: "Vous avez reçu un message de " + socket.username
-    //   })
-    // // otheruser est connecte
-    // } else {
-      // on recherche les sockets sur lesquels il n'est pas connecte au chat pour envoyer une notification immediate
-    // if (otheruser)
-    //   otheruser.sockets.forEach(os => {
-    //     if (!socketRoom.sockets.find(rs => rs === os)) {
-    //       console.log('emit NOTIFICATION_RECEIVE')
-    //       socket.to(os.id).emit('NOTIFICATION_RECEIVE', {
-    //         username: otheruserName,
-    //         message: "Vous avez reçu un message de " + socket.username
-    //       })
-    //     }
-    //   })
-    // }
     // on envoie le message aux utilisateurs connectes au chat (autre que l'emetteeur)
     socket.broadcast.to(data.room).emit('CHAT_RECEIVE_MESSAGE', data)
   })
@@ -183,6 +158,20 @@ io.on('connection', function(socket) {
     let message = data.actor.username + ' vous a '
     message += (data.action === 'unlike') ? 'unliké.' : 'liké.'
     message += ' Vous êtes amis.'
+    // fermeture du chat si un like et chat ouvert
+    if (data.action === 'unlike') {
+      console.log('unlike rooms', rooms)
+      const room = rooms.find(r => r.usernames.includes(data.actor.username) && r.usernames.includes(data.receptor.username))
+      if (room) {
+        let sockets = authUsers.find(u => u.username === data.actor.username).sockets
+        sockets.forEach(s => s.leave(room.id))
+        socket = authUsers.find(u => u.username === data.receptor.username)
+        sockets.forEach(s => s.leave(room.id))
+        rooms.splice(rooms.findIndex(r => room.id), 1)
+      }
+      console.log(rooms)
+    }
+    io.to(data.actor.username).emit('AUTH_RELATION', data)
     // si l'utilisateur recepteur est connecte
     if (authUsers.find(u => u.username === data.receptor.username)) {
       io.to(data.receptor.username).emit('AUTH_RELATION', data)

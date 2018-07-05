@@ -45,7 +45,7 @@
 <script>
   import DashboardItemNotif from './DashboardItemNotif.vue'
   import UserListItem from '../User/All/UserListItem.vue'
-  import { CHAT_ADD_MESSAGE } from '../../Store/chat/mutation-types'
+  import { CHAT_ADD_MESSAGE, CHAT_CLOSE_ROOM } from '../../Store/chat/mutation-types'
   import { AUTH_VISITADD, AUTH_RELATION_OTHER } from '../../Store/auth/mutation-types'
   import { NOTIFICATION_CREATE_REQUEST,  NOTIFICATION_DELETE_REQUEST} from '../../Store/notification/mutation-types'
   import { mapState } from 'vuex'
@@ -163,9 +163,17 @@
       AUTH_VISITADD: function() {
         this.$store.commit(AUTH_VISITADD)
       },
-      // réecption d'une action de relation d'un autre utilisateur
+      // réecption d'une action de relation
       AUTH_RELATION: function(data) {
         this.$store.commit(AUTH_RELATION_OTHER, data)
+        if (data.action === 'unlike') {
+          if (this.rooms.find(r => r.otheruser === data.actor.username)) {
+            this.$store.commit(CHAT_CLOSE_ROOM, data.actor.username)
+          }
+          if (this.rooms.find(r => r.otheruser === data.receptor.username)) {
+            this.$store.commit(CHAT_CLOSE_ROOM, data.receptor.username)
+          }
+        }
       },
       // réception d'une nouvelle notification
       NOTIFICATION_RECEIVE: function(data) {

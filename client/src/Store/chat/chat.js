@@ -139,7 +139,10 @@ const mutations = {
   },
   [CHAT_CLOSE_ROOM]: (state, otheruser) => {
     state.status = 'success'
-    state.rooms.splice(state.rooms.findIndex(room => room.otheruser === otheruser), 1)
+    const index = state.rooms.findIndex(room => room.otheruser === otheruser)
+    if (index !== 1) {
+      state.rooms.splice(index, 1)
+    }
   },
   [CHAT_CLOSE_ALLROOMS]: (state) => {
     state.status = 'success'
