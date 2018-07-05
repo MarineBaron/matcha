@@ -64,7 +64,7 @@ module.exports = {
 
   profile: function(id, callback) {
     User.findById(id)
-    .select('_id username role email visited is_completed firstname lastname age resume city zip visibility')
+    .select('_id username role email visited is_completed firstname lastname age resume city zip visibility last_logout')
     .populate({
       path: 'avatar.image'
     })
@@ -122,7 +122,8 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
-            notifications: results.notifications.data.filter(n => !n.read)
+            notifications: results.notifications.data.filter(n => !n.read),
+            last_logout: user.last_logout
           }
           callback(null, {
             success: 1,

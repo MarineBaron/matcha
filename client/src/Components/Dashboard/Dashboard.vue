@@ -17,27 +17,27 @@
       </div>
     </div>
     <div ref="menu" class="dropdown-menu" >
-        <b-dropdown-header class="clearfix">
-          <div class="d-flex justify-content-between">
-            <h5>{{title}}</h5>
-            <b-link @click.prevent="close">
-              <icon name="times"></icon>
-            </b-link>
-          </div>
-        </b-dropdown-header>
-        <dashboard-item-notif v-if="type === 'notifications'"
-          class="dashboard-item"
-          v-for="item in items"
-          :key="item._id"
-          :item="item"></dashboard-item-notif>
-        <user-list-item v-if="type === 'likes' || type === 'likers' || type === 'friends'"
-          class="dashboard-item"
-          v-for="item in items"
-          :key="item._username"
-          :item="item"
-          :actions="actions"
-          :actor="username"
-          :close="close"></user-list-item>
+      <b-dropdown-header class="clearfix">
+        <div class="d-flex justify-content-between">
+          <h5>{{title}}</h5>
+          <b-link @click.prevent="close">
+            <icon name="times"></icon>
+          </b-link>
+        </div>
+      </b-dropdown-header>
+      <dashboard-item-notif v-if="type === 'notifications'"
+        class="dashboard-item"
+        v-for="item in items"
+        :key="item._id"
+        :item="item" />
+      <user-list-item v-if="type === 'likes' || type === 'likers' || type === 'friends'"
+        class="dashboard-item"
+        v-for="item in items"
+        :key="item._username"
+        :item="item"
+        :actions="actions"
+        :actor="username"
+        @close="close" />
     </div>
   </div>
 </template>
@@ -63,16 +63,21 @@
     },
     methods: {
       changeType(type) {
-        if (type != 'visits' && this.elements.find(e => e.name === type).value !== 0) {
+        const element = this.elements.find(e => e.name === type)
+        if (type !== 'visits' && element.value !== 0) {
           if (this.type === type) {
             this.open = !this.open
           } else {
             this.open = true
           }
           this.type = type
+          // mise à jour des connectés
+          if(this.open && (type == 'friends' || type == 'likes' || type == 'likers')) {
+            element.items.forEach(i => this.$socket.emit('IS_CONNECTED_REQUEST', i.username))
+          }
         }
       },
-      close(e) {
+      close(type) {
         this.open = false
       }
     },

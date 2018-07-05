@@ -15,10 +15,10 @@
   export default {
     props: ['type', 'actor', 'receptor', 'scale'],
     methods: {
-      onClick() {
+      onClick(e) {
         switch(this.type) {
           case 'view':
-            this.$emit('close')
+            this.$emit('close', this.type)
             this.$router.push('/user/' + this.receptor)
           break;
           case 'like':
@@ -62,7 +62,7 @@
                 room: response.room,
                 username: this.actor
               })
-              this.$emit('close')
+              this.$emit('close', this.type)
               this.$router.push('/chat')
             }, (error) => {
               console.log("UserListItem.vue chat ERROR", error)

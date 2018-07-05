@@ -62,7 +62,7 @@ module.exports = {
   },
   findCompleteByUsername: function(username, callback) {
     User.findOne({username: username})
-      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests')
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout')
       .populate({
         path: 'avatar.image'
       })
@@ -115,6 +115,7 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
+            last_logout: user.last_logout
           }
           callback(null, {
             success: 1,

@@ -2,10 +2,10 @@
   <div role="tablist">
     <h3>{{title}}</h3>
     <b-card v-if="relations.friends && relations.friends.length" no-body class="mb-1">
-      <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-btn block href="#" v-b-toggle.accordion_friends variant="info">{{relationsTitle.friends}}</b-btn>
+      <b-card-header header-tag="header" class="p-1" role="tab" >
+        <b-btn block href="#" v-b-toggle.accordion_friends variant="info" >{{relationsTitle.friends}}</b-btn>
       </b-card-header>
-      <b-collapse id="accordion_friends" accordion="my-accordion" role="tabpanel">
+      <b-collapse id="accordion_friends" accordion="my-accordion" role="tabpanel" @shown="askConnexion('friends')">
         <b-card-body>
           <user-list-item v-if="relationStatus.isUser === true"
             v-for="user in relations.friends"
@@ -22,7 +22,7 @@
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-btn block href="#" v-b-toggle.accordion_likes variant="info">{{relationsTitle.likes}}</b-btn>
       </b-card-header>
-      <b-collapse id="accordion_likes" accordion="my-accordion" role="tabpanel">
+      <b-collapse id="accordion_likes" accordion="my-accordion" role="tabpanel"  @shown="askConnexion('likes')">
         <b-card-body>
           <user-list-item v-if="relationStatus.isUser === true"
             v-for="user in relations.likes"
@@ -39,7 +39,7 @@
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-btn block href="#" v-b-toggle.accordion_likers variant="info">{{relationsTitle.likers}}t</b-btn>
       </b-card-header>
-      <b-collapse id="accordion_likers" accordion="my-accordion" role="tabpanel">
+      <b-collapse id="accordion_likers" accordion="my-accordion" role="tabpanel" @shown="askConnexion('flikers')">
         <b-card-body>
           <user-list-item v-if="relationStatus.isUser === true"
             v-for="user in relations.likers"
@@ -63,7 +63,7 @@
       UserRelationItems,
       UserListItem
     },
-    props: ['relations', 'relationStatus'],
+    props: ['relations', 'relationStatus', 'actor'],
     data() {
       return ({
         title: 'Relations',
@@ -74,5 +74,10 @@
         }
       })
     },
+    methods: {
+      askConnexion(type) {
+        this.relations[type].forEach(u => this.$socket.emit('IS_CONNECTED_REQUEST', u.username))
+      }
+    }
   }
 </script>

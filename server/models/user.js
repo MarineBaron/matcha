@@ -137,7 +137,7 @@ UserSchema.methods.hashPassword = function hashPassword(next) {
 UserSchema.methods.getLikes = function(id, callback) {
   Like.find({liker: id})
   .populate({
-    select: 'username avatar',
+    select: 'username avatar last_logout',
     path: 'liked',
     populate: {
       path: 'avatar.image'
@@ -161,7 +161,7 @@ UserSchema.methods.getLikes = function(id, callback) {
 UserSchema.methods.getLikers = function(id, callback) {
   Like.find({liked: id})
   .populate({
-    select: 'username avatar',
+    select: 'username avatar last_logout',
     path: 'liker',
     populate: {
       path: 'avatar.image'
@@ -184,7 +184,7 @@ UserSchema.methods.getLikers = function(id, callback) {
 
 UserSchema.statics.getItemByUsername = function(username, callback) {
   this.findOne({username: username})
-  .select('_id username avatar')
+  .select('_id username avatar last_logout')
   .populate({
     path: 'avatar.image'
   })

@@ -1,13 +1,16 @@
 <template>
-  <div>
-  <h3>Chat Rooms</h3>
-  <b-card-group deck class="mb-3">
-    <RoomItem
-      v-for="room in getActiveRooms"
-      :key="room.data._id"
-      :room="room"
-    ></RoomItem>
-    </b-card-group></div>
+  <b-container fluid>
+    <h3>Chat Rooms</h3>
+    <b-row>
+      <b-col>
+        <RoomItem
+          v-for="room in getActiveRooms"
+          :key="room.data._id"
+          :room="room"
+        />
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>

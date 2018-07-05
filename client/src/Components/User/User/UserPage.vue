@@ -1,6 +1,8 @@
 <template>
   <b-container fluid v-if="userPage">
     <h2>{{relation}}</h2>
+    <user-connexion :connexion="connexion" />
+
     <b-row>
       <b-col md="8">
         <user-view :user="user" />
@@ -14,6 +16,7 @@
         <user-relations
           :relationStatus="relationStatus"
           :relations="relations"
+          :actor="username"
         />
       </b-col>
     </b-row>
@@ -30,6 +33,7 @@
   import UserPageActions from './UserPageActions.vue'
   import UserRelations from '../All/UserRelations.vue'
   import UserView from './UserView.vue'
+  import UserConnexion from '../All/UserConnexion.vue'
 
   export default {
     data() {
@@ -37,13 +41,15 @@
         error: null,
         userPage: null,
         user: null,
-        relations: null
+        relations: null,
+        connexion: null
       })
     },
     components: {
       UserPageActions,
       UserRelations,
-      UserView
+      UserView,
+      UserConnexion
     },
     // Pour un user, on n'enregistre pas les données dans le state, donc on appelle l'API directement
     beforeRouteEnter(to, from, next) {
@@ -64,6 +70,7 @@
     },
     methods: {
       setData(response, error) {
+        // récupération des données de la callApi
         if (error) {
           // @TODO : redirection page d'erreur
           console.log('UserPage ERROR in dataFetching', error)
@@ -93,6 +100,13 @@
           likers: resp.likers,
         }
         this.relations = relations
+
+        this.connexion = {
+          username: resp.username,
+          last_logout: resp.last_logout
+        }
+
+        // incrémentation du nombre de visites sur la page + notification
         callApi({url: '/user/addvisit/' + this.userPage})
         .then((resp) => {
           this.$socket.emit('USER_VISITADD', this.userPage)
@@ -113,7 +127,6 @@
       },
     },
     computed: {
-
       ...mapGetters([
         'isAuthenticated',
         'getUsername'
@@ -165,6 +178,6 @@
         }
         return this.userPage
       }
-    }
+    },
   }
 </script>

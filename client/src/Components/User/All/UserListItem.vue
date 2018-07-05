@@ -6,6 +6,9 @@
     <div class="user-name">
       {{item.username}}
     </div>
+    <div class="user-connected">
+      <user-connexion :connexion="connexion" icon="1" />
+    </div>
     <div class="user-actions">
       <user-button-action v-for="action in actions" :key="action"
         :type="action"
@@ -19,14 +22,24 @@
 <script>
   import config from '../../../Config/config'
   import UserButtonAction from './UserButtonAction.vue'
+  import UserConnexion from './UserConnexion.vue'
   export default {
     components: {
-      UserButtonAction
+      UserButtonAction,
+      UserConnexion
     },
     props: ['item', 'actor', 'actions'],
     data() {
       return {
         IMAGES_URL: config.IMAGES_URL
+      }
+    },
+    computed: {
+      connexion() {
+        return {
+          username: this.item.username,
+          last_logout: this.item.last_logout
+        }
       }
     }
   }

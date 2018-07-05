@@ -78,7 +78,6 @@ io.on('connection', function(socket) {
   })
 
   socket.on('UNLOAD_USER', function(user) {
-    console.log('UNLOAD_USER', user)
     if (user.username) {
       disauthUser(socket)
     }
@@ -86,20 +85,17 @@ io.on('connection', function(socket) {
 
   // Reception d'un message de login
   socket.on('AUTH_LOGIN', function(data) {
-    console.log('AUTH_LOGIN', data.username)
     authUser(socket, data.username)
   })
 
   // Reception d'un message de logout
   socket.on('AUTH_LOGOUT', function(data) {
-    console.log('AUTH_LOGOUT', data)
     disauthUser(socket)
   })
 
   // Chat Room
   socket.on('CHAT_OPEN_ROOM', function(data) {
     const { room, usernames } = data
-    console.log('CHAT_OPEN_ROOM', room._id, socket.username)
     socket.join(room._id)
     let socketRoom = rooms.find(r => r.id === room._id)
     if (socketRoom) {
@@ -123,7 +119,6 @@ io.on('connection', function(socket) {
   })
 
   socket.on('CHAT_QUIT_ROOM', function(id) {
-    console.log('CHAT_QUIT_ROOM', id, socket.username)
     let socketRoom = rooms.find(r => r.id === id)
     if (socketRoom) {
       if (socketRoom.sockets.length < 2) {
@@ -141,26 +136,22 @@ io.on('connection', function(socket) {
   })
 
   socket.on('CHAT_SEND_MESSAGE', function(data) {
-    console.log('CHAT_SENDMESSAGE', data.room, socket.username)
     // on envoie le message aux utilisateurs connectes au chat (autre que l'emetteeur)
     socket.broadcast.to(data.room).emit('CHAT_RECEIVE_MESSAGE', data)
   })
 
   // visite d'un utilisateur sur sa page
   socket.on('USER_VISITADD', function(username) {
-    console.log('USER_VISITADD', username)
     io.to(username).emit('AUTH_VISITADD')
   })
 
   // action de relation (like/unlike)
   socket.on('AUTH_RELATION', function(data) {
-    console.log('AUTH_RELATION', data.action, data.actor.username, data.receptor.username)
     let message = data.actor.username + ' vous a '
     message += (data.action === 'unlike') ? 'unliké.' : 'liké.'
     message += ' Vous êtes amis.'
     // fermeture du chat si un like et chat ouvert
     if (data.action === 'unlike') {
-      console.log('unlike rooms', rooms)
       const room = rooms.find(r => r.usernames.includes(data.actor.username) && r.usernames.includes(data.receptor.username))
       if (room) {
         let sockets = authUsers.find(u => u.username === data.actor.username).sockets
@@ -169,7 +160,6 @@ io.on('connection', function(socket) {
         sockets.forEach(s => s.leave(room.id))
         rooms.splice(rooms.findIndex(r => room.id), 1)
       }
-      console.log(rooms)
     }
     io.to(data.actor.username).emit('AUTH_RELATION', data)
     // si l'utilisateur recepteur est connecte
@@ -180,10 +170,17 @@ io.on('connection', function(socket) {
 
   // envoi d'une notification a username
   socket.on('NOTIFICATION_SEND', function(data) {
-    console.log('NOTIFICATION_RECEIVE', data)
     io.to(data.username).emit('NOTIFICATION_RECEIVE', data)
   })
 
+  // demande d'état de connexion d'un utilisateur
+  socket.on('IS_CONNECTED_REQUEST', function(username) {
+    const isConnected = authUsers.findIndex(u => u.username === username)
+    socket.emit('IS_CONNECTED_RESPONSE', {
+      username: username,
+      isConnected: isConnected === -1 ? false : true
+    })
+  })
 
   // Deconnexion d'un utilisateur
   socket.on('disconnect', function() {
