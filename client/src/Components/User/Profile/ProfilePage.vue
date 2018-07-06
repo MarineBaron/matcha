@@ -17,7 +17,6 @@
           <user-relations
             :actor="user.username"
             :relationStatus="relationStatus"
-            :relations="relations"
           />
         </b-col>
     </b-row>
@@ -61,13 +60,13 @@
       ...mapState({
         user: state => state.user.user,
         loadingSuccess: state => state.user.status === 'success' ? true : false,
-        relations: state => {
-          return {
-            likes: state.auth.profile.likes ? state.auth.profile.likes : [],
-            likers: state.auth.profile.likers ? state.auth.profile.likers : [],
-            friends: state.auth.profile.friends ? state.auth.profile.friends : [],
-          }
-        }
+        // relations: state => {
+        //   return {
+        //     likes: state.auth.profile.likes ? state.auth.profile.likes : [],
+        //     likers: state.auth.profile.likers ? state.auth.profile.likers : [],
+        //     friends: state.auth.profile.friends ? state.auth.profile.friends : [],
+        //   }
+        // }
       })
     },
   }

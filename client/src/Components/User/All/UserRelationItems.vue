@@ -6,7 +6,9 @@
         class="text-center"
       >
         <b-link :to="{path: '/user/' + user.username}">
-          <b-img v-if="user.avatar" :src="IMAGES_URL + '/' + user.avatar.image.name" center thumbnail fluid alt="user.avatar.alt" />
+          <user-avatar v-if="user.avatar"
+            :avatar="user.avatar"
+          />
           {{user.username}}
         </b-link>
       </b-col>
@@ -15,13 +17,11 @@
 </template>
 
 <script>
-  import config from '../../../Config/config'
+  import UserAvatar from './UserAvatar.vue'
   export default {
+    components: {
+      UserAvatar
+    },
     props: ['users'],
-    data() {
-      return ({
-        IMAGES_URL: config.IMAGES_URL
-      })
-    }
   }
 </script>

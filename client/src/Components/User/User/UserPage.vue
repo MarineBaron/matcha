@@ -9,7 +9,7 @@
       </b-col>
       <b-col md="4">
         <user-page-actions v-if="isAuthenticated && !isUser"
-          :actor="getUsername"
+          :actor="username"
           :receptor="userPage"
           :relationStatus="relationStatus"
         />
@@ -41,8 +41,8 @@
         error: null,
         userPage: null,
         user: null,
+        connexion: null,
         relations: null,
-        connexion: null
       })
     },
     components: {
@@ -135,8 +135,11 @@
         likes: state => state.auth.profile.likes ? state.auth.profile.likes : [],
         likers: state => state.auth.profile.likers ? state.auth.profile.likers : [],
         friends: state => state.auth.profile.friends ? state.auth.profile.friends : [],
-        username: state => this.isAuthenticated ? state.auth.profile.username : '',
+        username: state => state.auth.profile.username ? state.auth.profile.username : '',
       }),
+      isUser() {
+        return this.isAuthenticated && this.username === this.userPage
+      },
       visitor() {
         return this.isAuthenticated ? this.getUsername : 'Un visiteur anonyme'
       },
@@ -148,9 +151,6 @@
       },
       isFriend() {
         return this.friends.find(u => u.username === this.userPage) ? true : false
-      },
-      isUser() {
-        return this.username === this.userPage
       },
       relationStatus() {
         return {
@@ -164,7 +164,7 @@
         if (this.username === '') {
           return this.userPage
         }
-        if (this.isUser === true) {
+        if (this.isUser) {
           return this.username + " : c'est vous !"
         }
         if (this.isFriend === true) {
