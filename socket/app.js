@@ -17,6 +17,27 @@ function getUsersNb() {
   }
 }
 
+function alertOthers(profile, isConnected) {
+  let relations = []
+  if (profile.friends) {
+    relations = relations.concat(profile.friends)
+  }
+  if (profile.likes) {
+    relations = relations.concat(profile.likes)
+  }
+  if (profile.likers) {
+    relations = relations.concat(profile.likers)
+  }
+  relations.forEach(r => {
+    if (authUsers.find(u => u.username === r.username)) {
+      io.to(r.username).emit('IS_CONNECTED_RESPONSE', {
+        username: profile.username,
+        isConnected: isConnected
+      })
+    }
+  })
+}
+
 // Si l'utilisateur est authentifie (sur client), ajout a la liste des authentifies
 function authUser(socket, profile) {
   if (profile && profile.username) {
@@ -34,30 +55,7 @@ function authUser(socket, profile) {
     }
     socket.join(username)
     // on prévient les amis de la connexion
-    if (profile.friends) {
-      profile.friends.forEach(u => {
-        io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
-          username: username,
-          isConnected: true
-        })
-      })
-    }
-    if (profile.likers) {
-      profile.likers.forEach(u => {
-        io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
-          username: username,
-          isConnected: true
-        })
-      })
-    }
-    if (profile.likes) {
-      profile.likes.forEach(u => {
-        io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
-          username: username,
-          isConnected: true
-        })
-      })
-    }
+    alertOthers(profile, true)
   }
   io.emit('NBUSERS_CHANGE', getUsersNb())
 }
@@ -89,33 +87,7 @@ function disauthUser(socket, profile) {
         authUsers.splice(authUsers.findIndex(u => u.username === socket.username))
 
         // on prévient les amis de la deconnexion
-        if (profile) {
-          if (profile.friends) {
-            profile.friends.forEach(u => {
-              io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
-                username: socket.username,
-                isConnected: false
-              })
-            })
-          }
-          if (profile.likers) {
-            profile.likers.forEach(u => {
-              io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
-                username: socket.username,
-                isConnected: false
-              })
-            })
-          }
-          if (profile.likes) {
-            profile.likes.forEach(u => {
-              io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
-                username: socket.username,
-                isConnected: false
-              })
-            })
-          }
-        }
-
+        alertOthers(profile, false)
       } else {
         authUser.sockets.splice(authUser.sockets.findIndex(s => s.id === socket.id), 1)
       }
