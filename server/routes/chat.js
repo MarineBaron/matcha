@@ -53,6 +53,21 @@ router.post('/room', verifyToken, function(req, res, next) {
   })
 })
 
+/* POST more */
+router.post('/messages/more', verifyToken, function(req, res, next) {
+  messageController.getNewMessages(req.body.room, req.body.lastCreated, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
 /* GET delete one room */
 router.get('/room/delete/:id', verifyToken, function(req, res, next) {
   roomController.delete(req.params.id, function (err, result) {

@@ -37,6 +37,45 @@ module.exports = {
       })
     })
   },
+  get30ByRoom: function(id, lastCreated, callback) {
+    const created = lastCreated ? lastCreated : new Date()
+    ChatMessage.find({room: id, created: {$lt: created}})
+    .sort({'created' : -1})
+    .limit(5)
+    .populate('user', 'username')
+    .exec(function(err, messages) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1,
+        data: messages.reverse()
+      })
+    })
+  },
+  getNewMessages: function(id, lastCreated, callback) {
+    this.get30ByRoom(id, lastCreated, function(err, results) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      let messages = []
+      results.data.forEach(m => {
+        messages.push({
+          id: m._id,
+          room: id,
+          created: m.created,
+          username: m.user.username,
+          message: m.message,
+        })
+      })
+      callback(null, {
+        success: 1,
+        data: messages
+      })
+    })
+  },
   create: function(body, callback) {
     User.findOne({username: body.username}, function(err, user) {
       if (err) {
@@ -46,7 +85,8 @@ module.exports = {
       let message = new ChatMessage({
         room: {_id: body.roomId},
         user: {_id: user._id},
-        message: body.message
+        message: body.message,
+        created: new Date()
       })
       message.save(function(err, message) {
         if (err) {

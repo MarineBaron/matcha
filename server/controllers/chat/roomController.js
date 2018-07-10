@@ -63,13 +63,12 @@ module.exports = {
           return
         }
         if (room && room.users) {
-          console.log('room exists')
           let newRoom =  {
             _id: room._id,
             users: room.users,
             messages: []
           }
-          messageController.getAllByRoom(room._id, function(err, result) {
+          messageController.get30ByRoom(room._id, null, function(err, result) {
             if (err) {
               callback(err, null)
               return
@@ -97,7 +96,6 @@ module.exports = {
           })
           return
         }
-        console.log('new room is created')
         const newRoom = new ChatRoom({
           users: [
             {_id: users.user1._id},

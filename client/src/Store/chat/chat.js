@@ -7,14 +7,13 @@ import {
   CHAT_SEND_MESSAGE_SUCCESS,
   CHAT_CLOSE_ROOM,
   CHAT_CLOSE_ALLROOMS,
-  CHAT_WATCH_ROOM,
-  CHAT_WATCH_ALLROOMS,
-  CHAT_UNWATCH_ROOM,
-  CHAT_UNWATCH_ALLROOMS,
   CHAT_ADD_MESSAGE,
   CHAT_TOFRONT_ROOM,
   CHAT_TOGGLE_ROOM,
   CHAT_NEW_MESSAGE,
+  CHAT_MORE_REQUEST,
+  CHAT_MORE_ERROR,
+  CHAT_MORE_SUCCESS,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -26,7 +25,13 @@ const state = {
 
 const getters = {
   getRooms: state => state.rooms,
-  getActiveRooms: state => state.rooms.filter(r => r.status === 'actived')
+  getActiveRooms: state => state.rooms.filter(r => r.status === 'actived'),
+  getMessagesByRoom: state => roomId => {
+    if (!state.rooms || !state.rooms.length) {
+      return []
+    }
+    return state.rooms.find(r => r.data._id === roomId).data.messages
+  }
 }
 
 const actions = {
@@ -34,9 +39,13 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(CHAT_OPEN_ROOM_REQUEST)
       let room = {}
-      if (this.rooms && (room = this.rooms.find(room => room.otheruser === usernames[1]))) {
-        commit(CHAT_OPEN_ROOM_SUCCESS, usernames[1])
-        resolve(room)
+      if (state.rooms && state.rooms.length && (room = state.rooms.find(r => r.otheruser === usernames[1]))) {
+        const data = {
+          room: room,
+          usernames: usernames
+        }
+        commit(CHAT_OPEN_ROOM_SUCCESS, data)
+        resolve(data)
       } else {
         const data = {
           username1: usernames[0],
@@ -53,6 +62,28 @@ const actions = {
       }
     })
   },
+  [CHAT_MORE_REQUEST]: ({commit, dispatch}, room) => {
+    return new Promise((resolve, reject) => {
+      commit(CHAT_MORE_REQUEST)
+      const data = {
+        room: room.data._id,
+        lastCreated: (room.data.messages && room.data.messages.length)
+          ? room.data.messages[0].created
+          : null
+      }
+      callApi({url: 'chat/messages/more', data: data, method: 'POST'})
+      .then((resp) => {
+        commit(CHAT_MORE_SUCCESS, {
+          room: room.data._id,
+          messages: resp.data.data
+        })
+        resolve(resp.data.data)
+      }, (error) => {
+        commit(CHAT_MORE_ERROR)
+        resolve(error)
+      })
+    })
+  },
   [CHAT_SEND_MESSAGE_REQUEST]: ({commit, dispatch}, data) => {
     return new Promise((resolve, reject) => {
       commit(CHAT_SEND_MESSAGE_REQUEST)
@@ -66,12 +97,6 @@ const actions = {
         reject(error)
       })
     })
-  },
-  [CHAT_WATCH_ALLROOMS]: ({commit, dispatch}) => {
-    commit(CHAT_WATCH_ALLROOMS)
-  },
-  [CHAT_UNWATCH_ALLROOMS]: ({commit, dispatch}) => {
-    commit(CHAT_UNWATCH_ALLROOMS)
   },
   [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
     commit(CHAT_CLOSE_ROOM, room.otheruser)
@@ -102,7 +127,6 @@ const mutations = {
     let room = state.rooms.find(room => room.otheruser === otheruser)
     if (room) {
       room.status = 'actived'
-      room.data = data.room
     }
     else {
       state.rooms.push({
@@ -112,6 +136,23 @@ const mutations = {
         new: false
       })
     }
+  },
+  [CHAT_MORE_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [CHAT_MORE_SUCCESS]: (state, data) => {
+    if (data.messages.length) {
+      const roomIndex = state.rooms.findIndex(r => r.data._id === data.room)
+      if (roomIndex !== -1) {
+        data.messages.reverse().forEach(m => {
+          state.rooms[roomIndex].data.messages.splice(0, 0, m)
+        })
+      }
+    }
+    state.status = 'success'
+  },
+  [CHAT_MORE_ERROR]: (state) => {
+    state.status = 'error'
   },
   [CHAT_OPEN_ROOM_ERROR]: (state) => {
     state.status = 'error'
@@ -134,12 +175,6 @@ const mutations = {
   },
   [CHAT_SEND_MESSAGE_ERROR]: (state) => {
     state.status = 'error'
-  },
-  [CHAT_WATCH_ALLROOMS]: (state) => {
-    state.rooms.forEach(r => {r.status = 'actived'})
-  },
-  [CHAT_UNWATCH_ALLROOMS]: (state) => {
-    state.rooms.forEach(r => {r.status = 'closed'})
   },
   [CHAT_CLOSE_ROOM]: (state, room) => {
     state.status = 'success'
