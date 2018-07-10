@@ -12,6 +12,14 @@
           <user-list-item :item="otheruser" />
         </div>
         <div>
+          <b-button variant="link"
+            :title="isOtherUserActive ? 'Connecté au chat' : 'Déconnecté du chat'">
+            <icon name="comments"
+              :color="isOtherUserActive ? 'green' : 'red'"
+            />
+          </b-button>
+        </div>
+        <div>
         <b-button variant="link"
           :title="collapseTitle"
           v-b-toggle="'roommessage_' + room.otheruser"
@@ -46,6 +54,7 @@
       return {
         collapseTitle: this.room.status === 'actived' ? 'Masquer' : 'Afficher',
         clickToClose: false,
+        isOtherUserActive: false
       }
     },
     methods: {
@@ -80,6 +89,12 @@
               ? 'Bienvenue ' + username + ' !'
               : username + ' rejoint le chat.'
           }
+          // etat de l'autre utilisateur
+          if (username === this.username) {
+            this.isOtherUserActive = data.isOtherUserActive
+          } else {
+            this.isOtherUserActive = true
+          }
           this.$store.dispatch(CHAT_ADD_MESSAGE, {id: id, message: message})
         }
       },
@@ -92,6 +107,8 @@
               ? 'Au revoir ' + username + ' !'
               : username + ' quitte le chat.'
           }
+          // etat de l'autre utilisateur
+          this.isOtherUserActive = data.isOtherUserActive
           this.$store.dispatch(CHAT_ADD_MESSAGE, {id: id, message: message})
         }
       }

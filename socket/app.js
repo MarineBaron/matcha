@@ -97,10 +97,15 @@ io.on('connection', function(socket) {
   socket.on('CHAT_OPEN_ROOM', function(data) {
     const { room, usernames } = data
     socket.join(room._id)
+    let isOtherUserActive = false
     let socketRoom = rooms.find(r => r.id === room._id)
     if (socketRoom) {
       if (!socketRoom.sockets.find(s => s.id === socket.id)) {
         socketRoom.sockets.push(socket)
+      }
+      // l'autre user est-il connecté à la room
+      if(socketRoom.sockets.findIndex(s => s.username !== socket.username) !== -1) {
+        isOtherUserActive = true
       }
     }
     else {
@@ -113,7 +118,8 @@ io.on('connection', function(socket) {
     socket.join(room._id)
     data = {
       id: room._id,
-      username: socket.username
+      username: socket.username,
+      isOtherUserActive: isOtherUserActive
     }
     // ouverture de la room
     io.to(room._id).emit('CHAT_OPEN_ROOM', data)
@@ -126,15 +132,21 @@ io.on('connection', function(socket) {
 
   socket.on('CHAT_QUIT_ROOM', function(id) {
     let socketRoom = rooms.find(r => r.id === id)
+    let isOtherUserActive = false
     if (socketRoom) {
       if (socketRoom.sockets.length < 2) {
         rooms.splice(rooms.findIndex(r => r.id === id), 1)
       } else {
         socketRoom.sockets.splice(socketRoom.sockets.findIndex(s => s.id === socket.id), 1)
       }
+      // l'utilisateur a t-il d'autres connexion
+      if(socketRoom.sockets.findIndex(s => s.username === socket.username) !== -1) {
+        isOtherUserActive = true
+      }
       const data = {
         id: id,
-        username: socket.username
+        username: socket.username,
+        isOtherUserActive: isOtherUserActive
       }
       io.to(id).emit('CHAT_QUIT_ROOM', data)
       socket.leave(id)
