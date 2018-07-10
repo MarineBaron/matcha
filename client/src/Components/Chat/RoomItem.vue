@@ -18,6 +18,12 @@
               :color="isOtherUserActive ? 'green' : 'red'"
             />
           </b-button>
+          <b-button v-if="room.new" variant="link"
+            title="Message(s) non lu(s)">
+            <icon name="envelope"
+              color="red"
+            />
+          </b-button>
         </div>
         <div>
         <b-button variant="link"

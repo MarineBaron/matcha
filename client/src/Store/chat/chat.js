@@ -14,6 +14,7 @@ import {
   CHAT_ADD_MESSAGE,
   CHAT_TOFRONT_ROOM,
   CHAT_TOGGLE_ROOM,
+  CHAT_NEW_MESSAGE,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -107,7 +108,8 @@ const mutations = {
       state.rooms.push({
         otheruser: otheruser,
         status: 'actived',
-        data: data.room
+        data: data.room,
+        new: false
       })
     }
   },
@@ -170,10 +172,21 @@ const mutations = {
     }
   },
   [CHAT_TOGGLE_ROOM]: (state, data) => {
-    if (state.rooms.length) {
+    if (state.rooms && state.rooms.length) {
       const index = state.rooms.findIndex(r => r.data._id === data.data._id)
       if (index !== -1) {
         state.rooms[index].status = state.rooms[index].status === 'actived' ? 'closed' : 'actived'
+        if (state.rooms[index].status === 'actived') {
+          state.rooms[index].new = false
+        }
+      }
+    }
+  },
+  [CHAT_NEW_MESSAGE]: (state, id) => {
+    if (state.rooms && state.rooms.length) {
+      const index = state.rooms.findIndex(r => r.data._id === id)
+      if (index !== -1) {
+        state.rooms[index].new = true
       }
     }
   }

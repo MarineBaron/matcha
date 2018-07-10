@@ -18,24 +18,26 @@ function getUsersNb() {
 }
 
 function alertOthers(profile, isConnected) {
-  let relations = []
-  if (profile.friends) {
-    relations = relations.concat(profile.friends)
-  }
-  if (profile.likes) {
-    relations = relations.concat(profile.likes)
-  }
-  if (profile.likers) {
-    relations = relations.concat(profile.likers)
-  }
-  relations.forEach(r => {
-    if (authUsers.find(u => u.username === r.username)) {
-      io.to(r.username).emit('IS_CONNECTED_RESPONSE', {
-        username: profile.username,
-        isConnected: isConnected
-      })
+  if(profile) {
+    let relations = []
+    if (profile.friends) {
+      relations = relations.concat(profile.friends)
     }
-  })
+    if (profile.likes) {
+      relations = relations.concat(profile.likes)
+    }
+    if (profile.likers) {
+      relations = relations.concat(profile.likers)
+    }
+    relations.forEach(r => {
+      if (authUsers.find(u => u.username === r.username)) {
+        io.to(r.username).emit('IS_CONNECTED_RESPONSE', {
+          username: profile.username,
+          isConnected: isConnected
+        })
+      }
+    })
+  }
 }
 
 // Si l'utilisateur est authentifie (sur client), ajout a la liste des authentifies

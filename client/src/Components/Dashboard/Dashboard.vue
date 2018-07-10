@@ -45,7 +45,7 @@
 <script>
   import DashboardItemNotif from './DashboardItemNotif.vue'
   import UserListItem from '../User/All/UserListItem.vue'
-  import { CHAT_ADD_MESSAGE, CHAT_CLOSE_ROOM } from '../../Store/chat/mutation-types'
+  import { CHAT_ADD_MESSAGE, CHAT_CLOSE_ROOM, CHAT_NEW_MESSAGE } from '../../Store/chat/mutation-types'
   import { AUTH_VISITADD, AUTH_RELATION_OTHER } from '../../Store/auth/mutation-types'
   import { NOTIFICATION_CREATE_REQUEST,  NOTIFICATION_DELETE_REQUEST} from '../../Store/notification/mutation-types'
   import { mapState } from 'vuex'
@@ -188,13 +188,23 @@
       },
       // réception d'une nouvelle notification
       NOTIFICATION_RECEIVE: function(data) {
-        // si l'utilisateur est connecté à la room, on supprime le message en BDD
+        // si le message est une alerte de chat
         if (data.type
           && data.type === 'chat'
-          && this.rooms.length
-          && this.rooms.find(r => r.data._id === data.room && r.status === 'actived')) {
-            this.$store.dispatch('NOTIFICATION_DELETE_REQUEST', data._id)
-        // sinon on ajoute le message à la liste des messages
+          && this.rooms.length) {
+            const room = this.rooms.find(r => r.data._id === data.room)
+            // si la room existe
+            if (room) {
+              this.$store.dispatch('NOTIFICATION_DELETE_REQUEST', data._id)
+            // sinon, on ajoute la notification à la liste des notifications
+            } else {
+              this.$store.commit('AUTH_NOTIFICATION_INSERT', data)
+            }
+            // si la room est closed, on prévient qu'il y a un nouveau message
+            if (room && room.status === 'closed') {
+              this.$store.commit('CHAT_NEW_MESSAGE', data.room)
+            }
+        // sinon, on ajoute la notification à la liste des notifications
         } else {
           this.$store.commit('AUTH_NOTIFICATION_INSERT', data)
         }
