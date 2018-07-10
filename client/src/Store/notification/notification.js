@@ -5,9 +5,13 @@ import {
   NOTIFICATION_CREATE_REQUEST,
   NOTIFICATION_CREATE_ERROR,
   NOTIFICATION_CREATE_SUCCESS,
+  NOTIFICATION_DELETEALL_REQUEST,
+  NOTIFICATION_DELETEALL_ERROR,
+  NOTIFICATION_DELETEALL_SUCCESS,
 } from './mutation-types'
 import {
   AUTH_NOTIFICATION_DELETE,
+  AUTH_NOTIFICATION_DELETEALL,
 } from '../auth/mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -47,6 +51,20 @@ const actions = {
       })
     })
   },
+  [NOTIFICATION_DELETEALL_REQUEST]: ({commit, dispatch}, username) => {
+    return new Promise((resolve, reject) => {
+      commit(NOTIFICATION_DELETEALL_REQUEST)
+      callApi({url: '/notification/notifications/delete/' + username})
+      .then((resp) => {
+        commit(NOTIFICATION_DELETEALL_SUCCESS)
+        commit(AUTH_NOTIFICATION_DELETEALL)
+        resolve(username)
+      }, (error) => {
+        commit(NOTIFICATION_DELETEALL_ERROR)
+        reject(error)
+      })
+    })
+  },
 }
 
 const mutations = {
@@ -57,6 +75,15 @@ const mutations = {
     state.status = 'success'
   },
   [NOTIFICATION_DELETE_ERROR]: (state) => {
+    state.status = 'error'
+  },
+  [NOTIFICATION_DELETEALL_REQUEST]: (state) => {
+    state.status = 'loading'
+  },
+  [NOTIFICATION_DELETEALL_SUCCESS]: (state) => {
+    state.status = 'success'
+  },
+  [NOTIFICATION_DELETEALL_ERROR]: (state) => {
     state.status = 'error'
   },
   [NOTIFICATION_CREATE_REQUEST]: (state) => {

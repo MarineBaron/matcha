@@ -19,6 +19,7 @@ import {
   AUTH_PASSWORD_RESET_ERROR,
   AUTH_PASSWORD_RESET_SUCCESS,
   AUTH_NOTIFICATION_DELETE,
+  AUTH_NOTIFICATION_DELETEALL,
   AUTH_VISITADD,
   AUTH_RELATION_REQUEST,
   AUTH_RELATION_SUCCESS,
@@ -343,6 +344,9 @@ const mutations = {
   },
   [AUTH_NOTIFICATION_DELETE]: (state, id) => {
     state.profile.notifications.splice(state.profile.notifications.findIndex(n => n._id === id), 1)
+  },
+  [AUTH_NOTIFICATION_DELETEALL]: (state) => {
+    state.profile.notifications.splice(0, state.profile.notifications.length)
   },
   [AUTH_VISITADD]: (state) => {
     state.profile.visited++

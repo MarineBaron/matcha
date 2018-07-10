@@ -24,6 +24,9 @@
             <icon name="times"></icon>
           </b-link>
         </div>
+        <div v-if="type === 'notifications'">
+          <b-link @click="deleteAll">Tout supprimer</b-link>
+        </div>
       </b-dropdown-header>
       <dashboard-item-notif v-if="type === 'notifications'"
         class="dashboard-item"
@@ -47,7 +50,7 @@
   import UserListItem from '../User/All/UserListItem.vue'
   import { CHAT_ADD_MESSAGE, CHAT_CLOSE_ROOM, CHAT_NEW_MESSAGE } from '../../Store/chat/mutation-types'
   import { AUTH_VISITADD, AUTH_RELATION_OTHER } from '../../Store/auth/mutation-types'
-  import { NOTIFICATION_CREATE_REQUEST,  NOTIFICATION_DELETE_REQUEST} from '../../Store/notification/mutation-types'
+  import { NOTIFICATION_CREATE_REQUEST,  NOTIFICATION_DELETE_REQUEST, NOTIFICATION_DELETEALL_REQUEST} from '../../Store/notification/mutation-types'
   import { mapState } from 'vuex'
 
   export default {
@@ -75,6 +78,12 @@
       },
       close(type) {
         this.open = false
+      },
+      deleteAll() {
+        this.$store.dispatch('NOTIFICATION_DELETEALL_REQUEST', this.username)
+        .then((resp, err) => {
+          this.open = false
+        })
       }
     },
     computed: {
