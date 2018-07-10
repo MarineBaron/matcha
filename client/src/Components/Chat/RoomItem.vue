@@ -26,16 +26,16 @@
           </b-button>
         </div>
         <div>
-        <b-button variant="link"
-          :title="collapseTitle"
-          v-b-toggle="'roommessage_' + room.otheruser"
-          @click.prevent.stop="toggleCollapse"
-        ><icon :name="room.status === 'actived' ? 'minus-square' : 'plus-square'" /></b-button>
-        <b-button variant="link"
-          title="Fermer"
-          @click.stop="closeRoom"
-        ><icon name="times" /></b-button>
-      </div>
+          <b-button variant="link"
+            :title="collapseTitle"
+            v-b-toggle="'roommessage_' + room.otheruser"
+            @click.prevent.stop="toggleCollapse"
+          ><icon :name="room.status === 'actived' ? 'minus-square' : 'plus-square'" /></b-button>
+          <b-button variant="link"
+            title="Fermer"
+            @click.stop="closeRoom"
+          ><icon name="times" /></b-button>
+        </div>
       </header>
       <b-collapse :visible="room.status === 'actived'" :id="'roommessage_' + room.otheruser">
         <MessageContainer :room="room"/>
@@ -61,7 +61,6 @@
         collapseTitle: this.room.status === 'actived' ? 'Masquer' : 'Afficher',
         clickToClose: false,
         isOtherUserActive: false,
-        username: this.username
       }
     },
     methods: {
@@ -80,6 +79,11 @@
       toFront() {
         this.$store.commit(CHAT_TOFRONT_ROOM, this.room)
       }
+    },
+    computed: {
+      ...mapState({
+        username: state => state.auth.profile.username
+      })
     },
     sockets: {
       CHAT_OPEN_ROOM: function(data) {
