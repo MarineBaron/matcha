@@ -32,7 +32,7 @@
                 this.$socket.emit('AUTH_RELATION', data)
 
                 // creation d'un message en BDD
-                let message = data.actor.username + ' vous a '
+                let message = ' vous a '
                 message += (data.action === 'unlike') ? 'unliké.' : 'liké.'
                 if (data.action === 'relike') {
                   message += ' Vous êtes amis.'
@@ -40,7 +40,8 @@
                 const notif = {
                   username: data.receptor.username,
                   type: 'relation',
-                  message: message
+                  message: message,
+                  origin: data.actor.username
                 }
                 this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
                 .then((response) => {

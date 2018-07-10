@@ -14,7 +14,7 @@
   import { mapGetters, mapState } from 'vuex'
   import { CHAT_SEND_MESSAGE_REQUEST } from '../../../Store/chat/mutation-types'
   import { NOTIFICATION_CREATE_REQUEST } from '../../../Store/notification/mutation-types'
-  //import callApi from '../../../Api/callApi'
+  import config from '../../../Config/config'
 
   export default {
     props: ['room'],
@@ -42,9 +42,10 @@
             // creation de la notification en BDD
             const notif = {
               username: data.otheruser,
+              origin: data.username,
               type: 'chat',
               room: data.roomId,
-              message: data.username + ' vous a envoyé un message.'
+              message: ' vous a envoyé un message',
             }
             this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
             .then((response) => {

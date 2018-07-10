@@ -6,7 +6,12 @@
         <icon name="trash"></icon>
       </b-link>
     </div>
-    <p>{{item.message}}</p>
+    <p>
+      <b-link v-if="item.origin && item.origin.length" :to="{path: '/user/' + item.origin}">
+        {{item.origin}}
+      </b-link>
+      {{item.message}}
+    </p>
   </div>
 </template>
 

@@ -71,10 +71,6 @@
             this.open = true
           }
           this.type = type
-          // mise à jour des connectés
-          // if(this.open && (type == 'friends' || type == 'likes' || type == 'likers')) {
-          //   element.items.forEach(i => this.$socket.emit('IS_CONNECTED_REQUEST', i.username))
-          // }
         }
       },
       close(type) {

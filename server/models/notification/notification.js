@@ -12,6 +12,7 @@ const NotificationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "ChatRoom"
   },
+  origin: String,
   message: String,
   read: {
     type: Boolean,

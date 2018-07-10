@@ -110,10 +110,18 @@
         callApi({url: '/user/addvisit/' + this.userPage})
         .then((resp) => {
           this.$socket.emit('USER_VISITADD', this.userPage)
+          let message = ''
+          if (!this.isAuthenticated) {
+            message = this.visitor
+          }
+          message += ' a visité votre profil.'
           const notif = {
             username: this.userPage,
             type: 'visit',
-            message: this.visitor + ' a visité votre profil.'
+            message: message
+          }
+          if (this.isAuthenticated) {
+            notif.origin = this.getUsername
           }
           this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
           .then((response) => {

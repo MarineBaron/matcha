@@ -73,6 +73,7 @@ module.exports = {
       let notification = new Notification({
         user: {_id: user._id},
         message: body.message,
+        origin: body.origin ? body.origin : null,
         type: body.type,
         created: new Date()
       })
@@ -90,6 +91,7 @@ module.exports = {
             _id: notification._id,
             type: notification.type,
             room: notification.room,
+            origin: notification.origin,
             username: body.username,
             message: notification.message,
             created: notification.created
