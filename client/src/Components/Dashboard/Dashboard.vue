@@ -72,9 +72,9 @@
           }
           this.type = type
           // mise à jour des connectés
-          if(this.open && (type == 'friends' || type == 'likes' || type == 'likers')) {
-            element.items.forEach(i => this.$socket.emit('IS_CONNECTED_REQUEST', i.username))
-          }
+          // if(this.open && (type == 'friends' || type == 'likes' || type == 'likers')) {
+          //   element.items.forEach(i => this.$socket.emit('IS_CONNECTED_REQUEST', i.username))
+          // }
         }
       },
       close(type) {
@@ -170,6 +170,12 @@
       },
       // réecption d'une action de relation
       AUTH_RELATION: function(data) {
+        if (data.actor.username === this.username) {
+          this.$socket.emit('IS_CONNECTED_REQUEST', data.receptor.username)
+        }
+        if (data.receptor.username === this.username) {
+          this.$socket.emit('IS_CONNECTED_REQUEST', data.actor.username)
+        }
         this.$store.commit(AUTH_RELATION_OTHER, data)
         if (data.action === 'unlike') {
           if (this.rooms.find(r => r.otheruser === data.actor.username)) {

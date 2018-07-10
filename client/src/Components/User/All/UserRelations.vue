@@ -100,7 +100,7 @@
     },
     methods: {
       askConnexion(type) {
-        this.relationsComputed[type].forEach(u => this.$socket.emit('IS_CONNECTED_REQUEST', u.username))
+        //this.relationsComputed[type].forEach(u => this.$socket.emit('IS_CONNECTED_REQUEST', u.username))
       }
     }
   }

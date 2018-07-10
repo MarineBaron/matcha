@@ -56,6 +56,7 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import { AUTH_LOGIN_REQUEST, AUTH_LOGIN_SUCCESS } from '../../../Store/auth/mutation-types'
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength } from 'vuelidate/lib/validators'
@@ -101,7 +102,7 @@
         const { username } = this.form
         this.$store.dispatch(AUTH_LOGIN_REQUEST, this.form)
         .then((response) => {
-          this.$socket.emit('AUTH_LOGIN', {username: username})
+          this.$socket.emit('AUTH_LOGIN', this.getProfile)
           this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 5000})
           this.$router.push('/')
 
@@ -131,6 +132,11 @@
         this.showError = true
         this.errors = [error]
       }
+    },
+    computed: {
+      ...mapGetters([
+        'getProfile',
+      ]),
     }
   }
 </script>

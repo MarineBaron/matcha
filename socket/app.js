@@ -18,8 +18,9 @@ function getUsersNb() {
 }
 
 // Si l'utilisateur est authentifie (sur client), ajout a la liste des authentifies
-function authUser(socket, username) {
-  if (username) {
+function authUser(socket, profile) {
+  if (profile && profile.username) {
+    const username = profile.username
     socket.username = username
     const authUser = authUsers.find(u => u.username === username)
     if (authUser) {
@@ -32,12 +33,37 @@ function authUser(socket, username) {
       )
     }
     socket.join(username)
+    // on prévient les amis de la connexion
+    if (profile.friends) {
+      profile.friends.forEach(u => {
+        io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
+          username: username,
+          isConnected: true
+        })
+      })
+    }
+    if (profile.likers) {
+      profile.likers.forEach(u => {
+        io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
+          username: username,
+          isConnected: true
+        })
+      })
+    }
+    if (profile.likes) {
+      profile.likes.forEach(u => {
+        io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
+          username: username,
+          isConnected: true
+        })
+      })
+    }
   }
   io.emit('NBUSERS_CHANGE', getUsersNb())
 }
 
 // Si l'utilisateur est authentifie (sur client), suppression de la liste des authentifies
-function disauthUser(socket) {
+function disauthUser(socket, profile) {
   if (socket.username) {
     // Enleve l'utilisateur des rooms
     const socketRooms = rooms.filter(r => r.sockets.find(s => s.id === socket.id))
@@ -61,6 +87,35 @@ function disauthUser(socket) {
     if (authUser) {
       if (authUser.sockets.length < 2) {
         authUsers.splice(authUsers.findIndex(u => u.username === socket.username))
+
+        // on prévient les amis de la deconnexion
+        if (profile) {
+          if (profile.friends) {
+            profile.friends.forEach(u => {
+              io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
+                username: socket.username,
+                isConnected: false
+              })
+            })
+          }
+          if (profile.likers) {
+            profile.likers.forEach(u => {
+              io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
+                username: socket.username,
+                isConnected: false
+              })
+            })
+          }
+          if (profile.likes) {
+            profile.likes.forEach(u => {
+              io.to(u.username).emit('IS_CONNECTED_RESPONSE', {
+                username: socket.username,
+                isConnected: false
+              })
+            })
+          }
+        }
+
       } else {
         authUser.sockets.splice(authUser.sockets.findIndex(s => s.id === socket.id), 1)
       }
@@ -73,24 +128,24 @@ function disauthUser(socket) {
 io.on('connection', function(socket) {
   nbVisitors++
 
-  socket.on('IDENTIFY_USER', function(username) {
-    authUser(socket, username)
+  socket.on('IDENTIFY_USER', function(profile) {
+    authUser(socket, profile)
   })
 
-  socket.on('UNLOAD_USER', function(user) {
-    if (user.username) {
-      disauthUser(socket)
-    }
-  })
+  // socket.on('UNLOAD_USER', function(profile) {
+  //   if (profile.username) {
+  //     disauthUser(socket, profile)
+  //   }
+  // })
 
   // Reception d'un message de login
-  socket.on('AUTH_LOGIN', function(data) {
-    authUser(socket, data.username)
+  socket.on('AUTH_LOGIN', function(profile) {
+    authUser(socket, profile)
   })
 
   // Reception d'un message de logout
-  socket.on('AUTH_LOGOUT', function(data) {
-    disauthUser(socket)
+  socket.on('AUTH_LOGOUT', function(profile) {
+    disauthUser(socket, profile)
   })
 
   // Chat Room
@@ -203,6 +258,6 @@ io.on('connection', function(socket) {
   // Deconnexion d'un utilisateur
   socket.on('disconnect', function() {
     nbVisitors--
-    disauthUser(socket)
+    disauthUser(socket, null)
   })
 })

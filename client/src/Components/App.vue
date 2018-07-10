@@ -47,7 +47,7 @@ export default {
     this.$store.dispatch('AUTH_CHECKAUTH_REQUEST')
     .then((response) => {
       console.log('IDENTIFY_USER', this.getProfile.username)
-      this.$socket.emit('IDENTIFY_USER', this.getProfile.username)
+      this.$socket.emit('IDENTIFY_USER', this.getProfile)
     }, (error) => {
       console.log("Une erreur est survenue au chargement de l'application.")
     })
@@ -61,7 +61,7 @@ export default {
     unload(event) {
       event.preventDefault()
       if (this.token) {
-        this.$socket.emit('AUTH_LOGOUT', {username: this.getProfile.username})
+        this.$socket.emit('AUTH_LOGOUT', this.getProfile)
         this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
         this.$store.dispatch(AUTH_LOGOUT, this.getProfile.username)
       }

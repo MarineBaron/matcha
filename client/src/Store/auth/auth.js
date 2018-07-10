@@ -111,7 +111,9 @@ const actions = {
           callApi.defaults.headers.common['Authorization'] = data.token
           commit(AUTH_LOGIN_SUCCESS, data.token)
           dispatch(AUTH_PROFILE_REQUEST)
-          resolve(resp)
+          .then((response, error) => {
+            resolve(resp)
+          })
         }
       })
       .catch((err) => {
