@@ -115,7 +115,13 @@ io.on('connection', function(socket) {
       id: room._id,
       username: socket.username
     }
+    // ouverture de la room
     io.to(room._id).emit('CHAT_OPEN_ROOM', data)
+    // envoi du message de connection
+    io.to(room._id).emit('IS_CONNECTED_RESPONSE', {
+      username: usernames[0],
+      isConnected: true
+    })
   })
 
   socket.on('CHAT_QUIT_ROOM', function(id) {

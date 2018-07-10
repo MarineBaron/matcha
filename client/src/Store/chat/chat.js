@@ -12,6 +12,8 @@ import {
   CHAT_UNWATCH_ROOM,
   CHAT_UNWATCH_ALLROOMS,
   CHAT_ADD_MESSAGE,
+  CHAT_TOFRONT_ROOM,
+  CHAT_TOGGLE_ROOM,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -78,7 +80,7 @@ const actions = {
     commit(CHAT_CLOSE_ALLROOMS)
   },
   [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
-    commit(CHAT_CLOSE_ROOM, room.otheruser)
+    commit(CHAT_CLOSE_ROOM, room)
     return(room)
   },
   [CHAT_CLOSE_ALLROOMS]: ({commit, dispatch}) => {
@@ -137,10 +139,10 @@ const mutations = {
   [CHAT_UNWATCH_ALLROOMS]: (state) => {
     state.rooms.forEach(r => {r.status = 'closed'})
   },
-  [CHAT_CLOSE_ROOM]: (state, otheruser) => {
+  [CHAT_CLOSE_ROOM]: (state, room) => {
     state.status = 'success'
-    const index = state.rooms.findIndex(room => room.otheruser === otheruser)
-    if (index !== 1) {
+    const index = state.rooms.findIndex(r => r.data._id === room.data._id)
+    if (index !== -1) {
       state.rooms.splice(index, 1)
     }
   },
@@ -158,6 +160,23 @@ const mutations = {
       Vue.set(state.rooms[index].data.messages, state.rooms[index].data.messages.length, data.message)
     }
   },
+  [CHAT_TOFRONT_ROOM]: (state, data) => {
+    if (state.rooms.length > 1) {
+      const index = state.rooms.findIndex(r => r.data._id === data.data._id)
+      if (index !== -1 && index !== state.rooms.length - 1) {
+        state.rooms.push(state.rooms[index])
+        state.rooms.splice(index, 1)
+      }
+    }
+  },
+  [CHAT_TOGGLE_ROOM]: (state, data) => {
+    if (state.rooms.length) {
+      const index = state.rooms.findIndex(r => r.data._id === data.data._id)
+      if (index !== -1) {
+        state.rooms[index].status = state.rooms[index].status === 'actived' ? 'closed' : 'actived'
+      }
+    }
+  }
 }
 
 export default {

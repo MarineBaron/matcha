@@ -9,7 +9,7 @@
     <div class="user-connected">
       <user-connexion :connexion="connexion" icon="1" />
     </div>
-    <div class="user-actions">
+    <div v-if="actions" class="user-actions">
       <user-button-action v-for="action in actions" :key="action"
         :type="action"
         :actor="actor"
@@ -48,6 +48,12 @@
   .user-list-item.d-flex:hover {
     background: #eee;
   }
+  .user-list-item > div {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
 </style>
+
+
 
 

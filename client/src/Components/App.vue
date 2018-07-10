@@ -20,6 +20,7 @@
       </b-row>
     </b-container>
     <footer><counter /></footer>
+    <chat-rooms v-if="isAuthenticated"/>
   </div>
 </template>
 
@@ -29,6 +30,7 @@ import { AUTH_LOGOUT, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-type
 import { CHAT_CLOSE_ALLROOMS } from '../Store/chat/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
+import ChatRooms from './Chat/ChatRooms.vue'
 import Counter from './Counter/Counter.vue'
 import callApi from '../Api/callApi'
 
@@ -37,6 +39,7 @@ export default {
   components: {
     Navigation,
     Dashboard,
+    ChatRooms,
     Counter
   },
   created() {
@@ -62,7 +65,7 @@ export default {
         this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
         this.$store.dispatch(AUTH_LOGOUT, this.getProfile.username)
       }
-    }
+    },
   },
   computed: {
     ...mapGetters([
@@ -105,4 +108,11 @@ a {
 .flash-message {
   margin-top: 10px;
 }
+
+.v--modal-overlay {
+  z-index: 1001;
+  width:0;
+  height:0;
+}
+
 </style>

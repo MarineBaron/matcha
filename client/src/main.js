@@ -8,6 +8,7 @@ import VueSocketio from 'vue-socket.io'
 import BootstrapVue from 'bootstrap-vue'
 import VueLodash from 'vue-lodash'
 import VueMoment from 'vue-moment'
+import VueModal from 'vue-js-modal'
 
 
 import App from './Components/App.vue'
@@ -24,6 +25,7 @@ Vue.use(Vuex)
 Vue.use(Vuelidate)
 Vue.use(VueFlashMessage)
 Vue.use(VueMoment)
+Vue.use(VueModal, { dynamic: true })
 Vue.component('icon', Icon)
 
 import router from './Router/router'

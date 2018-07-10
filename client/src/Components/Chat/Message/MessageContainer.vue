@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="chat-room-content" ref="messageContainer">
     <MessageList :messages="room.data.messages" />
     <MessageInput :room="room" />
   </div>
@@ -19,6 +19,21 @@
     components: {
       MessageList,
       MessageInput
-    }
+    },
+    mounted() {
+      var elem = this.$el
+      elem.scrollTop = elem.scrollHeight
+    },
+    updated() {
+      var elem = this.$el
+      elem.scrollTop = elem.scrollHeight
+    },
   }
 </script>
+
+<style>
+  .chat-room-content {
+    height: 500px;
+    overflow-y: scroll;
+  }
+</style>

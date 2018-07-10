@@ -18,6 +18,7 @@
 
 <style>
   div.user-avatar {
+    display: inline-block;
     width: 50px;
   }
 </style>

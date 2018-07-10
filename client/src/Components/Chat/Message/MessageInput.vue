@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-form-input
+      ref="inputMessage"
       v-model="message"
       type="text"
       placeholder="Entrez votre message"
@@ -11,9 +12,9 @@
 
 <script>
   import { mapGetters, mapState } from 'vuex'
-  import { CHAT_SEND_MESSAGE_REQUEST } from '../../../../Store/chat/mutation-types'
-  import { NOTIFICATION_CREATE_REQUEST } from '../../../../Store/notification/mutation-types'
-  import callApi from '../../../../Api/callApi'
+  import { CHAT_SEND_MESSAGE_REQUEST } from '../../../Store/chat/mutation-types'
+  import { NOTIFICATION_CREATE_REQUEST } from '../../../Store/notification/mutation-types'
+  //import callApi from '../../../Api/callApi'
 
   export default {
     props: ['room'],
@@ -32,6 +33,7 @@
             message: this.message.trim()
           }
           this.message = ''
+          this.$refs.inputMessage.focus()
           // creation du message en BDD
           this.$store.dispatch(CHAT_SEND_MESSAGE_REQUEST, data)
           .then((response) => {
