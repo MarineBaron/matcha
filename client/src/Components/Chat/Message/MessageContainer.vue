@@ -1,7 +1,7 @@
 <template>
-  <div class="chat-room-content" ref="messageContainer">
-    <MessageList :messages="room.data.messages" />
-    <MessageInput :room="room" />
+  <div class="chat-room-content">
+    <MessageList :messages="room.data.messages" class="chat-room-messages"/>
+    <MessageInput :room="room" class="chat-room-input" />
   </div>
 </template>
 
@@ -10,12 +10,7 @@
   import MessageInput from './MessageInput.vue'
 
   export default {
-    props: {
-      room: {
-        type: Object,
-        required: true
-      }
-    },
+    props: ['room'],
     components: {
       MessageList,
       MessageInput
@@ -35,5 +30,13 @@
   .chat-room-content {
     height: 500px;
     overflow-y: scroll;
+  }
+  .chat-room-messages,
+  .chat-room-input {
+    margin: 20px;
+    padding: 10px;
+  }
+  .chat-room-messages {
+    /*background-color: #eee;*/
   }
 </style>

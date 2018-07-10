@@ -38,14 +38,14 @@
       </div>
       </header>
       <b-collapse :visible="room.status === 'actived'" :id="'roommessage_' + room.otheruser">
-        <MessageContainer :room="room" />
+        <MessageContainer :room="room"/>
       </b-collapse>
   </b-card>
   </modal>
 </template>
 
 <script>
-  import { mapState } from 'vuex'
+  import { mapState, mapGetters } from 'vuex'
   import { CHAT_CLOSE_ROOM, CHAT_ADD_MESSAGE, CHAT_TOFRONT_ROOM, CHAT_TOGGLE_ROOM } from '../../Store/chat/mutation-types'
   import UserListItem from '../User/All/UserListItem.vue'
   import MessageContainer from './Message/MessageContainer.vue'
@@ -60,7 +60,8 @@
       return {
         collapseTitle: this.room.status === 'actived' ? 'Masquer' : 'Afficher',
         clickToClose: false,
-        isOtherUserActive: false
+        isOtherUserActive: false,
+        username: this.username
       }
     },
     methods: {
@@ -79,11 +80,6 @@
       toFront() {
         this.$store.commit(CHAT_TOFRONT_ROOM, this.room)
       }
-    },
-    computed: {
-      ...mapState({
-        username: state => state.auth.profile.username
-      })
     },
     sockets: {
       CHAT_OPEN_ROOM: function(data) {

@@ -15,6 +15,6 @@
     props: ['messages'],
     components: {
       MessageItem
-    }
+    },
   }
 </script>

@@ -1,11 +1,14 @@
 <template>
   <div>
-    <b-form-input
+    <b-form-textarea
+    no-resize
+      :rows="3"
       ref="inputMessage"
       v-model="message"
       type="text"
       placeholder="Entrez votre message"
-      @keyup.native="checkKey"
+      @keyup.native="checkKeyUp"
+      @keydown.native="checkKeyDown"
     />
   </div>
 </template>
@@ -20,17 +23,27 @@
     props: ['room'],
     data() {
       return {
-        message: ''
+        message: '',
+        isMaj: false
       }
     },
     methods: {
-      checkKey(e) {
-        if(this.message.trim().length && e.keyCode === 13) {
+      checkKeyDown(e) {
+        if (e.keyCode === 16) {
+          this.isMaj = true
+        }
+      },
+      checkKeyUp(e) {
+        if (e.keyCode === 16) {
+          this.isMaj = false
+          return
+        }
+        if(this.message.trim().length && !this.isMaj && e.keyCode === 13) {
           const data = {
             roomId: this.room.data._id,
             otheruser:this.room.otheruser,
             username: this.getProfile.username,
-            message: this.message.trim()
+            message: this.message.trim().replace("\n",'<br />')
           }
           this.message = ''
           this.$refs.inputMessage.focus()

@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import RoomItem from './RoomItem.vue'
 export default {
   components: {
@@ -20,7 +20,7 @@ export default {
   data() {
     return ({
       clickToClose: false,
-      zIndex: 1000,
+      zIndex: 1000
     })
   },
   methods: {
