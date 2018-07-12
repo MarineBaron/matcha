@@ -26,6 +26,7 @@
 <script>
   import callApi from '../../../Api/callApi'
   export default {
+    props: ['status', 'refresh'],
     data() {
       return {
         fields: [
@@ -57,40 +58,39 @@
       }
     },
     mounted() {
-      this.fetchData()
+      if (this.refresh) {
+        this.fetchData()
+      }
     },
     methods: {
       fetchData() {
+        this.$emit('change-refresh', false)
+        this.$emit('change-status', 'loading')
         callApi({url: '/admin/users'})
         .then((resp) => {
+          this.$emit('change-status', 'success')
           this.users = resp.data.data
         }, (err) => {
+          this.$emit('change-status', 'error')
           console.log('ERR', err)
         })
       },
       deleteUser(id) {
-        callApi({url: '/admin/delete/' + id})
-        .then((resp) => {
-          this.fetchData()
-        }, (err) => {
-          console.log('ERR', err)
-        })
+        if(this.status === 'success') {
+          callApi({url: '/admin/delete/' + id})
+          .then((resp) => {
+            this.$emit('change-refresh', true)
+          }, (err) => {
+            console.log('ERR', err)
+          })
+        }
       },
-      createBots() {
-        callApi({url: '/admin/createbots/' + id})
-        .then((resp) => {
+    },
+    computed: {
+      askRefresh() {
+        if (this.refresh) {
           this.fetchData()
-        }, (err) => {
-          console.log('ERR', err)
-        })
-      },
-      deletebots() {
-        callApi({url: '/admin/deletebots/' + id})
-        .then((resp) => {
-          this.fetchData()
-        }, (err) => {
-          console.log('ERR', err)
-        })
+        }
       }
     }
   }
