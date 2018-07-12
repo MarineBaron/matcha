@@ -92,6 +92,10 @@ const UserSchema = new mongoose.Schema({
     },
     alt: String
   }],
+  bot: {
+    type: Boolean,
+    default: false
+  }
 })
 
 

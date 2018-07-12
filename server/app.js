@@ -39,11 +39,13 @@ const authRouter = require('./routes/auth')
 const userRouter = require('./routes/user')
 const chatRouter = require('./routes/chat')
 const notificationRouter = require('./routes/notification')
+const adminRouter = require('./routes/admin')
 
 app.use('/auth', authRouter)
 app.use('/user', userRouter)
 app.use('/chat', chatRouter)
 app.use('/notification', notificationRouter)
+app.use('/admin', adminRouter)
 
 app.use(function(req, res, next) {
   next(createError(404));

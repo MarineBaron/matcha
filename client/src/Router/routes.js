@@ -10,6 +10,7 @@ import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
 import ForumContent from '../Components/Forum/ForumContent.vue'
 import ForumSidebar from '../Components/Forum/ForumSidebar.vue'
+import AdminPage from '../Components/Admin/AdminPage.vue'
 //import Chat from '../Components/Chat/Chat.vue'
 
 import store from '../Store/store'
@@ -28,6 +29,14 @@ const ifAuthenticated = (to, from, next) => {
     return
   }
   next('/login')
+}
+
+const ifAdmin = (to, from, next) => {
+  if(store.getters.isAuthenticated || store.getters.getUsername === 'admin' ) {
+    next()
+    return
+  }
+  next('/')
 }
 
 export default [
@@ -90,6 +99,11 @@ export default [
   {
     path: '/user/:username',
     component: UserPage,
+    meta: {}
+  },
+  {
+    path: '/admin',
+    component: AdminPage,
     meta: {}
   }
 ]

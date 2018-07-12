@@ -132,9 +132,15 @@ module.exports = {
   },
 
   deleteAllByUser: function(username, callback) {
-    User.findOne({username: username}, function(err, user) {
+    User.findOne({username: username}, '_id', function(err, user) {
       if (err) {
         callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(null, {
+            success: 1
+        })
         return
       }
       Notification.deleteMany({user: user._id}, function(err) {

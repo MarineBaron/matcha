@@ -1,6 +1,6 @@
 <template>
   <div v-if="display" class="text-center">
-    <b-button variant="primary" @click="moreMessages">
+    <b-button variant="primary" @click.prevent.stop="moreMessages">
       Plus de messages
     </b-button>
 </div>

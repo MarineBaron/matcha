@@ -11,6 +11,7 @@
         <register-link v-if="!isAuthenticated"></register-link>
         <profile-link v-if="isAuthenticated" ></profile-link>
         <logout-link v-if="isAuthenticated" ></logout-link>
+        <b-nav-item v-if="getRole === 'admin'" :to="{path: '/admin'}">Admin</b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
@@ -46,11 +47,12 @@ export default {
     ...mapGetters([
       //'getProfile',
       'isAuthenticated',
-      'isProfileLoaded'
+      'isProfileLoaded',
+      'getRole'
     ]),
     ...mapState({
       authLoading: state => state.auth.status === 'loading',
-      username: state => isProfileLoaded ? state.auth.profile.username : ''
+      username: state => this.isProfileLoaded ? state.auth.profile.username : '',
     })
   }
 }

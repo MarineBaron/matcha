@@ -62,6 +62,7 @@ const getters = {
   authStatus: state => state.status,
   getProfile: state => state.profile,
   getUsername: state => !state.profile.username ? '' : state.profile.username,
+  getRole: state => !state.profile ? '' : state.profile.role,
   isProfileLoaded: state => !!state.profile.username
 }
 

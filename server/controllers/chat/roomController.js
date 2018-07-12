@@ -134,5 +134,25 @@ module.exports = {
         })
       })
     })
+  },
+  deleteAllByUser: function(id, callback) {
+    const self = this
+    ChatRoom.find({users: id}, function(err, rooms) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      rooms.forEach(r => {
+        self.delete(r._id, function(err, result) {
+          if (err) {
+            callback(err, null)
+            return
+          }
+        })
+      })
+    })
+    callback(null, {
+        success: 1
+    })
   }
 }
