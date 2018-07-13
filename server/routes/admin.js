@@ -4,8 +4,9 @@ const adminController = require('../controllers/admin/adminController')
 const verifyAdmin = require('../middleware/verifyAdmin')
 
 /* GET all */
-router.get('/users', verifyAdmin, function(req, res, next) {
-  adminController.findAll(function (err, result) {
+router.post('/users', verifyAdmin, function(req, res, next) {
+  console.log('/users')
+  adminController.findAll(req.body ,function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -50,7 +51,6 @@ router.get('/deletebots', verifyAdmin, function(req, res, next) {
 
 /* GET populate bots */
 router.get('/createbots', verifyAdmin, function(req, res, next) {
-  console.log('========================= /createbots')
   adminController.deleteBots(function (err, result) {
     if (err) {
       console.log(err)
@@ -71,7 +71,6 @@ router.get('/createbots', verifyAdmin, function(req, res, next) {
       res.status(200).json(result)
     })
   })
-
 })
 
 module.exports = router

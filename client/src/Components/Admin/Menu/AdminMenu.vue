@@ -19,6 +19,7 @@
         this.$emit('change-status', 'loading')
         callApi({url: '/admin/createbots'})
         .then((resp) => {
+          console.log('createBots success', resp)
           this.$emit('change-refresh', true)
         }, (err) => {
           this.$emit('change-status', 'error')

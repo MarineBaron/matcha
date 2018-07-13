@@ -7,9 +7,11 @@
   },
   "dependencies": {
     "async": "^2.6.1",
+    "axios": "^0.18.0",
     "bcrypt": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
+    "count-lines-in-file": "^1.1.0",
     "debug": "~2.6.9",
     "dotenv": "^6.0.0",
     "express": "~4.16.0",
@@ -21,6 +23,7 @@
     "morgan": "~1.9.0",
     "nodemailer": "^4.6.7",
     "nodemon": "^1.17.5",
+    "nthline": "^1.0.1",
     "printf": "^0.3.0"
   }
 }

@@ -2,7 +2,7 @@
   <b-container fluid>
     <b-row>
       <b-col cols="8">
-        <user-list-container :status="status" @change-status="changeStatus" :refresh="refresh" @change-refresh="changeRefresh"/>
+        <user-list-container :status="status" @change-status="changeStatus" @change-refresh="changeRefresh"  :refresh="refresh"/>
       </b-col>
       <b-col cols="4">
         <admin-menu :status="status" @change-status="changeStatus" @change-refresh="changeRefresh"/>

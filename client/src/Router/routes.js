@@ -11,7 +11,6 @@ import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
 import ForumContent from '../Components/Forum/ForumContent.vue'
 import ForumSidebar from '../Components/Forum/ForumSidebar.vue'
 import AdminPage from '../Components/Admin/AdminPage.vue'
-//import Chat from '../Components/Chat/Chat.vue'
 
 import store from '../Store/store'
 
@@ -104,6 +103,7 @@ export default [
   {
     path: '/admin',
     component: AdminPage,
+    beforeEnter: ifAdmin,
     meta: {}
   }
 ]

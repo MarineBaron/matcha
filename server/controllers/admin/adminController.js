@@ -4,6 +4,11 @@ const lodash = require('lodash')
 const loremIpsum = require('lorem-ipsum')
 const printf = require('printf')
 const fs = require('fs')
+const axios = require('axios')
+const countLinesInFile = require('count-lines-in-file')
+const nthline = require('nthline')
+const path = require('path')
+//const readStream = require('fs-readstream-seek')
 
 const User = require('../../models/user')
 const Image = require('../../models/image')
@@ -15,6 +20,72 @@ const notifController = require('./../notification/notificationController')
 const roomController = require('./../chat/roomController')
 const messageController = require('./../chat/messageController')
 const userController = require('./../userController')
+
+const citiesFile = path.resolve(__dirname, '../../' + process.env.CITIES_FILE)
+
+
+function getLineCount(file, cb) {
+    let count = 0;
+
+    fs.createReadStream(file)
+      .on('data', function(chunk) {
+        for (let i = 0; i < chunk.length; i++)
+        if (chunk[i] == 10) count++;
+      })
+      .once('error', cb('error'))
+      .on('end', function() {
+        cb(null, count);
+      });
+}
+
+function getLocalisation(nbLines) {
+  return new Promise((resolve, reject) => {
+    const numLine = Math.floor(Math.random() * nbLines)
+    nthline(numLine, citiesFile)
+    .then(line => {
+      axios.get(process.env.API_GOUV_REQUEST_COMMUNES + line, {
+        params: {
+          fields: 'nom,codesPostaux,centre',
+          format: 'json',
+          geometry: 'centre'
+        }
+      })
+      .then((resp) => {
+        const loc = {
+          zip: resp.data.codesPostaux[Math.floor(Math.random() * resp.data.codesPostaux.length)],
+          city: resp.data.nom,
+          coordinates:resp.data.centre.coordinates
+        }
+        resolve(loc)
+      })
+      .catch((err) => resolve(null))
+    })
+    .catch(err => reject(err))
+  })
+}
+
+function getLocalisations(nbUsers, nbLines) {
+  return new Promise((resolve, reject) => {
+    let tab = []
+    for (i = 0; i < nbUsers; i++) {
+      tab.push(i)
+    }
+    return Promise.all(tab.map((i) => getLocalisation(nbLines)))
+    .then((results) => {resolve(results.filter(r => r !== null))})
+    .catch((err) => reject(err))
+  })
+}
+
+function getLocalisationAll(nbUsers, callback) {
+  countLinesInFile(citiesFile, (error, nbLines) => {
+   if(error) {
+     callback(error, null)
+   }
+   getLocalisations(nbUsers, nbLines)
+   .then((results) => {callback(null, results)})
+   .catch(err => {callback(err, null)})
+  })
+}
 
 function getAleaIndexes(size, min, max, exact) {
   return new Promise((resolve, reject) => {
@@ -174,6 +245,7 @@ function updateUser(results, params, user) {
             lastname: getAleaName(),
           }
           if (Math.random() > params.nonCompleted) {
+            const loc = results.cities[Math.floor(Math.random() * results.cities.length)]
             updateUser = Object.assign({
               is_completed: true,
               firstname: getAleaName(),
@@ -186,8 +258,10 @@ function updateUser(results, params, user) {
                 format: 'plain',
                 random: Math.random
               }),
-              city: getAleaName(),
-              zip: Math.floor(Math.random() * (95000 - 1)) + 1,
+              city: loc.city,
+              zip: loc.zip,
+              longitude: loc.coordinates[0],
+              latitude: loc.coordinates[1],
               gender: results.genders[Math.floor(Math.random() * results.genders.length)]._id,
               orientation: orientation,
               interests: interests,
@@ -481,15 +555,40 @@ function deleteUsers(users) {
 }
 
 module.exports = {
-  findAll: function(callback) {
-    User.find({}, '_id, username confirmed is_completed bot', function(err, users) {
-      if (err) {
+  findAll: function(data, callback) {
+    const options = {}
+    if (data.filters.confirmed && data.filters.confirmed.length) {
+      options.confirmed = data.filters.confirmed === 'true' ? true : false
+    }
+    if (data.filters.is_completed && data.filters.is_completed.length) {
+      options.is_completed = data.filters.is_completed  === 'true'? true : false
+    }
+    if (data.filters.bot && data.filters.bot.length) {
+      options.bot = data.filters.bot === 'true' ? true : false
+    }
+    let queryUsers = User.find(options, '_id username confirmed is_completed bot')
+    let queryTotal = User.count(options)
+    queryUsers
+    .sort((data.sortDesc ? '-' : '') + data.sortBy)
+    .skip(data.perPage * (data.currentPage - 1))
+    .limit(data.perPage)
+
+    async.parallel({
+      users: (callback) => {
+        queryUsers.exec(callback)
+      },
+      total: (callback) => {
+        queryTotal.exec(callback)
+      }
+    }, function(err, results) {
+      if(err) {
         callback(err, null)
         return
       }
       callback(null, {
         success: 1,
-        data: users
+        data: results.users,
+        total: results.total
       })
     })
   },
@@ -565,13 +664,15 @@ module.exports = {
           },
           files: (callback) => {
             fs.readdir('./public/images', callback)
+          },
+          cities: (callback) => {
+            getLocalisationAll(nbUsers, callback)
           }
         }, function (err, results) {
           if(err) {
             callback(err, null)
             return
           }
-          // on complete les infos user (nom, prénom, et tout pour les users completed)
           updateUsers(results, {
             nonCompleted,
             minAge,
@@ -597,6 +698,7 @@ module.exports = {
                 callback(null, {
                   success: 1
                 })
+                return
               })
               .catch((err) => {
                 callback(err, null)
