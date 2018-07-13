@@ -557,14 +557,14 @@ function deleteUsers(users) {
 module.exports = {
   findAll: function(data, callback) {
     const options = {}
-    if (data.filters.confirmed && data.filters.confirmed.length) {
-      options.confirmed = data.filters.confirmed === 'true' ? true : false
+    if (data.filters.confirmed !== null) {
+      options.confirmed = data.filters.confirmed
     }
-    if (data.filters.is_completed && data.filters.is_completed.length) {
-      options.is_completed = data.filters.is_completed  === 'true'? true : false
+    if (data.filters.is_completed !== null) {
+      options.is_completed = data.filters.is_completed
     }
-    if (data.filters.bot && data.filters.bot.length) {
-      options.bot = data.filters.bot === 'true' ? true : false
+    if (data.filters.bot !== null) {
+      options.bot = data.filters.bot
     }
     let queryUsers = User.find(options, '_id username confirmed is_completed bot')
     let queryTotal = User.count(options)

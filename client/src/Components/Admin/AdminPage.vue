@@ -2,18 +2,20 @@
   <b-container fluid>
     <b-row>
       <b-col cols="8">
-        <user-list-container :status="status" @change-status="changeStatus" @change-refresh="changeRefresh"  :refresh="refresh"/>
+        <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"/>
       </b-col>
       <b-col cols="4">
-        <admin-menu :status="status" @change-status="changeStatus" @change-refresh="changeRefresh"/>
+        <admin-menu :status="status"/>
       </b-col>
     </b-row>
   </b-container>
 </template>
 
 <script>
+  import callApi from '../../Api/callApi'
   import AdminMenu from './Menu/AdminMenu.vue'
   import UserListContainer from './Content/UserListContainer.vue'
+
   export default {
     components: {
       AdminMenu,
@@ -22,16 +24,78 @@
     data() {
       return ({
         status: 'loading',
-        refresh: true
+        items: [],
+        totalRows: 0,
+        params: {
+          perPage: 10,
+          currentPage: 1,
+          sortBy: 'username',
+          sortDesc: false,
+          filters: {
+            confirmed: null,
+            is_completed: null,
+            bot: null
+          }
+        }
       })
     },
+    mounted() {
+      this.fetchData()
+    },
     methods: {
-      changeStatus(status) {
-        this.status = status
+      changeParams(params) {
+        this.params = params
+        this.fetchData()
       },
-      changeRefresh(refresh) {
-        this.refresh = refresh
+      fetchData() {
+        this.status = 'loading'
+        const data = this.params
+        callApi({url: '/admin/users', data, method: 'POST'})
+        .then((resp) => {
+          this.status = 'success'
+          console.log('fetchData', resp.data.total, resp.data.data)
+          this.items = resp.data.data
+          this.totalRows = resp.data.total
+        }, (err) => {
+          this.status = 'error'
+          console.log('ERR', err)
+          this.items = []
+          this.totalRows = 0
+        })
       },
-    }
+      deleteUser(id) {
+        if(this.status === 'success') {
+          this.status = 'loading'
+          callApi({url: '/admin/delete/' + id})
+          .then((resp) => {
+            this.fetchData()
+          }, (err) => {
+            console.log('ERR', err)
+          })
+        }
+      },
+      createBots() {
+        if(this.status === 'success') {
+          this.status = 'loading'
+          callApi({url: '/admin/createbots'})
+          .then((resp) => {
+            this.fetchData()
+          }, (err) => {
+            console.log('ERR', err)
+          })
+        }
+      },
+      deleteBots() {
+        if(this.status === 'success') {
+          this.status = 'loading'
+          callApi({url: '/admin/deletebots'})
+          .then((resp) => {
+            this.fetchData()
+          }, (err) => {
+            console.log('ERR', err)
+          })
+        }
+      },
+    },
   }
 </script>

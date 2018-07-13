@@ -5,7 +5,6 @@ const verifyAdmin = require('../middleware/verifyAdmin')
 
 /* GET all */
 router.post('/users', verifyAdmin, function(req, res, next) {
-  console.log('/users')
   adminController.findAll(req.body ,function (err, result) {
     if (err) {
       console.log(err)

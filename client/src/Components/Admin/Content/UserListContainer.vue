@@ -29,7 +29,7 @@
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
       no-local-sorting
-      @context-changed="fetchData"
+      @sort-changed="sortingChange"
       >
       <template slot="username" slot-scope="data">
         <b-link :to="{path: '/user/' + data.item.username}">{{data.item.username}}</b-link>
@@ -47,7 +47,7 @@
         <icon v-else name="times" color="red" />
       </template>
       <template slot="actions" slot-scope="data">
-        <b-link v-if="data.item.bot" @click.prevent="deleteUser(data.item._id)" title="Supprimer">
+        <b-link v-if="data.item.bot" @click.prevent="$emit('delete-user' ,data.item._id)" title="Supprimer">
           <icon name="trash"></icon>
         </b-link>
       </template>
@@ -61,17 +61,16 @@
 </template>
 
 <script>
-  import callApi from '../../../Api/callApi'
   export default {
-    props: ['status', 'refresh'],
+    props: ['status', 'params', 'items', 'totalRows'],
     data() {
       return {
+        localparams: this.params,
+        perPage: this.params.perPage,
+        currentPage: this.params.currentPage,
+        sortBy: this.params.sortBy,
+        sortDesc: this.params.sortDesc,
         isBusy: false,
-        perPage: 10,
-        currentPage: 1,
-        totalRows: 0,
-        sortBy: 'username',
-        sortDesc: false,
         fields: [
           {
             key: 'username',
@@ -97,86 +96,33 @@
             sortable: false
           }
         ],
-        items: [],
         options: [
           {text: 'Indifférent', value: null},
           {text: 'Oui', value: true},
           {text: 'Non', value: false}
         ],
-        filters: {
-          confirmed: null,
-          is_completed: null,
-          bot: null
-        }
       }
     },
     methods: {
-      fetchData(ctx) {
-        this.$emit('change-refresh', false)
-        this.$emit('change-status', 'loading')
-        const data = {
-          perPage: this.perPage,
-          currentPage: this.currentPage,
-          sortBy: this.sortBy,
-          sortDesc: this.sortDesc,
-        }
-        const filters = {}
-        if(this.filters.confirmed !== null) {
-          filters.confirmed = this.filters.confirmed
-        }
-        if(this.filters.is_completed !== null) {
-          filters.is_completed = this.filters.is_completed
-        }
-        if(this.filters.bot !== null) {
-          filters.bot = this.filters.bot
-        }
-        data.filters = filters
-        callApi({url: '/admin/users', data, method: 'POST'})
-        .then((resp) => {
-          this.$emit('change-status', 'success')
-          console.log('fetchData', resp.data.total, resp.data.data)
-          this.items = resp.data.data
-          this.totalRows = resp.data.total
-        }, (err) => {
-          this.$emit('change-status', 'error')
-          console.log('ERR', err)
-          this.fetchUsers = []
-        })
-      },
-      deleteUser(id) {
-        if(this.status === 'success') {
-          callApi({url: '/admin/delete/' + id})
-          .then((resp) => {
-            this.$emit('change-refresh', true)
-          }, (err) => {
-            console.log('ERR', err)
-          })
-        }
+      sortingChange(ctx) {
+        this.localparams.sortDesc = ctx.sortDesc
+        this.localparams.sortBy = ctx.sortBy
+        this.$emit('change-params', this.localparams)
       },
       changePagination(index) {
         this.currentPage = index
-        this.fetchData()
+        this.localparams.currentPage = index
+        this.$emit('change-params', this.localparams)
       },
       filterClick(e) {
         if(e.target.value === 'true') {
-          this.filters[e.target.name] = true
+          this.localparams.filters[e.target.name] = true
         } else if (e.target.value === 'false') {
-          this.filters[e.target.name] = false
+          this.localparams.filters[e.target.name] = false
         } else {
-          this.filters[e.target.name] = null
+          this.localparams.filters[e.target.name] = null
         }
-        this.filters[e.target.name] = e.target.value
-        this.fetchData()
-      }
-    },
-    created () {
-      this.fetchData()
-    },
-    computed: {
-      askRefresh() {
-        if (this.refresh) {
-          this.fetchData()
-        }
+        this.$emit('change-params', this.localparams)
       }
     }
   }
