@@ -43,29 +43,12 @@ const styles = {
   })
 }
 
-// Popup showing the position the user clicked
-// const popup = new Overlay({
-//   element: document.getElementById('popup')
-// })
-
 export default {
-  props: ['items'],
+  props: ['status','items'],
   data() {
     return {
       map: null,
-      view: new View({
-         projection: 'EPSG:4326',
-        center: [0, 0],
-        zoom: 2,
-      }),
-      usersLayer: new VectorLayer({
-        source: new VectorSource({
-          features: this.features
-        }),
-        style: function(feature) {
-          return styles['10']
-        }
-      }),
+      features: [],
       selectedFeatures: []
     }
   },
@@ -76,13 +59,20 @@ export default {
         new TileLayer({
           source: new OSM()
         }),
-        this.usersLayer
+        new VectorLayer({
+          source: new VectorSource(),
+          style: function(feature) {
+            return styles['10']
+          }
+        })
       ],
-      view: this.view
+      view: new View({
+         projection: 'EPSG:4326',
+        center: [0, 0],
+        zoom: 2,
+      }),
     })
 
-    //this.map.addOverlay(popup)
-    // ouverture d'une popup avec les éléments cliqués
     const self = this
     this.map.on('singleclick', function(e) {
       let hit = false
@@ -97,11 +87,7 @@ export default {
         hitTolerance: 10
       })
       if (allFeatureAtPixel.length > 0) {
-        console.log(e.pixel)
-        console.log(allFeatureAtPixel)
         self.selectedFeatures = allFeatureAtPixel.map(f => f.feature.get('properties'))
-        console.log(self.selectedFeatures)
-        //let coordinates = allFeatureAtPixel[0].feature.getGeometry().getCoordinates();
         const popup = document.getElementById('popup')
         popup.style.top = (e.pixel[1] - (self.selectedFeatures.length * 30) / 2) + 'px'
         popup.style.left = (e.pixel[0] - 75) + 'px'
@@ -112,9 +98,17 @@ export default {
         popup.style.display = 'none'
       }
     })
+
   },
-  computed: {
-    features() {
+  watch: {
+    status(n, o) {
+      if(n !== o && n === 'success') {
+        this.setFeatures()
+      }
+    }
+  },
+  methods: {
+    setFeatures() {
       let features = []
       this.items.filter(i => i.latitude !== undefined).forEach(i => {
         features.push(
@@ -126,20 +120,18 @@ export default {
           })
         )
       })
-      this.setFeatures(features)
-      return features
-    },
-  },
-  methods: {
-    setFeatures(features) {
-      this.usersLayer.getSource().clear()
-      this.usersLayer.getSource().addFeatures(features)
+      const view = this.map.getView()
+      const layer = this.map.getLayers().array_[1]
+      layer.getSource().clear()
+      layer.getSource().addFeatures(features)
       if (features.length > 0) {
-        this.view.fit(this.usersLayer.getSource().getExtent(), this.map.getSize())
+        view.fit(layer.getSource().getExtent(), this.map.getSize())
       }
-      if(this.view.getZoom() > 15) {
-        this.view.setZoom(15)
+      if(view.getZoom() > 15) {
+        view.setZoom(15)
       }
+      this.features = features
+      return features
     }
   },
 }

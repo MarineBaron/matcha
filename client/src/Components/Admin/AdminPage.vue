@@ -8,7 +8,7 @@
         <admin-menu :status="status"/>
       </b-col>
     </b-row>
-    <admin-map :items="items" />
+    <admin-map :status="status" :items="items" />
   </b-container>
 </template>
 
