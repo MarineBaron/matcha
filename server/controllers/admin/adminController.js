@@ -566,9 +566,12 @@ module.exports = {
     if (data.filters.bot !== null) {
       options.bot = data.filters.bot
     }
-    let queryUsers = User.find(options, '_id username confirmed is_completed bot latitude longitude')
+    let queryUsers = User.find(options, '_id username avatar confirmed is_completed bot latitude longitude last_logout')
     let queryTotal = User.count(options)
     queryUsers
+    .populate({
+      path: 'avatar.image'
+    })
     .sort((data.sortDesc ? '-' : '') + data.sortBy)
     .skip(data.perPage * (data.currentPage - 1))
     .limit(data.perPage)

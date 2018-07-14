@@ -61,6 +61,7 @@ module.exports = {
     })
   },
   findCompleteByUsername: function(username, callback) {
+    console.log('findCompleteByUsername')
     User.findOne({username: username})
       .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout')
       .populate({
@@ -73,16 +74,17 @@ module.exports = {
       .populate('orientation')
       .populate('interests')
       .exec(function (err, user) {
-      if (err) {
-        callback(err, null)
-        return
-      }
-      if (!user) {
-        callback(null, {
-          success: 0,
-          message: 'USER NOT FOUND'
-        })
-      } else {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        if (!user) {
+          callback(null, {
+            success: 0,
+            message: 'USER NOT FOUND'
+          })
+          return
+        }
         async.parallel({
           likes: (callback) => {
             user.getLikes(user._id, callback)
@@ -122,8 +124,7 @@ module.exports = {
             data: data
           })
         })
-      }
-    })
+      })
   },
 
 

@@ -32,7 +32,12 @@
       @sort-changed="sortingChange"
       >
       <template slot="username" slot-scope="data">
-        <b-link :to="{path: '/user/' + data.item.username}">{{data.item.username}}</b-link>
+        <user-list-item
+          :item="data.item"
+          actor="admin"
+          :actions="['view']"
+        />
+        <!-- <b-link :to="{path: '/user/' + data.item.username}">{{data.item.username}}</b-link> -->
       </template>
       <template slot="confirmed" slot-scope="data">
         <icon v-if="data.item.confirmed" name="check" color="green" />
@@ -61,7 +66,11 @@
 </template>
 
 <script>
+  import UserListItem from '../../User/All/UserListItem.vue'
   export default {
+    components: {
+      UserListItem
+    },
     props: ['status', 'params', 'items', 'totalRows'],
     data() {
       return {

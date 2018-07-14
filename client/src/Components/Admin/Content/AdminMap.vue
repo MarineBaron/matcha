@@ -4,7 +4,11 @@
     <div id="popup">
       <div>
         <div v-for="feature in selectedFeatures" :key="feature.username">
-          {{feature.username}}
+          <user-list-item
+            :item="feature.user"
+            actor="admin"
+            :actions="['view']"
+          />
         </div>
       </div>
     </div>
@@ -26,6 +30,8 @@ import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
 import { boundingExtent } from 'ol/extent'
 import 'ol/ol.css'
 
+import UserListItem from '../../User/All/UserListItem.vue'
+
 const styles = {
   '10': new Style({
     image: new CircleStyle({
@@ -44,10 +50,14 @@ const styles = {
 }
 
 export default {
+  components: {
+    UserListItem
+  },
   props: ['status','items'],
   data() {
     return {
       map: null,
+      hitTolerance: 5,
       features: [],
       selectedFeatures: []
     }
@@ -74,6 +84,17 @@ export default {
     })
 
     const self = this
+    // cursor on features
+    this.map.on('pointermove', function(e) {
+      let hit = false
+      self.map.forEachFeatureAtPixel(e.pixel, function() {
+        hit = true
+      }, {
+        hitTolerance: self.hitTolerance
+      })
+      self.map.getViewport().style.cursor = hit ? 'pointer' : ''
+    })
+    // click on features
     this.map.on('singleclick', function(e) {
       let hit = false
       let allFeatureAtPixel = []
@@ -84,14 +105,13 @@ export default {
           layer
         })
       }, {
-        hitTolerance: 10
+        hitTolerance: self.hitTolerance
       })
       if (allFeatureAtPixel.length > 0) {
         self.selectedFeatures = allFeatureAtPixel.map(f => f.feature.get('properties'))
         const popup = document.getElementById('popup')
-        popup.style.top = (e.pixel[1] - (self.selectedFeatures.length * 30) / 2) + 'px'
+        popup.style.top = (e.pixel[1] - (self.selectedFeatures.length * 50) / 2) + 'px'
         popup.style.left = (e.pixel[0] - 75) + 'px'
-        popup.style.height = (self.selectedFeatures.length * 30) + 'px'
         popup.style.display = 'block'
       } else {
         self.selectedFeatures = []
@@ -115,7 +135,7 @@ export default {
           new Feature({
             geometry: new Point([i.longitude, i.latitude]),
             properties: {
-              username: i.username
+              user: i
             }
           })
         )
@@ -147,13 +167,11 @@ export default {
   #popup {
     position: absolute;
     z-index: 100;
-    background-color: black;
-    border: 1px solid #ccc;
-    color: #fff;
+    border: 3px solid #ccc;
+    border-radius: 4px;
     padding: 5px;
-    font-size: 18px;
     width: 150px;
-    pointer-events: none;
+    background-color: #fff;
     display: none;
   }
 
