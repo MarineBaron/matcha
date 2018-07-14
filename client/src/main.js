@@ -10,7 +10,6 @@ import VueLodash from 'vue-lodash'
 import VueMoment from 'vue-moment'
 import VueModal from 'vue-js-modal'
 
-
 import App from './Components/App.vue'
 
 import "bootstrap/dist/css/bootstrap.min.css"

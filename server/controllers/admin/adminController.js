@@ -566,7 +566,7 @@ module.exports = {
     if (data.filters.bot !== null) {
       options.bot = data.filters.bot
     }
-    let queryUsers = User.find(options, '_id username confirmed is_completed bot')
+    let queryUsers = User.find(options, '_id username confirmed is_completed bot latitude longitude')
     let queryTotal = User.count(options)
     queryUsers
     .sort((data.sortDesc ? '-' : '') + data.sortBy)

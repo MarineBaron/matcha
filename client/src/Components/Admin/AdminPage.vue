@@ -8,6 +8,7 @@
         <admin-menu :status="status"/>
       </b-col>
     </b-row>
+    <admin-map :items="items" />
   </b-container>
 </template>
 
@@ -15,11 +16,13 @@
   import callApi from '../../Api/callApi'
   import AdminMenu from './Menu/AdminMenu.vue'
   import UserListContainer from './Content/UserListContainer.vue'
+  import AdminMap from './Content/AdminMap.vue'
 
   export default {
     components: {
       AdminMenu,
-      UserListContainer
+      UserListContainer,
+      AdminMap
     },
     data() {
       return ({
@@ -53,7 +56,6 @@
         callApi({url: '/admin/users', data, method: 'POST'})
         .then((resp) => {
           this.status = 'success'
-          console.log('fetchData', resp.data.total, resp.data.data)
           this.items = resp.data.data
           this.totalRows = resp.data.total
         }, (err) => {
