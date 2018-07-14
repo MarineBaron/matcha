@@ -33,17 +33,52 @@ import 'ol/ol.css'
 import UserListItem from '../../User/All/UserListItem.vue'
 
 const styles = {
-  '10': new Style({
+  'bot': new Style({
     image: new CircleStyle({
       radius: 5,
-      fill: new Fill({color: '#666666'}),
+      fill: new Fill({color: 'grey'}),
       stroke: new Stroke({color: '#bada55', width: 1})
     })
   }),
-  '20': new Style({
+  'me': new Style({
     image: new CircleStyle({
-      radius: 10,
-      fill: new Fill({color: '#666666'}),
+      radius: 5,
+      fill: new Fill({color: 'blue'}),
+      stroke: new Stroke({color: '#bada55', width: 1})
+    })
+  }),
+  'friend': new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({color: 'green'}),
+      stroke: new Stroke({color: '#bada55', width: 1})
+    })
+  }),
+  'liker': new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({color: 'purple'}),
+      stroke: new Stroke({color: '#bada55', width: 1})
+    })
+  }),
+  'liked': new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({color: 'orange'}),
+      stroke: new Stroke({color: '#bada55', width: 1})
+    })
+  }),
+  'other': new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({color: 'black'}),
+      stroke: new Stroke({color: '#bada55', width: 1})
+    })
+  }),
+  'all': new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({color: 'white'}),
       stroke: new Stroke({color: '#bada55', width: 1})
     })
   })
@@ -58,8 +93,11 @@ export default {
     return {
       map: null,
       hitTolerance: 5,
-      features: [],
-      selectedFeatures: []
+      //features: [],
+      selectedFeatures: [],
+      center: [1, 42],
+      zoom: 5,
+      names: []
     }
   },
   mounted() {
@@ -68,19 +106,30 @@ export default {
       layers: [
         new TileLayer({
           source: new OSM()
-        }),
-        new VectorLayer({
-          source: new VectorSource(),
-          style: function(feature) {
-            return styles['10']
-          }
         })
       ],
       view: new View({
          projection: 'EPSG:4326',
-        center: [0, 0],
-        zoom: 2,
+        center: this.center,
+        zoom: this.zoom,
       }),
+    })
+
+    const names = ['all','bot', 'me', 'friend', 'liker', 'liked', 'other']
+    names.forEach(name => {
+      const layer = new VectorLayer({
+        name: name,
+        source: new VectorSource(),
+        style: function(feature) {
+          return styles[name]
+        }
+      })
+      if (name === 'all') {
+        layer.setVisible(false)
+      } else {
+        this.names.push(name)
+      }
+      this.map.addLayer(layer)
     })
 
     const self = this
@@ -131,8 +180,10 @@ export default {
     setFeatures() {
       let features = []
       this.items.filter(i => i.latitude !== undefined).forEach(i => {
+        let name = 'bot'
         features.push(
           new Feature({
+            name : name,
             geometry: new Point([i.longitude, i.latitude]),
             properties: {
               user: i
@@ -141,17 +192,59 @@ export default {
         )
       })
       const view = this.map.getView()
-      const layer = this.map.getLayers().array_[1]
-      layer.getSource().clear()
-      layer.getSource().addFeatures(features)
-      if (features.length > 0) {
-        view.fit(layer.getSource().getExtent(), this.map.getSize())
-      }
-      if(view.getZoom() > 15) {
-        view.setZoom(15)
-      }
-      this.features = features
-      return features
+      const layers = this.map.getLayers()
+      let layerAll
+      //récupératioon des names des layers
+      layers.forEach(layer => {
+        if (layer.get('name') === 'all') {
+          layerAll = layer
+        }
+      })
+
+      //nettotage des layers
+      layers.forEach(layer => {
+        if(layer.get('name') !== undefined) {
+          layer.getSource().clear()
+        }
+      })
+
+      if(features.length) {
+        // remplissage du layer all avec toutes les features
+        layerAll.getSource().addFeatures(features)
+        //remplissage des layers spécifiques avec les features correspondantes
+        this.names.forEach(name => {
+          layers.forEach(layer => {
+            if(layer.get('name') === name) {
+                if (name === 'other') {
+                  if(features.length) {
+                    layer.getSource().addFeatures(features)
+                    layer.setVisible(true)
+                  } else {
+                    layer.setVisible(false)
+                  }
+                } else {
+                  const featuresSelected = features.filter(f => f.get('name') === name)
+                  if(featuresSelected.length) {
+                    layer.getSource().addFeatures(featuresSelected)
+                    features = features.filter(f => f.get('name') !== name)
+                    layer.setVisible(true)
+                  } else {
+                    layer.setVisible(false)
+                  }
+                }
+                //console.log(layer.get('name', layer.getSource().features.length, layer.isVisible()))
+              }
+            })
+          })
+          view.fit(layerAll.getSource().getExtent(), this.map.getSize())
+          if(view.getZoom() > 15) {
+            view.setZoom(15)
+          }
+        }
+
+        this.featuresSelected = []
+        //this.features = features
+        return features
     }
   },
 }
