@@ -180,7 +180,12 @@ export default {
     setFeatures() {
       let features = []
       this.items.filter(i => i.latitude !== undefined).forEach(i => {
-        let name = 'bot'
+        let name = null
+        if (i.username === 'admin') {
+          name = 'me'
+        } else if (i.bot === 'bot') {
+          name = 'bot'
+        }
         features.push(
           new Feature({
             name : name,
