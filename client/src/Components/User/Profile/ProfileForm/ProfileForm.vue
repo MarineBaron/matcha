@@ -9,28 +9,70 @@
       Tout va bien.
     </b-alert>
     <b-form :show="showForm" @submit.prevent="onSubmit">
-      <b-form-input id="form"
-        type="text"
-        required
-        v-model.trim="form.firstname"
-        placeholder="Votre prénom"
-        :state="statusField($v.form.firstname)"
-        @input="$v.form.firstname.$touch()"
+      <b-form-group id="firstnameGroup"
+        label="Prénom"
+        label-for="firstname"
+      >
+        <b-form-input id="firstname"
+          type="text"
+          required
+          v-model.trim="form.firstname"
+          placeholder="Votre prénom"
+          :state="statusField($v.form.firstname)"
+          @input="$v.form.firstname.$touch()"
+          />
+        <b-form-invalid-feedback id="firstnameFeedback">
+            Ce champ est requis et ne doit pas dépasser 20 caractères.
+        </b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group id="lastnameGroup"
+        label="Nom"
+        label-for="lastname"
+      >
+        <b-form-input id="lastname"
+          type="text"
+          required
+          v-model.trim="form.lastname"
+          placeholder="Votre nom"
+          :state="statusField($v.form.lastname)"
+          @input="$v.form.lastname.$touch()"
         />
-      <b-form-invalid-feedback id="firstnameFeedback">
+        <b-form-invalid-feedback id="lastnameFeedback">
           Ce champ est requis et ne doit pas dépasser 20 caractères.
-      </b-form-invalid-feedback>
-      <b-form-input id="form"
-        type="text"
-        required
-        v-model.trim="form.lastname"
-        placeholder="Votre nom"
-        :state="statusField($v.form.lastname)"
-        @input="$v.form.lastname.$touch()"
-      />
-      <b-form-invalid-feedback id="lastnameFeedback">
-        Ce champ est requis et ne doit pas dépasser 20 caractères.
-      </b-form-invalid-feedback>
+        </b-form-invalid-feedback>
+      </b-form-group>
+
+      <b-form-group id="zipGroup"
+        label="Code Postal"
+        label-for="zip"
+      >
+        <b-form-input id="zip"
+          type="text"
+          v-model.trim="form.zip"
+          placeholder="Code Postal"
+          :state="statusField($v.form.zip)"
+          @input="$v.form.zip.$touch(); changeZip()"
+        />
+        <b-form-invalid-feedback id="zipFeedback">
+          Un code postal contient 5 chiffres.
+        </b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group id="cityGroup" v-if="displayCitySelect"
+        label="Ville"
+        label-for="zip"
+      >
+        <b-form-select id="city"
+          v-model="form.city"
+          placeholder="Choisissez une ville"
+          :state="statusField($v.form.city)"
+          :options="citiesOptions"
+          @input="$v.form.city.$touch()"
+        />
+        <b-form-invalid-feedback id="cityFeedback">
+          Vous devez choisir une ville
+        </b-form-invalid-feedback>
+      </b-form-group>
+
       <b-button
         type="submit"
         variant="primary"
@@ -41,10 +83,13 @@
 </template>
 
 <script>
+  const codesPostaux = require('codes-postaux')
   import { USER_ACCOUNT_REQUEST } from '../../../../Store/user/mutation-types'
   import { validationMixin } from "vuelidate"
-  import { required, minLength, maxLength, sameAs } from 'vuelidate/lib/validators'
+  import { required, requiredIf, minLength, maxLength, sameAs, numeric, helpers } from 'vuelidate/lib/validators'
   import { mapState } from 'vuex'
+
+  const zipValidate = helpers.regex('alpha', /^\d{5}$/)
 
   export default {
     props: ['user'],
@@ -54,15 +99,15 @@
           firstname: this.user.firstname,
           lastname: this.user.lastname,
           age: this.user.age,
-          genders: ,
-          orientation: ,
-          interests: ,
+          genders: this.user.genders,
+          orientation: this.user.orientation,
+          interests: this.user.interests,
           email: this.user.email,
           city: this.user.city,
           zip: this.user.zip,
-
-
         },
+        citiesOptions: this.user.city ? [this.user.city] : [],
+        statusCitiesRequest: '',
         showUpdate: false,
         showForm: true,
         show: false,
@@ -83,6 +128,11 @@
           minLength: minLength(1),
           maxLength: maxLength(20),
         },
+        zip: {
+          zipValidate
+        },
+        city: {
+        }
       }
     },
     methods: {
@@ -99,12 +149,21 @@
           });
        },
       onSubmit(e) {
-        const { firstname, lastname } = this.form
+        const {
+          firstname,
+          lastname,
+          zip,
+          city
+        } = this.form
         const data = {
           firstname: firstname,
           lastname: lastname,
-          username: this.user.username
+          username: this.user.username,
+          zip,
+          city
         }
+        console.log('Data send to server',data)
+
         this.$store.dispatch(USER_ACCOUNT_REQUEST, data)
           .then((response) => {
             this.showForm = true
@@ -124,7 +183,34 @@
         this.showError = true
         this.errors = [error]
       },
+      getCitiesApi() {
+        this.statusCitiesRequest = 'loading'
+        this.citiesOptions = []
+
+        const response = codesPostaux.find(this.form.zip)
+        if(response.length) {
+          this.citiesOptions = response.map(r => r.nomCommune)
+          this.form.city = this.citiesOptions[0]
+          this.statusCitiesRequest = 'success'
+        } else {
+          this.citiesOptions = []
+          this.form.city = null
+          this.statusCitiesRequest = 'error'
+        }
+      },
+      changeZip(e) {
+        if(this.statusField(this.$v.form.zip)) {
+          this.getCitiesApi()
+        } else {
+          this.citiesOptions = []
+        }
+      }
     },
+    computed: {
+      displayCitySelect() {
+        return this.citiesOptions.length
+      }
+    }
 //    computed: {
 //        ...mapState({
 //          user: state => state.user.user

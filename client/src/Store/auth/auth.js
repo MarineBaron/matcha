@@ -305,6 +305,8 @@ const mutations = {
       role: data.role,
       visited: data.visited,
       is_completed: data.is_completed,
+      latitude: data.latitude,
+      longitude: data.longtitude,
       //visibility: data.visibility,
       likes: data.likes,
       likers: data.likers,

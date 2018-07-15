@@ -1,11 +1,46 @@
 const async = require('async')
 const jwt = require('jsonwebtoken')
 const lodash = require('lodash')
+const axios = require('axios')
 
 const User = require('../models/user')
 const Like = require('../models/likes')
 const Image = require('../models/image')
 const mailController = require('./mailController')
+
+function searchLocation(updateUser, user, callback) {
+  if (updateUser.zip !== user.zip
+      || updateUser.city !== user.city
+      || (updateUser.zip !== '' && !user.latitude)
+    )
+  {
+    const params = {
+      country: 'France',
+      postalcode: updateUser.zip,
+      format: 'json',
+    }
+    if(updateUser.city) {
+      params.city = updateUser.city
+    }
+    axios.get(process.env.API_OPENSTREETMAP_SEARCH, {
+      params
+    })
+    .then((resp) => {
+      updateUser.latitude = resp.data[0].lat
+      updateUser.longitude = resp.data[0].lon
+      callback(null, updateUser)
+      return
+
+    })
+    .catch((err) => {
+      callback(err, null)
+      return
+    })
+  } else {
+    callback(null, updateUser)
+  }
+}
+
 
 module.exports = {
   findAll: function(callback){
@@ -61,9 +96,8 @@ module.exports = {
     })
   },
   findCompleteByUsername: function(username, callback) {
-    console.log('findCompleteByUsername')
     User.findOne({username: username})
-      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout')
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout latitude longitude')
       .populate({
         path: 'avatar.image'
       })
@@ -210,15 +244,27 @@ module.exports = {
     })
   },
 
-  update: function (user, callback){
-    User.findOneAndUpdate({username: user.username}, user, {new: true}, function(err, newUser) {
+  update: function (updateUser, callback){
+    User.find({username: updateUser.username}, function(err, user) {
       if (err){
         callback(err, null)
         return
       }
-      callback(null, {
-        success: 1,
-        data: newUser
+      searchLocation(updateUser, user, function(err, updateUser) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, {
+            success: 1,
+            data: newUser
+          })
+        })
       })
     })
   },

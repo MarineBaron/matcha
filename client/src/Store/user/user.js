@@ -161,7 +161,9 @@ const mutations = {
         orientation: data.orientation,
         interests: data.interests,
         avatar: data.avatar,
-        gallery: data.gallery
+        gallery: data.gallery,
+        latitude: data.latitude,
+        longitude: data.longitude
       })
     }
   },

@@ -64,7 +64,7 @@ module.exports = {
 
   profile: function(id, callback) {
     User.findById(id)
-    .select('_id username role email visited is_completed firstname lastname age resume city zip visibility last_logout')
+    .select('_id username role email visited is_completed firstname lastname age resume city zip visibility last_logout latitude longitude')
     .populate({
       path: 'avatar.image'
     })
