@@ -125,7 +125,9 @@ module.exports = {
             likers: likers ? likers : [],
             friends: friends ? friends : [],
             notifications: results.notifications.data.filter(n => !n.read),
-            last_logout: user.last_logout
+            last_logout: user.last_logout,
+            latitude: user.latitude,
+            longitude: user.longitude
           }
           callback(null, {
             success: 1,
