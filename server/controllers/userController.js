@@ -381,6 +381,29 @@ module.exports = {
     })
   },
 
+  findMatch: function(username, callback) {
+    User.findOne({username: username}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      User.find({
+        is_completed: true,
+        gender: {$in: user.orientation}
+      }, function(err, users) {
+        if (err) {
+          callback(err, null)
+          return
+        }
+        
+        callback(null, {
+          success: 1,
+          data: users
+        })
+      })
+    })
+  },
+
 
 
   sendEmailConfirmation: function(user, authToken) {
