@@ -16,6 +16,7 @@
     "codes-postaux": "^2.1.0",
     "dotenv": "^6.0.0",
     "ol": "^5.0.3",
+    "ol-layerswitcher": "^2.0.0",
     "popper.js": "^1.12.9",
     "vicopo": "^1.1.8",
     "vue": "^2.5.3",

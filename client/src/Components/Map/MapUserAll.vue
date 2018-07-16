@@ -21,16 +21,18 @@ import View from 'ol/View'
 import Overlay from 'ol/Overlay'
 import LayerGroup from 'ol/layer/Group'
 import TileLayer from 'ol/layer/Tile'
-import OSM from 'ol/source/OSM.js'
+import OSM from 'ol/source/OSM'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import Collection from 'ol/Collection'
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { boundingExtent } from 'ol/extent'
-import {transform} from 'ol/proj'
+import { transform } from 'ol/proj'
+//import LayerSwitcher from 'ol-layerswitcher'
 import 'ol/ol.css'
+import 'ol-layerswitcher/src/ol-layerswitcher.css'
 
 import UserListItem from '../User/All/UserListItem.vue'
 
@@ -110,6 +112,7 @@ export default {
            title: 'Base maps',
            layers: [
              new TileLayer({
+               type: 'base',
                source: new OSM()
              })
            ]

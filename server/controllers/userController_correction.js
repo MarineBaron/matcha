@@ -5,8 +5,9 @@ const axios = require('axios')
 
 const User = require('../models/user')
 // GASTON 12 : Ajouter les modèles exigés
-// à toi de jouer
-
+const Gender = require('../models/gender')
+const Interest = require('../models/interest')
+//
 const Like = require('../models/likes')
 const Image = require('../models/image')
 const mailController = require('./mailController')
@@ -246,11 +247,40 @@ module.exports = {
       })
     })
   },
-
+  
   // GASTON 11 : ceation d'une méthode getGendersInterests
   // cette méthode utilise async.parallel pour rechercher les 2 infos
   getGendersInterests: function(callback) {
-    // A toi de jouer !
+    // on fait les 2 requetes en parallele
+    async.parallel({
+      // cette requete renvoie les genders, si pas d'erreur
+      genders: (callback) => {
+        Gender.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      // cette requete renvoie les interests, si pas d'erreur
+      interests: (callback) => {
+        Interest.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      }
+      // lorsque les 2 requetes ont été exécutées, on peut retourner le résultat final
+    }, function(err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, results)
+    })
   },
 
   update: function (updateUser, callback){
