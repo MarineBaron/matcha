@@ -19,7 +19,8 @@
 import Map from 'ol/Map'
 import View from 'ol/View'
 import Overlay from 'ol/Overlay'
-import TileLayer from 'ol/layer/Tile.js'
+import LayerGroup from 'ol/layer/Group'
+import TileLayer from 'ol/layer/Tile'
 import OSM from 'ol/source/OSM.js'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -90,7 +91,7 @@ export default {
   components: {
     UserListItem
   },
-  props: ['user', 'status','items'],
+  props: ['type', 'user', 'status', 'items'],
   data() {
     return {
       map: null,
@@ -105,9 +106,19 @@ export default {
     this.map = new Map({
       target: 'map',
       layers: [
-        new TileLayer({
-          source: new OSM()
-        })
+         new LayerGroup({
+           title: 'Base maps',
+           layers: [
+             new TileLayer({
+               source: new OSM()
+             })
+           ]
+         }),
+         new LayerGroup({
+           title: 'Vector maps',
+           layers: []
+         })
+        ,
       ],
       view: new View({
         projection: 'EPSG:3857',
@@ -116,10 +127,13 @@ export default {
       }),
     })
 
+    const layers = new Collection()
     const names = ['all','bot', 'me', 'friends', 'likers', 'likes', 'other']
     names.forEach(name => {
       const layer = new VectorLayer({
+        title: name,
         name: name,
+        visible: false,
         source: new VectorSource({
           projection: 'EPSG:4326'
         }),
@@ -132,10 +146,18 @@ export default {
       } else {
         this.names.push(name)
       }
-      this.map.addLayer(layer)
+      layers.push(layer)
     })
 
-    if(this.status === 'success') {
+    let group
+    this.map.getLayerGroup().getLayers().forEach(l => {
+      if (l.get('title') === 'Vector maps') {
+        group = l
+      }
+    })
+    group.setLayers(layers)
+
+    if(this.type === 'user') {
       this.setFeatures()
     }
 
@@ -177,7 +199,7 @@ export default {
   },
   watch: {
     status(n, o) {
-      if(n !== o && n === 'success') {
+      if(this.type === 'admin' && n !== o && n === 'success') {
         this.setFeatures()
       }
     }
@@ -185,13 +207,13 @@ export default {
   methods: {
     setFeatures() {
       let features = []
-      if (this.items) {
+      if (this.type === 'admin') {
         this.items.filter(i => i.latitude !== undefined).forEach(i => {
           let name = null
-          if (i.username === username) {
+          if (i.username === 'admin') {
             name = 'me'
-          } else if (i.relation) {
-            name = i.relations
+          } else if (i.bot) {
+            name = 'bot'
           }
           features.push(
             new Feature({
@@ -203,7 +225,7 @@ export default {
             })
           )
         })
-      } else if (this.user) {
+      } else {
         if(this.user.latitude !== undefined) {
           features.push(new Feature({
             name : 'me',
@@ -234,9 +256,14 @@ export default {
         })
       }
       const view = this.map.getView()
-      const layers = this.map.getLayers()
+      let group
+      this.map.getLayerGroup().getLayers().forEach(l => {
+        if (l.get('title') === 'Vector maps') {
+          group = l
+        }
+      })
+      const layers = group.getLayers()
       let layerAll
-      //récupératioon des names des layers
       layers.forEach(layer => {
         if (layer.get('name') === 'all') {
           layerAll = layer

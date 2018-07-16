@@ -8,7 +8,7 @@
         <admin-menu :status="status"/>
       </b-col>
     </b-row>
-    <map-admin username="admin" :status="status" :items="items" />
+    <map-user-all type="admin" :status="status" :items="items" />
   </b-container>
 </template>
 
@@ -16,13 +16,13 @@
   import callApi from '../../Api/callApi'
   import AdminMenu from './Menu/AdminMenu.vue'
   import UserListContainer from './Content/UserListContainer.vue'
-  import MapAdmin from '../Map/MapAdmin.vue'
+  import MapUserAll from '../Map/MapUserAll.vue'
 
   export default {
     components: {
       AdminMenu,
       UserListContainer,
-      MapAdmin
+      MapUserAll
     },
     data() {
       return ({
