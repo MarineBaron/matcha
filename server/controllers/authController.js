@@ -64,7 +64,7 @@ module.exports = {
 
   profile: function(id, callback) {
     User.findById(id)
-    .select('_id username avatar gallery role email visited is_completed firstname lastname age resume gender orientation interests city zip visibility last_logout latitude longitude')
+    .select('_id username avatar gallery role email visited is_completed firstname lastname age resume gender orientation interests city zip visibility last_logout location is_loc')
     .populate({
       path: 'avatar.image'
     })
@@ -126,8 +126,8 @@ module.exports = {
             friends: friends ? friends : [],
             notifications: results.notifications.data.filter(n => !n.read),
             last_logout: user.last_logout,
-            latitude: user.latitude,
-            longitude: user.longitude
+            location: user.location,
+            is_loc: user.is_loc
           }
           callback(null, {
             success: 1,

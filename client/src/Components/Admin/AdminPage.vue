@@ -2,10 +2,10 @@
   <b-container fluid>
     <b-row>
       <b-col cols="8">
-        <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"/>
+        <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"  @delete-user="deleteUser"/>
       </b-col>
       <b-col cols="4">
-        <admin-menu :status="status"/>
+        <admin-menu :status="status" @delete-bots="deleteBots"  @create-bots="createBots"/>
       </b-col>
     </b-row>
     <map-user-all type="admin" :status="status" :items="items" />
@@ -66,6 +66,7 @@
         })
       },
       deleteUser(id) {
+        console.log('deleteUser')
         if(this.status === 'success') {
           this.status = 'loading'
           callApi({url: '/admin/delete/' + id})
@@ -88,6 +89,7 @@
         }
       },
       deleteBots() {
+        console.log('deleteBots')
         if(this.status === 'success') {
           this.status = 'loading'
           callApi({url: '/admin/deletebots'})

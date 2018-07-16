@@ -64,8 +64,20 @@ const UserSchema = new mongoose.Schema({
       type: String,
       enum: ["LoggedOut", "LoggedIn", "Absent", "Buzy" ]
   },
-  latitude: Number,
-  longitude: Number,
+  location: {
+    type: {
+      type: String,
+      default: 'Point'
+    },
+    coordinates: {
+      type: Array,
+      default: [0, 0]
+    }
+  },
+  is_loc: {
+    type: Boolean,
+    default: false
+  },
   avatar: {
     image: {
       type: mongoose.Schema.Types.ObjectId,
@@ -97,7 +109,7 @@ const UserSchema = new mongoose.Schema({
     default: false
   }
 })
-
+UserSchema.index({'location' : "2dsphere"})
 
 UserSchema.methods.comparePassword = function comparePassword(password, callback) {
   bcrypt.compare(password, this.password, callback)

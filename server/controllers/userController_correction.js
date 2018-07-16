@@ -15,7 +15,7 @@ const mailController = require('./mailController')
 function searchLocation(updateUser, user, callback) {
   if (updateUser.zip !== user.zip
       || updateUser.city !== user.city
-      || (updateUser.zip !== '' && !user.latitude)
+      || (updateUser.zip !== '' && !user.is_loc)
     )
   {
     const params = {
@@ -30,8 +30,11 @@ function searchLocation(updateUser, user, callback) {
       params
     })
     .then((resp) => {
-      updateUser.latitude = resp.data[0].lat
-      updateUser.longitude = resp.data[0].lon
+      updateUser.location = {
+        type: 'Point',
+        coordinates: [resp.data[0].lon, resp.data[0].lat]
+      }
+      updateUser.is_loc = true
       callback(null, updateUser)
       return
 
@@ -101,7 +104,7 @@ module.exports = {
   },
   findCompleteByUsername: function(username, callback) {
     User.findOne({username: username})
-      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout latitude longitude')
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout location is_loc')
       .populate({
         path: 'avatar.image'
       })
@@ -247,7 +250,7 @@ module.exports = {
       })
     })
   },
-  
+
   // GASTON 11 : ceation d'une méthode getGendersInterests
   // cette méthode utilise async.parallel pour rechercher les 2 infos
   getGendersInterests: function(callback) {

@@ -8,7 +8,6 @@ const axios = require('axios')
 const countLinesInFile = require('count-lines-in-file')
 const nthline = require('nthline')
 const path = require('path')
-//const readStream = require('fs-readstream-seek')
 
 const User = require('../../models/user')
 const Image = require('../../models/image')
@@ -56,6 +55,7 @@ function getLocalisation(nbLines) {
           city: resp.data.nom,
           coordinates:resp.data.centre.coordinates
         }
+        console.log('loc', loc)
         resolve(loc)
       })
       .catch((err) => resolve(null))
@@ -246,7 +246,12 @@ function updateUser(results, params, user) {
           }
           if (Math.random() > params.nonCompleted) {
             const loc = results.cities[Math.floor(Math.random() * results.cities.length)]
+            const location = {
+              type: 'Point',
+              coordinates: loc.coordinates
+            }
             updateUser = Object.assign({
+              is_loc: true,
               is_completed: true,
               firstname: getAleaName(),
               lastname: getAleaName(),
@@ -260,8 +265,7 @@ function updateUser(results, params, user) {
               }),
               city: loc.city,
               zip: loc.zip,
-              longitude: loc.coordinates[0],
-              latitude: loc.coordinates[1],
+              location: location,
               gender: results.genders[Math.floor(Math.random() * results.genders.length)]._id,
               orientation: orientation,
               interests: interests,
@@ -566,7 +570,7 @@ module.exports = {
     if (data.filters.bot !== null) {
       options.bot = data.filters.bot
     }
-    let queryUsers = User.find(options, '_id username avatar confirmed is_completed bot latitude longitude last_logout')
+    let queryUsers = User.find(options, '_id username avatar confirmed is_completed bot location is_loc last_logout')
     let queryTotal = User.count(options)
     queryUsers
     .populate({

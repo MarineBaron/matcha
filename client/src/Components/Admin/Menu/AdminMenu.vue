@@ -11,7 +11,6 @@
 </template>
 
 <script>
-  import callApi from '../../../Api/callApi'
   export default {
     props: ['status'],
   }

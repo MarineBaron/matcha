@@ -113,7 +113,9 @@ export default {
            layers: [
              new TileLayer({
                type: 'base',
-               source: new OSM()
+               source: new OSM({
+                 crossOrigin: null
+               })
              })
            ]
          }),
@@ -211,7 +213,7 @@ export default {
     setFeatures() {
       let features = []
       if (this.type === 'admin') {
-        this.items.filter(i => i.latitude !== undefined).forEach(i => {
+        this.items.filter(i => i.is_loc === true).forEach(i => {
           let name = null
           if (i.username === 'admin') {
             name = 'me'
@@ -221,7 +223,7 @@ export default {
           features.push(
             new Feature({
               name : name,
-              geometry: new Point(transform([i.longitude, i.latitude], 'EPSG:4326', 'EPSG:3857')),
+              geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
               properties: {
                 user: i
               }
@@ -229,10 +231,10 @@ export default {
           )
         })
       } else {
-        if(this.user.latitude !== undefined) {
+        if(this.user.is_loc === true) {
           features.push(new Feature({
             name : 'me',
-            geometry: new Point(transform([this.user.longitude, this.user.latitude], 'EPSG:4326', 'EPSG:3857')),
+            geometry: new Point(transform(this.user.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
             properties: {
               user: this.user
             }
@@ -243,11 +245,11 @@ export default {
         relations.forEach(name => {
           if(this.user[name] && this.user[name]) {
             this.user[name].forEach(i => {
-              if (i.latitude) {
+              if (i.is_loc) {
                 features.push(
                   new Feature({
                     name : name,
-                    geometry: new Point(transform([i.longitude, i.latitude], 'EPSG:4326', 'EPSG:3857')),
+                    geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
                     properties: {
                       user: i
                     }

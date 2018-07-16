@@ -37,7 +37,6 @@
           actor="admin"
           :actions="['view']"
         />
-        <!-- <b-link :to="{path: '/user/' + data.item.username}">{{data.item.username}}</b-link> -->
       </template>
       <template slot="confirmed" slot-scope="data">
         <icon v-if="data.item.confirmed" name="check" color="green" />
@@ -52,7 +51,7 @@
         <icon v-else name="times" color="red" />
       </template>
       <template slot="actions" slot-scope="data">
-        <b-link v-if="data.item.bot" @click.prevent="$emit('delete-user' ,data.item._id)" title="Supprimer">
+        <b-link @click="$emit('delete-user', data.item._id)" title="Supprimer">
           <icon name="trash"></icon>
         </b-link>
       </template>

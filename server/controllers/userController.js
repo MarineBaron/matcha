@@ -14,7 +14,7 @@ const mailController = require('./mailController')
 function searchLocation(updateUser, user, callback) {
   if (updateUser.zip !== user.zip
       || updateUser.city !== user.city
-      || (updateUser.zip !== '' && !user.latitude)
+      || (updateUser.zip !== '' && user.is_loc !== true)
     )
   {
     const params = {
@@ -29,8 +29,11 @@ function searchLocation(updateUser, user, callback) {
       params
     })
     .then((resp) => {
-      updateUser.latitude = resp.data[0].lat
-      updateUser.longitude = resp.data[0].lon
+      updateUser.location = {
+        type: 'Point',
+        coordinates: [parseFloat(resp.data[0].lon), parseFloat(resp.data[0].lat)]
+      }
+      updateUser.is_loc = true
       callback(null, updateUser)
       return
 
@@ -100,7 +103,7 @@ module.exports = {
   },
   findCompleteByUsername: function(username, callback) {
     User.findOne({username: username})
-      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout latitude longitude')
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout location is_loc')
       .populate({
         path: 'avatar.image'
       })
@@ -264,6 +267,7 @@ module.exports = {
           callback(err, null)
           return
         }
+        console.log(updateUser)
         User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
           if (err){
             callback(err, null)
@@ -395,7 +399,7 @@ module.exports = {
           callback(err, null)
           return
         }
-        
+
         callback(null, {
           success: 1,
           data: users
