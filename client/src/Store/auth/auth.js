@@ -6,6 +6,7 @@ import {
   AUTH_LOGIN_ERROR,
   AUTH_LOGIN_SUCCESS,
   AUTH_LOGOUT,
+  AUTH_UNLOAD,
   AUTH_PROFILE_REQUEST,
   AUTH_PROFILE_ERROR,
   AUTH_PROFILE_SUCCESS,
@@ -133,6 +134,19 @@ const actions = {
         commit(AUTH_LOGOUT)
         // suppression des variables dans les storages
         removeStorage()
+        resolve()
+      }, (err) => {
+        reject()
+      })
+    })
+  },
+  [AUTH_UNLOAD]: ({commit, dispatch}, username) => {
+    return new Promise((resolve, reject) => {
+      callApi({url: '/auth/logout', data: {username: username}, method: 'POST'})
+      .then((resp) => {
+        commit(AUTH_LOGOUT)
+        // suppression des variables dans les storages
+        // removeStorage()
         resolve()
       }, (err) => {
         reject()
@@ -269,7 +283,8 @@ const mutations = {
         : (localStorage.getItem('token') ? localStorage.getItem('token') : '')
     state.username = sessionStorage.getItem('username')
         ? sessionStorage.getItem('username')
-        : (localStorage.getItem('username') ? localStorage.getItem('username') : '')
+        : (localStorage.getItem('username') ? localStorage.getItem('username')
+        : '')
   },
   [AUTH_CHECKAUTH_SUCCESS]: (state) => {
     state.status = 'success'
@@ -364,10 +379,9 @@ const mutations = {
   [AUTH_RELATION_OTHER]: (state, data) => {
     state.status = 'success'
     if (data) {
-      console.log(AUTH_RELATION_OTHER, data)
       let index
       if (data.actor.username === state.profile.username) {
-        state.profile.store = data.stores.actor
+        state.profile.score = data.scores.actor
         switch(data.action) {
           case 'like':
             state.profile.likes.push(data.receptor)
@@ -389,7 +403,7 @@ const mutations = {
           break
         }
       } else {
-        state.profile.store = data.stores.receptor
+        state.profile.score = data.scores.receptor
         switch(data.action) {
           case 'like':
             index = state.profile.likes.findIndex(u => u.username === data.actor.username)

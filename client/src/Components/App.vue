@@ -26,7 +26,7 @@
 
 <script>
 import {mapGetters, mapState} from 'vuex'
-import { AUTH_LOGOUT, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-types'
+import { AUTH_UNLOAD, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-types'
 import { CHAT_CLOSE_ALLROOMS } from '../Store/chat/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
@@ -63,7 +63,7 @@ export default {
       if (this.token) {
         this.$socket.emit('AUTH_LOGOUT', this.getProfile)
         this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
-        this.$store.dispatch(AUTH_LOGOUT, this.getProfile.username)
+        this.$store.dispatch(AUTH_UNLOAD, this.getProfile.username)
       }
     },
   },
