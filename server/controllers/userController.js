@@ -510,23 +510,183 @@ module.exports = {
     })
   },
 
-  findMatch: function(username, callback) {
-    User.findOne({username: username}, function(err, user) {
+  getInfos: function(username, callback) {
+    console.log('getInfos')
+    async.parallel({
+      genders: (callback) => {
+        Gender.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      interests: (callback) => {
+        Interest.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      agemax: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'age': -1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$age'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      },
+      agemin: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'age': 1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$age'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      },
+      distances: (callback) => {
+        User.findOne({username: username}, function(err, user) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          let query = {
+            username: {$ne: user.username},
+            is_completed: true,
+            is_loc: true,
+          }
+          User.aggregate([
+            {
+             $geoNear: {
+                near: { type: "Point", coordinates: user.location.coordinates },
+                distanceField: "dist.calculated",
+                query: query,
+                distanceMultiplier: 1.0/6378.1,
+                spherical: true,
+              }
+            }
+          ]).exec(function(err, users) {
+            if (err) {
+              callback(err, null)
+              return
+            }
+            if (!users.length) {
+              callback(null, [0,0])
+              return
+            }
+            callback(null, [
+              Math.floor(users[0].dist.calculated),
+              Math.ceil(users[users.length - 1].dist.calculated)
+            ])
+          })
+        })
+      },
+      scoremax: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'score': -1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$score'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      },
+      scoremin: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'score': 1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$score'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      }
+    }, function(err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        genders: results.genders,
+        interests: results.interests,
+        ages: [results.agemin, results.agemax],
+        distances: results.distances,
+        scores: [results.scoremin, results.scoremax]
+      })
+    })
+  },
+
+  findMatch: function(body, callback) {
+    User.findOne({username: body.username}, function(err, user) {
+      console.log('findMatch', body)
       if (err) {
         callback(err, null)
         return
+      }
+      if (!user.is_loc) {
+        callback(null, {
+          success: 1,
+          data: []
+        })
+        return
+      }
+      let query = {
+        username: {$ne: user.username},
+        is_completed: true,
+        is_loc: true,
+        gender: {$in: user.orientation},
+        age: {
+          $gte: body.ages[0],
+          $lte: body.ages[1]
+        },
+        score: {
+          $gte: body.scores[0],
+          $lte: body.scores[1]
+        }
       }
       User.aggregate([
         {
          $geoNear: {
             near: { type: "Point", coordinates: user.location.coordinates },
             distanceField: "dist.calculated",
-            query: {
-              username: {$ne: user.username},
-              is_completed: true,
-              is_loc: true,
-              gender: {$in: user.orientation},
-            },
+            query: query,
+            distanceMin: body.distances[0],
+            distanceMax: body.distances[1],
             distanceMultiplier: 1.0/6378.1,
             spherical: true
           }
@@ -537,7 +697,9 @@ module.exports = {
           return
         }
 
-        usersCalcMatching(users, user)
+        usersCalcMatching(users.filter(u =>
+          u.interests.some(i => body.interests.includes(i._id.toString()))
+        ), user)
         .then((resp) => {
 
           callback(null, {

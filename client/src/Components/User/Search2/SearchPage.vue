@@ -6,7 +6,12 @@
         <search-result type="match" :status="statusMatch" :users="matches" />
       </b-col>
       <b-col cols="4">
-        <search-form :status="statusSearch" @change-filter="changeFilters"/>
+        <search-form
+          v-if="genderOptions.length"
+          :status="statusSearch"
+          :genderOptions="genderOptions"
+          :interestOptions="interestOptions"
+          @change-filters="changeFilters"/>
       </b-col>
     </b-row>
   </b-container>
@@ -29,7 +34,9 @@
         statusSearch: '',
         matches: [],
         searches: [],
-        filters: [],
+        filters: {},
+        genderOptions: [],
+        interestOptions: []
       }
     },
     computed: {
@@ -38,18 +45,42 @@
       })
     },
     mounted() {
-      this.fetchMatch()
+      this.getInfos()
     },
     methods: {
       changeFilters(filters) {
         this.filters = filters
-        this.fetchSearch()
+        //this.fetchSearch()
+        this.fetchMatch()
+      },
+      getInfos() {
+        callApi({url: '/user/infos/' + this.username})
+        .then((resp) => {
+          this.genderOptions = resp.data.genders.map(o => {
+            return {value: o._id, text: o.name}
+          })
+          this.interestOptions = resp.data.interests.map(o => {
+            return {value: o._id, text: o.name}
+          })
+          this.ageLimits = resp.data.ages
+          this.distanceLimits = resp.data.distances
+          this.filters = {
+            genders: this.genderOptions.map(o => o.value),
+            interests: this.interestOptions.map(o => o.value),
+            ages: resp.data.ages,
+            distances: resp.data.distances,
+            scores: resp.data.scores
+          }
+          this.fetchMatch()
+        })
+        .catch((err) => {
+          console.log(err)
+        })
       },
       fetchSearch() {
         this.statusSearch = 'loading'
-        const data = {
-          username: this.username
-        }
+        let data = this.filters
+        data.username = this.username
         callApi({url: '/user/search', data})
         .then((resp) => {
           this.searches = resp.data.data
@@ -63,9 +94,9 @@
       },
       fetchMatch() {
         this.statusMatch = 'loading'
-        const data = {
-            username: this.username
-        }
+        let data = this.filters
+        data.username = this.username
+        console.log('fetchMatch', data)
         callApi({url: '/user/match', data, method: 'POST'})
         .then((resp) => {
           console.log(resp.data)
