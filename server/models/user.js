@@ -59,7 +59,7 @@ const UserSchema = new mongoose.Schema({
   },
   resume: String,
   city: String,
-  zip: Number,
+  zip: String,
   visibility: {
       type: String,
       enum: ["LoggedOut", "LoggedIn", "Absent", "Buzy" ]
