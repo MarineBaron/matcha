@@ -3,15 +3,16 @@
     <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
     <b-navbar-brand :to="{path: '/'}">Matcha</b-navbar-brand>
     <b-collapse is-nav id="nav_collapse">
-      <b-navbar-nav v-for="link in links" :key="links.url">
-        <b-nav-item v-if="!link.needAuthenticated||isAuthenticated" :to="{path: link.path}">{{link.text}}</b-nav-item>
+      <b-navbar-nav>
+        <b-nav-item  v-for="link in links" :key="links.url" v-if="!link.needAuthenticated||isAuthenticated" :to="{path: link.path}">{{link.text}}</b-nav-item>
+        <b-nav-item v-if="getRole === 'admin'" :to="{path: '/admin'}">Gestion</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <login-link v-if="!isAuthenticated"></login-link>
         <register-link v-if="!isAuthenticated"></register-link>
         <profile-link v-if="isAuthenticated" ></profile-link>
         <logout-link v-if="isAuthenticated" ></logout-link>
-        <b-nav-item v-if="getRole === 'admin'" :to="{path: '/admin'}">Admin</b-nav-item>
+
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
@@ -37,8 +38,8 @@ export default {
   data () {
     return {
       links: [
-        {text: 'Recherche', path: '/search'},
-        {text: 'Forum', path: '/forum'},
+        {text: 'Recherche', path: '/search', needAuthenticated: true},
+        {text: 'Forum', path: '/forum', needAuthenticated: true},
         {text: 'A propos', path: '/about'}
       ]
     }

@@ -294,6 +294,7 @@ const mutations = {
   },
   [AUTH_LOGOUT]: (state) => {
     state.token = ''
+    state.profile = {}
   },
   [AUTH_PROFILE_REQUEST]: (state) => {
     state.status = 'loading'

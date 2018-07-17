@@ -1,19 +1,23 @@
 <template>
-  <b-container fluid>
+  <b-container fluid id="admin-users-table">
     <b-row>
-      <b-col md="6" class="my-1">
+      <b-col sm="4" class="my-1">
         <b-form-group>
-          <label for="radios-confirmed">Confirmé :</label>
+          <label for="radios-confirmed">Confirmé</label>
           <b-form-radio-group  plain id="radios-confirmed" :options="options" name="confirmed" @click.native="filterClick" :disabled="status !== 'success'">
           </b-form-radio-group>
         </b-form-group>
+      </b-col>
+      <b-col sm="4" class="my-1">
         <b-form-group>
-          <label for="radios-is_completed">Complet :</label>
+          <label for="radios-is_completed">Complet</label>
           <b-form-radio-group  plain id="radios-is_completed"  :options="options" name="is_completed" @click.native="filterClick" :disabled="status !== 'success'">
           </b-form-radio-group>
         </b-form-group>
+      </b-col>
+      <b-col sm="4" class="my-1">
         <b-form-group>
-          <label for="radios-bot">Bot :</label>
+          <label for="radios-bot">Bot</label>
           <b-form-radio-group  plain id="radios-bot" :options="options" name="bot" @click.native="filterClick" :disabled="status !== 'success'">
           </b-form-radio-group>
         </b-form-group>
@@ -53,15 +57,15 @@
       </template>
     </b-table>
     <b-row>
-      <b-col md="6" class="my-1">
-        <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" class="my-0" @change="changePagination"/>
+      <b-col>
+        <b-pagination align="center" :total-rows="totalRows" :per-page="perPage" v-model="currentPage" class="my-0" @change="changePagination"/>
       </b-col>
     </b-row>
   </b-container>
 </template>
 
 <script>
-  import UserListItem from '../../User/All/UserListItem.vue'
+  import UserListItem from '../User/All/UserListItem.vue'
   export default {
     components: {
       UserListItem
@@ -130,3 +134,18 @@
     }
   }
 </script>
+
+<style scoped>
+  #admin-users-table {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .my-1 {
+    text-align: center;
+  }
+
+  .my-1 label {
+    font-weight: bold;
+  }
+</style>

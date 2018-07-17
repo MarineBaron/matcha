@@ -1,5 +1,6 @@
 <template>
   <b-container fluid>
+    <h2>Gestion des utilisateurs</h2>
     <admin-menu :status="status" @delete-bots="deleteBots"  @create-bots="createBots"/>
     <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"  @delete-user="deleteUser"/>
     <map-user-all type="admin" :status="status" :items="items" />
@@ -8,8 +9,8 @@
 
 <script>
   import callApi from '../../Api/callApi'
-  import AdminMenu from './Menu/AdminMenu.vue'
-  import UserListContainer from './Content/UserListContainer.vue'
+  import AdminMenu from './AdminMenu.vue'
+  import UserListContainer from './UserListContainer.vue'
   import MapUserAll from '../Map/MapUserAll.vue'
 
   export default {
