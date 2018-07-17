@@ -164,6 +164,7 @@ const mutations = {
         gallery: data.gallery,
         location: data.location,
         is_loc: data.is_loc,
+        score: data.score
       })
     }
   },

@@ -19,8 +19,8 @@ router.post('/users', verifyAdmin, function(req, res, next) {
 })
 
 /* GET delete one */
-router.get('/delete/:id', verifyAdmin, function(req, res, next) {
-  adminController.deleteOne(req.params.id, function (err, result) {
+router.get('/delete/:username', verifyAdmin, function(req, res, next) {
+  adminController.deleteOne(req.params.username, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({

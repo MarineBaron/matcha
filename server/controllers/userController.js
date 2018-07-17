@@ -6,6 +6,8 @@ const axios = require('axios')
 const User = require('../models/user')
 // GASTON 12 : Ajouter les modèles exigés
 // à toi de jouer
+const Gender = require('../models/gender')
+const Interest = require('../models/interest')
 
 const Like = require('../models/likes')
 const Image = require('../models/image')
@@ -45,6 +47,64 @@ function searchLocation(updateUser, user, callback) {
   } else {
     callback(null, updateUser)
   }
+}
+
+function nbInterests(iA, iB) {
+  let nb = 0
+  iA.forEach(ui => {
+    iB.forEach(i => {
+      console.log(ui, i)
+      if (ui.toString() == i) {
+        nb++
+      }
+    })
+  })
+  return nb
+}
+
+function userCalcMatching(userA, user) {
+
+  userA.communInterests = nbInterests(userA.interests, user.interests)
+  userA.distance = userA.dist.calculated
+  const factDist = userA.distance < 10 ? 5 : (userA.distance < 50 ? 3 : (userA.distance < 500 ? 1 : 0))
+  userA.matching = factDist + 2 * userA.communInterests
+}
+
+function usersCalcMatching(users, user) {
+  return new Promise((resolve, reject) => {
+    return Promise.all(users.map((u) => userCalcMatching(u, user)))
+    .then(() => {resolve(users)})
+    .catch((err) => reject(err))
+  })
+}
+
+function updateScore(user, callback) {
+  console.log('updateScore', user)
+  async.parallel({
+    likes: (callback) => {
+      user.getLikes(user._id, callback)
+    },
+    likers: (callback) => {
+      user.getLikers(user._id, callback)
+    },
+  }, function(err, results) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
+    const likes = lodash.differenceBy(results.likes, friends, 'username')
+    const likers = lodash.differenceBy(results.likers, friends, 'username')
+    const score = friends.length * 2 + likers.length
+    User.findByIdAndUpdate(user._id, {score: score}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+    })
+    callback(null, score)
+    return
+  })
 }
 
 
@@ -103,7 +163,7 @@ module.exports = {
   },
   findCompleteByUsername: function(username, callback) {
     User.findOne({username: username})
-      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout location is_loc')
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout location is_loc score')
       .populate({
         path: 'avatar.image'
       })
@@ -157,7 +217,9 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
-            last_logout: user.last_logout
+            last_logout: user.last_logout,
+            location: user.location,
+            score: user.score
           }
           callback(null, {
             success: 1,
@@ -253,11 +315,40 @@ module.exports = {
   // GASTON 11 : ceation d'une méthode getGendersInterests
   // cette méthode utilise async.parallel pour rechercher les 2 infos
   getGendersInterests: function(callback) {
-    // A toi de jouer !
+    // on fait les 2 requetes en parallele
+    async.parallel({
+      // cette requete renvoie les genders, si pas d'erreur
+      genders: (callback) => {
+        Gender.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      // cette requete renvoie les interests, si pas d'erreur
+      interests: (callback) => {
+        Interest.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      }
+      // lorsque les 2 requetes ont été exécutées, on peut retourner le résultat final
+    }, function(err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, results)
+    })
   },
 
   update: function (updateUser, callback){
-    User.find({username: updateUser.username}, function(err, user) {
+    User.findOne({username: updateUser.username}, function(err, user) {
       if (err){
         callback(err, null)
         return
@@ -267,15 +358,21 @@ module.exports = {
           callback(err, null)
           return
         }
-        console.log(updateUser)
-        User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
+        updateScore(user, function(err, score) {
           if (err){
             callback(err, null)
             return
           }
-          callback(null, {
-            success: 1,
-            data: newUser
+          console.log(updateUser)
+          User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
+            if (err){
+              callback(err, null)
+              return
+            }
+            callback(null, {
+              success: 1,
+              data: newUser
+            })
           })
         })
       })
@@ -334,11 +431,25 @@ module.exports = {
                 if (result) {
                   data.action = 'relike'
                 }
-                callback(null, {
-                  success: 1,
-                  data: data
+                async.parallel({
+                  actor: (callback) => {
+                    updateScore(data.actor, callback)
+                  },
+                  receptor: (callback) => {
+                    updateScore(data.receptor, callback)
+                  }
+                }, function(err, results) {
+                  if (err){
+                    callback(err, null)
+                    return
+                  }
+                  data.scores = results
+                  callback(null, {
+                    success: 1,
+                    data: data
+                  })
+                  return
                 })
-                return
               })
             })
           })
@@ -361,11 +472,25 @@ module.exports = {
                 callback(err, null)
                 return
               }
-              callback(null, {
-                success: 1,
-                data: data
+              async.parallel({
+                actor: (callback) => {
+                  updateScore(data.actor, callback)
+                },
+                receptor: (callback) => {
+                  updateScore(data.receptor, callback)
+                }
+              }, function(err, results) {
+                if (err){
+                  callback(err, null)
+                  return
+                }
+                data.scores = results
+                callback(null, {
+                  success: 1,
+                  data: data
+                })
+                return
               })
-              return
             })
           })
         break
@@ -391,18 +516,37 @@ module.exports = {
         callback(err, null)
         return
       }
-      User.find({
-        is_completed: true,
-        gender: {$in: user.orientation}
-      }, function(err, users) {
+      User.aggregate([
+        {
+         $geoNear: {
+            near: { type: "Point", coordinates: user.location.coordinates },
+            distanceField: "dist.calculated",
+            query: {
+              username: {$ne: user.username},
+              is_completed: true,
+              is_loc: true,
+              gender: {$in: user.orientation},
+            },
+            distanceMultiplier: 1.0/6378.1,
+            spherical: true
+          }
+        }
+      ]).exec(function(err, users) {
         if (err) {
           callback(err, null)
           return
         }
 
-        callback(null, {
-          success: 1,
-          data: users
+        usersCalcMatching(users, user)
+        .then((resp) => {
+
+          callback(null, {
+            success: 1,
+            data: resp.sort((a, b) => b.matching - a.matching).slice(0, 9)
+          })
+        })
+        .catch((err) => {
+          callback(err, null)
         })
       })
     })

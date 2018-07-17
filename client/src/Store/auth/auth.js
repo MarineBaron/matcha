@@ -310,7 +310,8 @@ const mutations = {
       likes: data.likes,
       likers: data.likers,
       friends: data.friends,
-      notifications: data.notifications
+      notifications: data.notifications,
+      score: data.score,
     })
   },
   [AUTH_PROFILE_ERROR]: (state) => {

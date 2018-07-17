@@ -1,13 +1,7 @@
 <template>
   <b-container fluid>
-    <b-row>
-      <b-col cols="8">
-        <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"  @delete-user="deleteUser"/>
-      </b-col>
-      <b-col cols="4">
-        <admin-menu :status="status" @delete-bots="deleteBots"  @create-bots="createBots"/>
-      </b-col>
-    </b-row>
+    <admin-menu :status="status" @delete-bots="deleteBots"  @create-bots="createBots"/>
+    <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"  @delete-user="deleteUser"/>
     <map-user-all type="admin" :status="status" :items="items" />
   </b-container>
 </template>
@@ -65,11 +59,10 @@
           this.totalRows = 0
         })
       },
-      deleteUser(id) {
-        console.log('deleteUser')
+      deleteUser(username) {
         if(this.status === 'success') {
           this.status = 'loading'
-          callApi({url: '/admin/delete/' + id})
+          callApi({url: '/admin/delete/' + username})
           .then((resp) => {
             this.fetchData()
           }, (err) => {
@@ -89,7 +82,6 @@
         }
       },
       deleteBots() {
-        console.log('deleteBots')
         if(this.status === 'success') {
           this.status = 'loading'
           callApi({url: '/admin/deletebots'})

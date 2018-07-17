@@ -64,7 +64,7 @@
       fetchMatch() {
         this.statusMatch = 'loading'
         const data = {
-            username: 'user1'
+            username: this.username
         }
         callApi({url: '/user/match', data, method: 'POST'})
         .then((resp) => {

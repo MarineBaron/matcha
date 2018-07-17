@@ -107,6 +107,10 @@ const UserSchema = new mongoose.Schema({
   bot: {
     type: Boolean,
     default: false
+  },
+  score: {
+    type: Number,
+    default: 0
   }
 })
 UserSchema.index({'location' : "2dsphere"})
@@ -153,7 +157,7 @@ UserSchema.methods.hashPassword = function hashPassword(next) {
 UserSchema.methods.getLikes = function(id, callback) {
   Like.find({liker: id})
   .populate({
-    select: 'username avatar last_logout latitude longitude',
+    select: 'username avatar last_logout location is_loc score',
     path: 'liked',
     populate: {
       path: 'avatar.image'
@@ -177,7 +181,7 @@ UserSchema.methods.getLikes = function(id, callback) {
 UserSchema.methods.getLikers = function(id, callback) {
   Like.find({liked: id})
   .populate({
-    select: 'username avatar last_logout latitude longitude',
+    select: 'username avatar last_logout location is_loc score',
     path: 'liker',
     populate: {
       path: 'avatar.image'
@@ -200,7 +204,7 @@ UserSchema.methods.getLikers = function(id, callback) {
 
 UserSchema.statics.getItemByUsername = function(username, callback) {
   this.findOne({username: username})
-  .select('_id username avatar last_logout latitude longitude')
+  .select('_id username avatar last_logout location is_loc score')
   .populate({
     path: 'avatar.image'
   })

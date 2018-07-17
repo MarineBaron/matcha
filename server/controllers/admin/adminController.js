@@ -518,6 +518,57 @@ function createRelationsUsers(allUsers, params) {
   })
 }
 
+function updateScore(user) {
+  return new Promise((resolve, reject) =>  {
+    async.parallel({
+      likes: (callback) => {
+        user.getLikes(user._id, callback)
+      },
+      likers: (callback) => {
+        user.getLikers(user._id, callback)
+      },
+    }, function(err, results) {
+      if (err) {
+        reject(err)
+        return
+      }
+      const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
+      const likes = lodash.differenceBy(results.likes, friends, 'username')
+      const likers = lodash.differenceBy(results.likers, friends, 'username')
+      const score = friends.length * 2 + likers.length
+      User.findByIdAndUpdate(user._id, {score: score}, function(err, user) {
+        if (err) {
+          reject(err)
+          return
+        }
+      })
+      resolve(score)
+      return
+    })
+  })
+}
+
+function updateScoreUsers() {
+  return new Promise((resolve, reject) => {
+    User.find({}, function(err, users) {
+      if (err) {
+        reject(err)
+        return
+      }
+      return Promise.all(users.map(u => updateScore(u)))
+      .then(() => {
+        resolve()
+        return
+      })
+      .catch((err) => {
+        reject(err)
+        return
+      })
+    })
+  })
+}
+
+
 function deleteUser(user) {
   return new Promise((resolve, reject) =>  {
     async.parallel({
@@ -570,7 +621,7 @@ module.exports = {
     if (data.filters.bot !== null) {
       options.bot = data.filters.bot
     }
-    let queryUsers = User.find(options, '_id username avatar confirmed is_completed bot location is_loc last_logout')
+    let queryUsers = User.find(options, '_id username avatar confirmed is_completed bot location is_loc last_logout score')
     let queryTotal = User.count(options)
     queryUsers
     .populate({
@@ -599,8 +650,8 @@ module.exports = {
       })
     })
   },
-  deleteOne: function(id, callback) {
-    User.findById(id, '_id username', function(err, user) {
+  deleteOne: function(username, callback) {
+    User.findOne({username: username}, '_id username', function(err, user) {
       if (err) {
         callback(err, null)
         return
@@ -613,8 +664,16 @@ module.exports = {
       }
       deleteUser(user)
       .then(() => {
-        callback(null, {
-          success: 1
+        updateScoreUsers()
+        .then(() => {
+          callback(null, {
+            success: 1
+          })
+          return
+        })
+        .catch(err => {
+          callback(err, null)
+          return
         })
       })
       .catch(err => callback(err, null))
@@ -628,11 +687,22 @@ module.exports = {
       }
       deleteUsers(users)
       .then(() => {
-        callback(null, {
-          success: 1
+        updateScoreUsers()
+        .then(() => {
+          callback(null, {
+            success: 1
+          })
+          return
+        })
+        .catch(err => {
+          callback(err, null)
+          return
         })
       })
-      .catch(err => callback(err, null))
+      .catch(err => {
+        callback(err, null)
+        return
+      })
     })
   },
   createBots: function(callback){
@@ -702,10 +772,17 @@ module.exports = {
                 anonymVisit
               })
               .then(() => {
-                callback(null, {
-                  success: 1
+                updateScoreUsers()
+                .then(() => {
+                  callback(null, {
+                    success: 1
+                  })
+                  return
                 })
-                return
+                .catch((err) => {
+                  callback(err, null)
+                  return
+                })
               })
               .catch((err) => {
                 callback(err, null)

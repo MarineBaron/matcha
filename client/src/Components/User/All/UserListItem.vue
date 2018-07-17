@@ -14,6 +14,7 @@
         :type="action"
         :actor="actor"
         :receptor="item.username"
+        @delete-user="deleteUser"
       />
     </div>
   </div>
@@ -36,6 +37,11 @@
           username: this.item.username,
           last_logout: this.item.last_logout
         }
+      }
+    },
+    methods: {
+      deleteUser(username) {
+        this.$emit('delete-user', username)
       }
     }
   }

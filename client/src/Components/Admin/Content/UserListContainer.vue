@@ -35,7 +35,8 @@
         <user-list-item
           :item="data.item"
           actor="admin"
-          :actions="['view']"
+          :actions="['view', 'delete']"
+          @delete-user="deleteUser"
         />
       </template>
       <template slot="confirmed" slot-scope="data">
@@ -49,11 +50,6 @@
       <template slot="bot" slot-scope="data">
         <icon v-if="data.item.bot" name="check" color="green" />
         <icon v-else name="times" color="red" />
-      </template>
-      <template slot="actions" slot-scope="data">
-        <b-link @click="$emit('delete-user', data.item._id)" title="Supprimer">
-          <icon name="trash"></icon>
-        </b-link>
       </template>
     </b-table>
     <b-row>
@@ -99,10 +95,6 @@
             label: 'Bot',
             sortable: true
           },
-          {
-            key: 'actions',
-            sortable: false
-          }
         ],
         options: [
           {text: 'Indifférent', value: null},
@@ -131,6 +123,9 @@
           this.localparams.filters[e.target.name] = null
         }
         this.$emit('change-params', this.localparams)
+      },
+      deleteUser(username) {
+        this.$emit('delete-user', username)
       }
     }
   }
