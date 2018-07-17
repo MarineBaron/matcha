@@ -13,7 +13,7 @@ import {
   USER_USERS_SUCCESS,
   USER_ACCOUNT_REQUEST,
   USER_ACCOUNT_SUCCESS,
-  USER_ACCOUNT_ERROR,
+  USER_ACCOUNT_ERROR
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'

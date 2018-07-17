@@ -45,6 +45,7 @@
   import { validationMixin } from "vuelidate"
   import { required, minLength, maxLength, sameAs } from 'vuelidate/lib/validators'
   import { mapState } from 'vuex'
+  import callApi from '../../../../Api/callApi'
 
   export default {
     props: ['user'],
@@ -54,9 +55,9 @@
           firstname: this.user.firstname,
           lastname: this.user.lastname,
           age: this.user.age,
-          genders: ,
-          orientation: ,
-          interests: ,
+          //genders: ,
+          //orientation: ,
+          //interests: ,
           email: this.user.email,
           city: this.user.city,
           zip: this.user.zip,
@@ -85,6 +86,22 @@
         },
       }
     },
+    created: function () {
+      console.log("avant lecture des genders")
+      callApi({url: 'user/genders'})
+      .then((resp, err) => {
+        if (!resp.data.success) {
+         reject(resp.data.message)
+       } else {
+         resolve(resp.data.data)
+       }
+      })
+      .catch(err => {
+       reject(err)
+      })
+     console.log("lecture des genders", resp, err)
+    },
+
     methods: {
       statusField(fieldState) {
         if (!fieldState.$dirty) {
@@ -92,12 +109,6 @@
         }
         return !fieldState.$invalid
       },
-      mounted: function() {
-        this.callApi({url: 'user/users'})
-          .then(data => {
-            this.genders = data;
-          });
-       },
       onSubmit(e) {
         const { firstname, lastname } = this.form
         const data = {

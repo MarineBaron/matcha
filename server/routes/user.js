@@ -114,9 +114,26 @@ router.get('/addvisit/:username', function(req, res, next) {
 
 /* GET user Accès à tous les users */
 router.get('/users', function(req, res, next) {
+  console.log('fucking /user/users')
   controller.findAll(function (err, result) {
     if (err) {
       // console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
+/* GET gender Accès à tous les genres */
+router.get('/genders', function(req, res, next) {
+  console.log('fucking /user/genders')
+  controller.findGenders(function (err, result) {
+    if (err) {
+      console.log(err)
       res.status(500).json({
         success: 0,
         error: err

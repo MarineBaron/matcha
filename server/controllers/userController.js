@@ -3,11 +3,24 @@ const jwt = require('jsonwebtoken')
 const lodash = require('lodash')
 
 const User = require('../models/user')
+const Gender = require('../models/gender')
 const Like = require('../models/likes')
 const Image = require('../models/image')
 const mailController = require('./mailController')
 
 module.exports = {
+  findGenders: function(callback){
+    Gender.find(function(err, genders) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1,
+        data: genders
+      })
+    })
+  },
   findAll: function(callback){
     User.find(function(err, users) {
       if (err) {
