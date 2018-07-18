@@ -141,6 +141,11 @@
     margin-bottom: 20px;
   }
 
+  #admin-users-table svg {
+    display: block;
+    margin: auto;
+  }
+
   .my-1 {
     text-align: center;
   }

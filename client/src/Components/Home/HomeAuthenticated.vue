@@ -4,7 +4,7 @@
     <b-row>
       <b-col md="8">
         <map-user-all
-        type="user"
+        type="home"
         status="success"
         :user="user"
         />

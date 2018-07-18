@@ -1,5 +1,5 @@
 <template>
-  <b-container fluid v-if="status !== ''">
+  <b-container fluid v-if="status !== ''" id="match-users-table">
     <b-button class="float-right" @click="$emit('change-type')">{{buttonValue}}</b-button>
     <h3>{{title}}</h3>
     <div v-if="status === 'loading'">
@@ -13,6 +13,7 @@
     </div>
     <div v-if="status === 'success' && users.length">
       <b-table
+
         striped hover
         :items="users"
         :fields="fields"
@@ -134,3 +135,22 @@
     }
   }
 </script>
+
+<style scoped>
+  #match-users-table {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  #match-users-table td {
+    text-align: center;
+  }
+
+  .my-1 {
+    text-align: center;
+  }
+
+  .my-1 label {
+    font-weight: bold;
+  }
+</style>

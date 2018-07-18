@@ -30,7 +30,6 @@ import Collection from 'ol/Collection'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { boundingExtent } from 'ol/extent'
 import { transform } from 'ol/proj'
-//import LayerSwitcher from 'ol-layerswitcher'
 import 'ol/ol.css'
 import 'ol-layerswitcher/src/ol-layerswitcher.css'
 
@@ -162,7 +161,7 @@ export default {
     })
     group.setLayers(layers)
 
-    if(this.type === 'user') {
+    if(this.type === 'home') {
       this.setFeatures()
     }
 
@@ -204,7 +203,7 @@ export default {
   },
   watch: {
     status(n, o) {
-      if(this.type === 'admin' && n !== o && n === 'success') {
+      if((this.type === 'admin' || this.type === 'match') && n !== o && n === 'success') {
         this.setFeatures()
       }
     }
@@ -230,7 +229,7 @@ export default {
             })
           )
         })
-      } else {
+      } else if (this.type === 'home'){
         if(this.user.is_loc === true) {
           features.push(new Feature({
             name : 'me',
@@ -258,6 +257,35 @@ export default {
               }
             })
           }
+        })
+      } else if (this.type === 'match') {
+        features.push(new Feature({
+          name : 'me',
+          geometry: new Point(transform(this.user.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+          properties: {
+            user: this.user
+          }
+        }))
+        this.items.filter(i => i.is_loc === true).forEach(i => {
+          let name = 'other'
+          if (this.user.friends.length && this.user.friends.map(u => u.username).includes(i.username)) {
+            name = 'friends'
+          } else if (this.user.likes.length && this.user.likes.map(u => u.username).includes(i.username)) {
+            name = 'likes'
+          } else if (this.user.likers.length && this.user.likers.map(u => u.username).includes(i.username)) {
+            name = 'likers'
+          } else if (i.bot === true) {
+            name = 'bot'
+          }
+          features.push(
+            new Feature({
+              name : name,
+              geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+              properties: {
+                user: i
+              }
+            })
+          )
         })
       }
       const view = this.map.getView()

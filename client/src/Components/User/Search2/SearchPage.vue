@@ -13,6 +13,7 @@
           @change-type="changeType"
           @change-pagination="changePagination"
           />
+      <map-user-all type="match" :status="status" :items="users" :user="user"/>
       </b-col>
       <b-col cols="4">
         <search-form
@@ -31,6 +32,7 @@
 </template>
 
 <script>
+  import MapUserAll from '../../Map/MapUserAll.vue'
   import callApi from '../../../Api/callApi'
   import SearchForm from './SearchForm.vue'
   import SearchResult from './SearchResult.vue'
@@ -39,7 +41,8 @@
   export default {
     components: {
       SearchForm,
-      SearchResult
+      SearchResult,
+      MapUserAll
     },
     data() {
       return {
@@ -67,6 +70,7 @@
     },
     computed: {
       ...mapState({
+        user: state => state.auth.profile,
         username: state => state.auth.profile.username
       })
     },

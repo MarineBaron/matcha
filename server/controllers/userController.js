@@ -664,7 +664,21 @@ module.exports = {
       if (!results.user.is_loc) {
         callback(null, {
           success: 1,
-          data: []
+          users: [],
+          total: 0
+        })
+        return
+      }
+
+      const interests = results.interests.map(i => i._id)
+      const genders = body.type === 'match'
+        ? results.user.orientation
+        : results.genders.map(i => i._id)
+      if(!interests || !interests.length || !genders || !genders.length) {
+        callback(null, {
+          success: 1,
+          users: [],
+          total: 0
         })
         return
       }
@@ -673,10 +687,8 @@ module.exports = {
         username: {$ne: results.user.username},
         is_completed: true,
         is_loc: true,
-        gender: body.type === 'match'
-          ? {$in: results.user.orientation}
-          : {$in: results.genders.map(i => i._id)},
-        interests: {$elemMatch: {$in: results.interests.map(i => i._id)}},
+        gender: {$in: genders},
+        interests: {$elemMatch: {$in: interests}},
         age: {
           $gte: body.ages[0],
           $lte: body.ages[1]
@@ -715,14 +727,6 @@ module.exports = {
           }
         },
         {
-          $lookup: {
-            from: 'interests',
-            localField: 'interests',
-            foreignField: '_id',
-            as: 'interestsname'
-          }
-        },
-        {
           $project: {
             _id: 1,
             username: 1,
@@ -731,6 +735,8 @@ module.exports = {
             age: 1,
             city: 1,
             location: 1,
+            is_loc: 1,
+            bot: 1,
             distance: {$trunc: "$dist.calculated"},
             interests: 1,
             matchInterests: {

@@ -93,7 +93,6 @@
           avatar: resp.avatar,
           gallery: resp.gallery
         }
-        console.log(user)
         this.user = user
         const relations = {
           friends: resp.friends,
