@@ -1,5 +1,4 @@
 <template>
-
 <b-row>
     <b-col cols="6">
         <profile-view-images :images="getImages" />

@@ -65,7 +65,7 @@ function nbInterests(iA, iB) {
 function userCalcMatching(userA, user) {
 
   userA.communInterests = nbInterests(userA.interests, user.interests)
-  userA.distance = userA.dist.calculated
+  //userA.distance = userA.dist.calculated
   const factDist = userA.distance < 10 ? 5 : (userA.distance < 50 ? 3 : (userA.distance < 500 ? 1 : 0))
   userA.matching = factDist + 2 * userA.communInterests
 }
@@ -79,7 +79,6 @@ function usersCalcMatching(users, user) {
 }
 
 function updateScore(user, callback) {
-  console.log('updateScore', user)
   async.parallel({
     likes: (callback) => {
       user.getLikes(user._id, callback)
@@ -203,6 +202,8 @@ module.exports = {
           const data = {
             _id: user._id,
             username: user.username,
+            avatar: user.avatar,
+            gallery: user.gallery,
             visited: user.visited,
             firstname: user.firstname,
             lastname: user.lastname,
@@ -511,7 +512,6 @@ module.exports = {
   },
 
   getInfos: function(username, callback) {
-    console.log('getInfos')
     async.parallel({
       genders: (callback) => {
         Gender.find({}, function(err, results) {
@@ -652,24 +652,31 @@ module.exports = {
   },
 
   findMatch: function(body, callback) {
-    User.findOne({username: body.username}, function(err, user) {
-      console.log('findMatch', body)
+    async.parallel({
+      user: (callback) => User.findOne({username: body.username}, '_id username orientation location is_loc interests', callback),
+      interests: (callback) => Interest.find({_id: {$in: body.interests}}, '_id', callback),
+      genders: (callback) => Gender.find({_id: {$in: body.genders}}, '_id', callback),
+    }, function(err, results) {
       if (err) {
         callback(err, null)
         return
       }
-      if (!user.is_loc) {
+      if (!results.user.is_loc) {
         callback(null, {
           success: 1,
           data: []
         })
         return
       }
+
       let query = {
-        username: {$ne: user.username},
+        username: {$ne: results.user.username},
         is_completed: true,
         is_loc: true,
-        gender: {$in: user.orientation},
+        gender: body.type === 'match'
+          ? {$in: results.user.orientation}
+          : {$in: results.genders.map(i => i._id)},
+        interests: {$elemMatch: {$in: results.interests.map(i => i._id)}},
         age: {
           $gte: body.ages[0],
           $lte: body.ages[1]
@@ -682,34 +689,115 @@ module.exports = {
       User.aggregate([
         {
          $geoNear: {
-            near: { type: "Point", coordinates: user.location.coordinates },
+            near: { type: "Point", coordinates: results.user.location.coordinates },
             distanceField: "dist.calculated",
             query: query,
-            distanceMin: body.distances[0],
-            distanceMax: body.distances[1],
+            minDistance: body.distances[0] * 6378.1,
+            maxDistance: body.distances[1] * 6378.1,
             distanceMultiplier: 1.0/6378.1,
             spherical: true
           }
+        },
+        {
+          $lookup: {
+            from: 'genders',
+            localField: 'gender',
+            foreignField: '_id',
+            as: 'gender'
+          }
+        },
+        {
+          $lookup: {
+            from: 'images',
+            localField: 'avatar.image',
+            foreignField: '_id',
+            as: 'avatar.image'
+          }
+        },
+        {
+          $lookup: {
+            from: 'interests',
+            localField: 'interests',
+            foreignField: '_id',
+            as: 'interestsname'
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            username: 1,
+            avatar: 1,
+            score: 1,
+            age: 1,
+            city: 1,
+            location: 1,
+            distance: {$trunc: "$dist.calculated"},
+            interests: 1,
+            matchInterests: {
+              $sum : {
+                $map: {
+                  input: "$interests",
+                  as: "i",
+                  in: {$cond: [{$in : ["$$i" , results.user.interests]}, 1, 0]}
+                }
+              }
+            },
+            gender: "$gender.name",
+          }
+        },
+        {
+          $addFields: {
+            matching: {
+              $add: [{
+                $multiply: [5, "$matchInterests"]
+              }, {
+                $cond: [{$lte : ["$distance" , 5]}, 5, {
+                  $cond: [{$lte : ["$distance" , 10]}, 4, {
+                    $cond: [{$lte : ["$distance" , 50]}, 3, {
+                      $cond: [{$lte : ["$distance" , 100]}, 2, {
+                        $cond: [{$lte : ["$distance" , 500]}, 1, 0]
+                      }]
+                    }]
+                  }]
+                }]
+              }
+            ]},
+          }
+        },
+        {
+          $lookup: {
+            from: 'interests',
+            localField: 'interests',
+            foreignField: '_id',
+            as: 'interests'
+          }
+        },
+        { $unwind: "$gender" },
+        { $unwind: "$avatar.image" },
+        { $sort: body.sortOrder },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            results: { $push: '$$ROOT' }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
         }
-      ]).exec(function(err, users) {
-        if (err) {
-          callback(err, null)
-          return
-        }
-
-        usersCalcMatching(users.filter(u =>
-          u.interests.some(i => body.interests.includes(i._id.toString()))
-        ), user)
-        .then((resp) => {
-
-          callback(null, {
-            success: 1,
-            data: resp.sort((a, b) => b.matching - a.matching).slice(0, 9)
-          })
+      }
+    ]).then(([{ count, rows }]) => {
+        callback(null, {
+          success: 1,
+          users: rows,
+          total: count
         })
-        .catch((err) => {
-          callback(err, null)
-        })
+        return
+      }).catch((err) => {
+        callback(err, null)
+        return
       })
     })
   },

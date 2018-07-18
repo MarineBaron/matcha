@@ -159,7 +159,7 @@ router.get('/infos/:username', verifyToken, function(req, res, next) {
 
 /* GET matching */
 router.post('/match', verifyToken, function(req, res, next) {
-  console.log(req.body)
+  //console.log(req.body)
   controller.findMatch(req.body, function(err, result) {
     if (err) {
       // console.log(err)

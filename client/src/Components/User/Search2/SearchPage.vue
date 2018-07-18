@@ -2,15 +2,28 @@
   <b-container fluid>
     <b-row>
       <b-col cols="8">
-        <search-result type="search" :status="statusSearch" :users="searches" />
-        <search-result type="match" :status="statusMatch" :users="matches" />
+        <search-result
+          :type="type"
+          :status="status"
+          :users="users"
+          :totalRows="totalRows"
+          :currentPage="currentPage"
+          :perPage="perPage"
+          @change-sort="changeSort"
+          @change-type="changeType"
+          @change-pagination="changePagination"
+          />
       </b-col>
       <b-col cols="4">
         <search-form
           v-if="genderOptions.length"
-          :status="statusSearch"
+          :type="type"
+          :status="status"
           :genderOptions="genderOptions"
           :interestOptions="interestOptions"
+          :ageLimits="ageLimits"
+          :scoreLimits="scoreLimits"
+          :distanceLimits="distanceLimits"
           @change-filters="changeFilters"/>
       </b-col>
     </b-row>
@@ -30,13 +43,26 @@
     },
     data() {
       return {
-        statusMatch: '',
-        statusSearch: '',
-        matches: [],
-        searches: [],
+        type: 'match',
+        status: '',
+        users: [],
         filters: {},
+        sortOrder: {
+          matching: -1,
+          distance: 1,
+          matchInterests: -1,
+          score: -1,
+          age: 1,
+          genre: 1,
+        },
+        totalRows: 0,
+        perPage: 5,
+        currentPage: 1,
         genderOptions: [],
-        interestOptions: []
+        interestOptions: [],
+        ageLimits: [0, 0],
+        scoreLimits: [0, 0],
+        distanceLimits: [0, 0]
       }
     },
     computed: {
@@ -48,9 +74,20 @@
       this.getInfos()
     },
     methods: {
+      changeType() {
+        this.type = this.type === 'match' ? 'search' : 'match'
+        this.fetchMatch()
+      },
       changeFilters(filters) {
         this.filters = filters
-        //this.fetchSearch()
+        this.fetchMatch()
+      },
+      changeSort(sortOrder) {
+        this.sortOrder = sortOrder
+        this.fetchMatch()
+      },
+      changePagination(index) {
+        this.currentPage = index
         this.fetchMatch()
       },
       getInfos() {
@@ -63,6 +100,7 @@
             return {value: o._id, text: o.name}
           })
           this.ageLimits = resp.data.ages
+          this.scoreLimits = resp.data.scores
           this.distanceLimits = resp.data.distances
           this.filters = {
             genders: this.genderOptions.map(o => o.value),
@@ -77,36 +115,24 @@
           console.log(err)
         })
       },
-      fetchSearch() {
-        this.statusSearch = 'loading'
-        let data = this.filters
-        data.username = this.username
-        callApi({url: '/user/search', data})
-        .then((resp) => {
-          this.searches = resp.data.data
-          this.statusSearch = 'success'
-        })
-        .catch((err) => {
-          console.log(err)
-          this.searches = []
-          this.statusSearch = 'error'
-        })
-      },
       fetchMatch() {
-        this.statusMatch = 'loading'
+        this.status = 'loading'
         let data = this.filters
+        data.type = this.type
         data.username = this.username
-        console.log('fetchMatch', data)
+        data.sortOrder = this.sortOrder
+        data.perPage = this.perPage
+        data.currentPage = this.currentPage
         callApi({url: '/user/match', data, method: 'POST'})
         .then((resp) => {
-          console.log(resp.data)
-          this.matches = resp.data.data
-          this.statusMatch = 'success'
+          this.users = resp.data.users
+          this.totalRows = resp.data.total
+          this.status = 'success'
         })
         .catch((err) => {
           console.log(err)
-          this.matches = []
-          this.statusMatch = 'error'
+          this.users = []
+          this.status = 'error'
         })
       }
     }

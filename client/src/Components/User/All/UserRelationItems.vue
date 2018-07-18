@@ -5,25 +5,17 @@
         cols="4"
         class="text-center"
       >
-        <b-link :to="{path: '/user/' + user.username}">
-          <user-avatar v-if="user.avatar"
-            :avatar="user.avatar"
-          />
-        </b-link>
-        <br/>
-        <b-link :to="{path: '/user/' + user.username}">
-          {{user.username}}
-        </b-link>
+        <user-item :user="user" />
       </b-col>
     </b-row>
   </b-container>
 </template>
 
 <script>
-  import UserAvatar from './UserAvatar.vue'
+  import UserItem from './UserItem.vue'
   export default {
     components: {
-      UserAvatar
+      UserItem
     },
     props: ['users'],
   }
