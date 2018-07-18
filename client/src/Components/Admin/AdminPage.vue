@@ -65,6 +65,7 @@
           this.status = 'loading'
           callApi({url: '/admin/delete/' + username})
           .then((resp) => {
+            this.flash('L\'utilisateur a été supprimé.', 'success', {timeout: 5000})
             this.fetchData()
           }, (err) => {
             console.log('ERR', err)
@@ -76,6 +77,7 @@
           this.status = 'loading'
           callApi({url: '/admin/createbots'})
           .then((resp) => {
+            this.flash('Les bots ont été créés.', 'success', {timeout: 5000})
             this.fetchData()
           }, (err) => {
             console.log('ERR', err)
@@ -87,6 +89,7 @@
           this.status = 'loading'
           callApi({url: '/admin/deletebots'})
           .then((resp) => {
+            this.flash('Les bots ont été supprimés.', 'success', {timeout: 5000})
             this.fetchData()
           }, (err) => {
             console.log('ERR', err)
