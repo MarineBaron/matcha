@@ -55,7 +55,6 @@ function getLocalisation(nbLines) {
           city: resp.data.nom,
           coordinates:resp.data.centre.coordinates
         }
-        console.log('loc', loc)
         resolve(loc)
       })
       .catch((err) => resolve(null))
@@ -573,6 +572,7 @@ function deleteUser(user) {
   return new Promise((resolve, reject) =>  {
     async.parallel({
       notifications: (callback) => {
+        console.log()
         notifController.deleteAllByUser(user.username, callback)
       },
       chat: (callback) => {
@@ -680,7 +680,7 @@ module.exports = {
     })
   },
   deleteBots: function(callback){
-    User.find({bot: 1}, '_id' , function(err, users) {
+    User.find({bot: 1}, '_id username' , function(err, users) {
       if (err) {
         callback(err, null)
         return
