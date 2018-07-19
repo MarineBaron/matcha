@@ -15,7 +15,8 @@
 </template>
 
 <script>
-import axios from 'axios'
+  import axios from 'axios'
+  import callApi from '../../Api/callApi'
   import { mapGetters, mapState } from 'vuex'
   import config from '../../Config/config'
   export default {
@@ -41,13 +42,35 @@ import axios from 'axios'
       return this.user === null ? null : (!this.user.is_loc ? null : this.user.location)
     },
   },
+  watch: {
+    dyn(n, o) {
+      if(this.user && n !== o && n) {
+        if (this.bdd === null
+          || this.bdd.coordinates[0] !== n.coordinates[0]
+          || this.bdd.coordinates[1] !== n.coordinates[1]
+        ) {
+          const data = {
+            username: this.user.username,
+            location: n
+          }
+          callApi({url: '/user/updatelocation', data , method: 'POST'})
+          .then((resp) => {
+            console.log('Localisation Success', resp)
+          })
+          .catch((err) => {
+            console.log('Localisation Error', err)
+          })
+        }
+      }
+    }
+  },
   mounted() {
     this.getLocalisation()
   },
   methods: {
     successHtml5Localisation(pos) {
       this.dyn = {
-        geometry: 'Point',
+        type: 'Point',
         coordinates: [pos.coords.longitude, pos.coords.latitude]
       }
     },
@@ -60,15 +83,20 @@ import axios from 'axios'
     },
     successIPLocalisation(pos) {
       this.dyn = {
-        geometry: 'Point',
+        type: 'Point',
         coordinates: [pos.longitude, pos.latitude]
       }
     },
     errorIPLocalisation(err) {
       console.warn(`ERROR(${err.code}): ${err.type} - ${err.message}`)
+      this.dyn = this.bdd
     },
     getIPLocalisation(err) {
       axios.get(config.API_IPSTACK_URL, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        },
         params: {
           access_key: config.API_IPSTACK_KEY,
           fields: 'latitude, longitude',

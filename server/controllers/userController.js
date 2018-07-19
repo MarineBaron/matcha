@@ -499,6 +499,20 @@ module.exports = {
     })
   },
 
+  updateLocation: function(body, callback) {
+    User.findOneAndUpdate({username: body.username}, {
+      location: body.location
+    }, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1
+      })
+    })
+  },
+
   addVisit: function(username, callback) {
     User.findOneAndUpdate({username: username}, {$inc: {visited: 1}}, function(err, user) {
       if (err) {

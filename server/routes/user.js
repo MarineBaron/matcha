@@ -69,6 +69,30 @@ router.post('/relation', verifyToken, function(req, res, next) {
   })
 })
 
+/* POST update relations */
+router.post('/updatelocation', verifyToken, function(req, res, next) {
+  console.log(req.user.username, req.body.username)
+  if (req.user.username !== req.body.username) {
+    console.log(err)
+    res.status(500).json({
+      success: 0,
+      error: 'ACCESS_DENIED'
+    })
+    return
+  }
+  controller.updateLocation(req.body, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    res.status(200).json(result)
+  })
+})
+
 /* GET profile - Accès aux données complètes de l'utilisateur connecté. */
 router.get('/profile', verifyToken, function(req, res, next) {
   controller.findById(req.user._id, function (err, result) {
