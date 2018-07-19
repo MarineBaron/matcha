@@ -73,10 +73,10 @@ const UserSchema = new mongoose.Schema({
     },
     alt: String
   },
-  gender: {
+  gender: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Gender'
-  },
+  }],
   orientation: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Gender'
