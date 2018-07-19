@@ -40,17 +40,7 @@ router.post('/update', function(req, res, next) {
 // router.get('/gendersinterests', ...) qui appelle une methode du controller
 // ->getGendersInterests
 router.get('/gendersinterests', function(req, res, next) {
-  controller.getGendersInterests(function (err, result) {
-    if (err) {
-      console.log(err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    res.status(200).json(result)
-  })
+  // a toi de jouer
 })
 
 

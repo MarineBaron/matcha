@@ -43,40 +43,10 @@
       </b-form-group>
 
       <!-- GASTON 3 : création d'un group radio pour le gender (ajouter plain, sinon cela ne marche pas...) -->
-      <b-form-group id="genderGroup"
-        label="Genre"
-        label-for="genre"
-      >
-        <b-form-radio-group id="gender"
-          v-model="form.gender"
-          :options="genderOptions"
-          plain
-        />
-      </b-form-group>
 
       <!-- GASTON 4 : création d'une list de checkbox pour l'orientation avec les memes options que gender (ajouter plain, sinon cela ne marche pas...)-->
-      <b-form-group id="orientationGroup"
-        label="Orientation"
-        label-for="orientation"
-      >
-        <b-form-checkbox-group id="orientation"
-          v-model="form.orientation"
-          :options="genderOptions"
-          plain
-        />
-      </b-form-group>
 
       <!-- GASTON 5 : création d'une list de checkbox pour les interests (ajouter plain, sinon cela ne marche pas...)-->
-      <b-form-group id="interestsGroup"
-        label="Centre d'intérêts"
-        label-for="interestsn"
-      >
-        <b-form-checkbox-group id="interests"
-          v-model="form.interests"
-          :options="interestOptions"
-          plain
-        />
-      </b-form-group>
 
       <b-form-group id="zipGroup"
         label="Code Postal"
@@ -138,9 +108,6 @@
           age: this.user.age,
 
           // GASTON 1 : Ajouter gender, orientation, interests au formulaire
-          gender: this.user.gender,
-          orientation: this.user.orientation,
-          interests: this.user.interests,
 
           email: this.user.email,
           city: this.user.city,
@@ -148,8 +115,6 @@
         },
 
         // GASTON 2 : Ajouter les options genderOptions & interestOptions que l'on utilisera pour créer les radios et checkbox
-        genderOptions: [],
-        interestOptions: [],
 
         citiesOptions: this.user.city ? [this.user.city] : [],
         statusCitiesRequest: '',
@@ -184,20 +149,6 @@
       // GASTON 8 : Lorsque le formulaire est mounted, on recherche les genders et interestOptions
       // GASTON 9 : modification de la réponse (dans le then) pour que chaque option contienne :
       // (utilisation de Array.map()) {value: objet._id, text: object.name}
-      callApi({url: '/user/gendersinterests'})
-      .then((resp) => {
-        // GASTON 9 : modification de la réponse pour que chaque option contienne :
-        // (utilisation de Array.map()) {value: objet._id, text: object.name}
-        this.genderOptions = resp.data.genders.map(o => {
-          return {value: o._id, text: o.name}
-        })
-        this.interestOptions = resp.data.interests.map(o => {
-          return {value: o._id, text: o.name}
-        })
-      })
-      .catch((err) => {
-        console.log(err)
-      })
     },
     methods: {
       statusField(fieldState) {
@@ -217,9 +168,6 @@
           firstname,
           lastname,
           // GASTON 6  : ajouter les champs gender, orientation, interests
-          gender,
-          orientation,
-          interests,
 
           zip,
           city
@@ -229,9 +177,6 @@
           lastname: lastname,
           username: this.user.username,
           // GASTON 7  : ajouter les champs gender, orientation, interests
-          gender,
-          orientation,
-          interests,
 
           zip,
           city
