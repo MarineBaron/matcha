@@ -14,6 +14,7 @@ import {
   USER_ACCOUNT_REQUEST,
   USER_ACCOUNT_SUCCESS,
   USER_ACCOUNT_ERROR,
+  USER_CHANGE_LOCATION,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -204,6 +205,12 @@ const mutations = {
   [USER_ACCOUNT_ERROR]: (state) => {
     state.status = 'error'
   },
+  [USER_CHANGE_LOCATION]: (state, data) => {
+    if (data.username === state.user.username) {
+      state.user.is_loc = true
+      state.user.location = data.location
+    }
+  }
 
 }
 

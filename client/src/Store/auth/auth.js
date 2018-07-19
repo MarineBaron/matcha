@@ -27,6 +27,7 @@ import {
   AUTH_RELATION_ERROR,
   AUTH_RELATION_OTHER,
   AUTH_NOTIFICATION_INSERT,
+  AUTH_CHANGE_LOCATION,
 } from './mutation-types'
 import {
   USER_USER_SUCCESS
@@ -440,6 +441,27 @@ const mutations = {
   },
   [AUTH_NOTIFICATION_INSERT]: (state, data) => {
     state.profile.notifications.splice(0, 0, data)
+  },
+  [AUTH_CHANGE_LOCATION]: (state, data) => {
+    // changement de la location sur le profile
+    if (data.username === state.profile.username) {
+      state.profile.is_loc = true
+      state.profile.location = data.location
+    // changement de la location si un profile est en ligne
+    } else {
+      state.profile.friends.filter(u => u.username === data.username).map(u => {
+        u.is_loc = true,
+        u.location = data.location
+      })
+      state.profile.likers.filter(u => u.username === data.username).map(u => {
+        u.is_loc = true,
+        u.location = data.location
+      })
+      state.profile.likes.filter(u => u.username === data.username).map(u => {
+        u.is_loc = true,
+        u.location = data.location
+      })
+    }
   }
 }
 

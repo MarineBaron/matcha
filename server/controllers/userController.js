@@ -501,6 +501,7 @@ module.exports = {
 
   updateLocation: function(body, callback) {
     User.findOneAndUpdate({username: body.username}, {
+      is_loc: true,
       location: body.location
     }, function(err, user) {
       if (err) {
