@@ -19,19 +19,20 @@
         </b-col>
       </b-row>
     </b-container>
-    <footer><counter /></footer>
+    <footer><localisation /><counter /></footer>
     <chat-rooms v-if="isAuthenticated"/>
   </div>
 </template>
 
 <script>
 import {mapGetters, mapState} from 'vuex'
-import { AUTH_LOGOUT, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-types'
+import { AUTH_UNLOAD, AUTH_CHECKAUTH_REQUEST } from '../Store/auth/mutation-types'
 import { CHAT_CLOSE_ALLROOMS } from '../Store/chat/mutation-types'
 import Navigation from './Navigation/Navigation.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
 import ChatRooms from './Chat/ChatRooms.vue'
 import Counter from './Counter/Counter.vue'
+import Localisation from './Localisation/Localisation.vue'
 import callApi from '../Api/callApi'
 
 export default {
@@ -40,7 +41,8 @@ export default {
     Navigation,
     Dashboard,
     ChatRooms,
-    Counter
+    Counter,
+    Localisation
   },
   created() {
     window.addEventListener('beforeunload', this.unload)
@@ -63,7 +65,7 @@ export default {
       if (this.token) {
         this.$socket.emit('AUTH_LOGOUT', this.getProfile)
         this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
-        this.$store.dispatch(AUTH_LOGOUT, this.getProfile.username)
+        this.$store.dispatch(AUTH_UNLOAD, this.getProfile.username)
       }
     },
   },

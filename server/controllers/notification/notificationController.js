@@ -148,8 +148,14 @@ module.exports = {
           callback(err, null)
           return
         }
-        callback(null, {
-            success: 1
+        Notification.deleteMany({origin: username}, function(err) {
+          if (err) {
+            callback(err, null)
+            return
+          }
+          callback(null, {
+              success: 1
+          })
         })
       })
     })

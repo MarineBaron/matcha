@@ -31,7 +31,7 @@
             :actor="actor"
             :actions="['view', 'unlike']"
           />
-          <user-relation-items :users="relationsComputed.likes" />
+          <user-relation-items v-else :users="relationsComputed.likes" />
         </b-card-body>
       </b-collapse>
     </b-card>
@@ -48,7 +48,7 @@
             :actor="actor"
             :actions="['view', 'like']"
           />
-          <user-relation-items :users="relationsComputed.likers" />
+          <user-relation-items v-else :users="relationsComputed.likers" />
         </b-card-body>
       </b-collapse>
     </b-card>

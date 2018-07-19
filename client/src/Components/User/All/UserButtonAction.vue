@@ -68,7 +68,10 @@
             }, (error) => {
               console.log("UserButtonAction.vue chat ERROR", error)
             })
-          break;
+          break
+          case 'delete':
+            this.$emit('delete-user', this.receptor)
+          break
           default:
             console.log("UserButtonAction onClick: no action")
           break
@@ -97,6 +100,9 @@
           case 'chat':
             return 'Chat'
           break
+          case 'delete':
+            return 'Supprimer'
+          break
           default:
             return 'No action'
           break
@@ -115,6 +121,9 @@
           break
           case 'chat':
             return 'comments'
+          break
+          case 'delete':
+            return 'trash'
           break
           default:
             return 'No action'

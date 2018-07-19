@@ -20,7 +20,7 @@ router.post('/create', function(req, res, next) {
 
 /* POST update */
 router.post('/update', function(req, res, next) {
-  //console.log('server/routes/user.js', req.body)
+  console.log('server/routes/user.js', req.body)
   controller.update(req.body, function (err, result) {
     if (err) {
       console.log(err)
@@ -30,7 +30,7 @@ router.post('/update', function(req, res, next) {
       })
       return
     }
-    //console.log('server/routes/user.js', result)
+    console.log('server/routes/user.js', result)
     res.status(200).json(result)
   })
 })
@@ -40,13 +40,7 @@ router.post('/update', function(req, res, next) {
 // router.get('/gendersinterests', ...) qui appelle une methode du controller
 // ->getGendersInterests
 router.get('/gendersinterests', function(req, res, next) {
-  // a toi de jouer
-})
-
-
-/* POST update relations */
-router.post('/relation', verifyToken, function(req, res, next) {
-  controller.updateRelation(req.body, function (err, result) {
+  controller.getGendersInterests(function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -59,18 +53,10 @@ router.post('/relation', verifyToken, function(req, res, next) {
   })
 })
 
+
 /* POST update relations */
-router.post('/updatelocation', verifyToken, function(req, res, next) {
-  console.log(req.user.username, req.body.username)
-  if (req.user.username !== req.body.username) {
-    console.log(err)
-    res.status(500).json({
-      success: 0,
-      error: 'ACCESS_DENIED'
-    })
-    return
-  }
-  controller.updateLocation(req.body, function (err, result) {
+router.post('/relation', verifyToken, function(req, res, next) {
+  controller.updateRelation(req.body, function (err, result) {
     if (err) {
       console.log(err)
       res.status(500).json({
@@ -143,55 +129,7 @@ router.get('/addvisit/:username', function(req, res, next) {
 
 /* GET user Accès à tous les users */
 router.get('/users', function(req, res, next) {
-  console.log('fucking /user/users')
   controller.findAll(function (err, result) {
-    if (err) {
-      // console.log(err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    res.status(200).json(result)
-  })
-})
-
-/* GET gender Accès à tous les genres */
-router.get('/genders', function(req, res, next) {
-  console.log('fucking /user/genders')
-  controller.findGenders(function (err, result) {
-    if (err) {
-      console.log(err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    res.status(200).json(result)
-  })
-})
-
-/* GET infos */
-router.get('/infos/:username', verifyToken, function(req, res, next) {
-  controller.getInfos(req.params.username, function(err, result) {
-    if (err) {
-      // console.log(err)
-      res.status(500).json({
-        success: 0,
-        error: err
-      })
-      return
-    }
-    res.status(200).json(result)
-  })
-})
-
-/* GET matching */
-router.post('/match', verifyToken, function(req, res, next) {
-  //console.log(req.body)
-  controller.findMatch(req.body, function(err, result) {
     if (err) {
       // console.log(err)
       res.status(500).json({

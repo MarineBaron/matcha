@@ -67,7 +67,7 @@
     methods: {
       changeType(type) {
         const element = this.elements.find(e => e.name === type)
-        if (type !== 'visits' && element.value !== 0) {
+        if (type !== 'visits' && type !== 'score' && element.value !== 0) {
           if (this.type === type) {
             this.open = !this.open
           } else {
@@ -103,6 +103,14 @@
             title: 'Visites',
             icon: 'eye',
             value: this.visits,
+            items: []
+          },
+          {
+            name: 'score',
+            color: '',
+            title: 'Score',
+            icon: 'star',
+            value: this.score,
             items: []
           },
           {
@@ -155,6 +163,7 @@
         likers: state => state.auth.profile.likers ? state.auth.profile.likers : [],
         likes: state => state.auth.profile.likes ? state.auth.profile.likes : [],
         visits: state => state.auth.profile.visited ? state.auth.profile.visited : 0,
+        score: state => state.auth.profile.score ? state.auth.profile.score : 0,
         rooms: state => state.chat.rooms ? state.chat.rooms : [],
         username: state => state.auth.profile ? state.auth.profile.username : ''
       })

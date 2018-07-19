@@ -59,13 +59,25 @@ const UserSchema = new mongoose.Schema({
   },
   resume: String,
   city: String,
-  zip: Number,
+  zip: String,
   visibility: {
       type: String,
       enum: ["LoggedOut", "LoggedIn", "Absent", "Buzy" ]
   },
-  latitude: Number,
-  longitude: Number,
+  location: {
+    type: {
+      type: String,
+      default: 'Point'
+    },
+    coordinates: {
+      type: Array,
+      default: [0, 0]
+    }
+  },
+  is_loc: {
+    type: Boolean,
+    default: false
+  },
   avatar: {
     image: {
       type: mongoose.Schema.Types.ObjectId,
@@ -95,9 +107,13 @@ const UserSchema = new mongoose.Schema({
   bot: {
     type: Boolean,
     default: false
+  },
+  score: {
+    type: Number,
+    default: 0
   }
 })
-
+UserSchema.index({'location' : "2dsphere"})
 
 UserSchema.methods.comparePassword = function comparePassword(password, callback) {
   bcrypt.compare(password, this.password, callback)
@@ -141,7 +157,7 @@ UserSchema.methods.hashPassword = function hashPassword(next) {
 UserSchema.methods.getLikes = function(id, callback) {
   Like.find({liker: id})
   .populate({
-    select: 'username avatar last_logout',
+    select: 'username avatar last_logout location is_loc score',
     path: 'liked',
     populate: {
       path: 'avatar.image'
@@ -165,7 +181,7 @@ UserSchema.methods.getLikes = function(id, callback) {
 UserSchema.methods.getLikers = function(id, callback) {
   Like.find({liked: id})
   .populate({
-    select: 'username avatar last_logout',
+    select: 'username avatar last_logout location is_loc score',
     path: 'liker',
     populate: {
       path: 'avatar.image'
@@ -188,7 +204,7 @@ UserSchema.methods.getLikers = function(id, callback) {
 
 UserSchema.statics.getItemByUsername = function(username, callback) {
   this.findOne({username: username})
-  .select('_id username avatar last_logout')
+  .select('_id username avatar last_logout location is_loc score')
   .populate({
     path: 'avatar.image'
   })

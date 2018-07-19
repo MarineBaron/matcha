@@ -8,8 +8,7 @@ import ProfilePage from '../Components/User/Profile/ProfilePage.vue'
 import UserPage from '../Components/User/User/UserPage.vue'
 import SearchContent from '../Components/User/Search/SearchContent.vue'
 import SearchSidebar from '../Components/User/Search/SearchSidebar.vue'
-import ForumContent from '../Components/Forum/ForumContent.vue'
-import ForumSidebar from '../Components/Forum/ForumSidebar.vue'
+import SearchPage from '../Components/User/Search2/SearchPage.vue'
 import AdminPage from '../Components/Admin/AdminPage.vue'
 
 import store from '../Store/store'
@@ -89,10 +88,8 @@ export default [
   },
   {
     path: '/forum',
-    components: {default: ForumContent, sidebar: ForumSidebar},
-    meta: {
-      sidebar: true
-    },
+    component: SearchPage,
+    meta: {},
     beforeEnter: ifAuthenticated
   },
   {

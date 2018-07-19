@@ -1,5 +1,4 @@
 <template>
-
 <b-row>
     <b-col cols="6">
         <profile-view-images :images="getImages" />
@@ -26,7 +25,7 @@ export default {
     computed: {
         getImages() {
             let images = []
-            if (this.user.avatar) {
+            if (this.user.avatar && this.user.avatar.image) {
                 images.push({
                     name: this.user.avatar.image.name,
                     alt: this.user.avatar.alt,

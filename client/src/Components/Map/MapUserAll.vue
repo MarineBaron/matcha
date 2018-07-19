@@ -6,7 +6,7 @@
         <div v-for="feature in selectedFeatures" :key="feature.username">
           <user-list-item
             :item="feature.user"
-            actor="admin"
+            actor="username"
             :actions="['view']"
           />
         </div>
@@ -19,18 +19,21 @@
 import Map from 'ol/Map'
 import View from 'ol/View'
 import Overlay from 'ol/Overlay'
-import TileLayer from 'ol/layer/Tile.js'
-import OSM from 'ol/source/OSM.js'
+import LayerGroup from 'ol/layer/Group'
+import TileLayer from 'ol/layer/Tile'
+import OSM from 'ol/source/OSM'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import Collection from 'ol/Collection'
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { boundingExtent } from 'ol/extent'
+import { transform } from 'ol/proj'
 import 'ol/ol.css'
+import 'ol-layerswitcher/src/ol-layerswitcher.css'
 
-import UserListItem from '../../User/All/UserListItem.vue'
+import UserListItem from '../User/All/UserListItem.vue'
 
 const styles = {
   'bot': new Style({
@@ -47,21 +50,21 @@ const styles = {
       stroke: new Stroke({color: '#bada55', width: 1})
     })
   }),
-  'friend': new Style({
+  'friends': new Style({
     image: new CircleStyle({
       radius: 5,
       fill: new Fill({color: 'green'}),
       stroke: new Stroke({color: '#bada55', width: 1})
     })
   }),
-  'liker': new Style({
+  'likers': new Style({
     image: new CircleStyle({
       radius: 5,
       fill: new Fill({color: 'purple'}),
       stroke: new Stroke({color: '#bada55', width: 1})
     })
   }),
-  'liked': new Style({
+  'likes': new Style({
     image: new CircleStyle({
       radius: 5,
       fill: new Fill({color: 'orange'}),
@@ -85,15 +88,15 @@ const styles = {
 }
 
 export default {
+  name: 'map-user-all',
   components: {
     UserListItem
   },
-  props: ['status','items'],
+  props: ['type', 'user', 'status', 'items'],
   data() {
     return {
       map: null,
       hitTolerance: 5,
-      //features: [],
       selectedFeatures: [],
       center: [1, 42],
       zoom: 5,
@@ -104,22 +107,40 @@ export default {
     this.map = new Map({
       target: 'map',
       layers: [
-        new TileLayer({
-          source: new OSM()
-        })
+         new LayerGroup({
+           title: 'Base maps',
+           layers: [
+             new TileLayer({
+               type: 'base',
+               source: new OSM({
+                 crossOrigin: null
+               })
+             })
+           ]
+         }),
+         new LayerGroup({
+           title: 'Vector maps',
+           layers: []
+         })
+        ,
       ],
       view: new View({
-         projection: 'EPSG:4326',
+        projection: 'EPSG:3857',
         center: this.center,
         zoom: this.zoom,
       }),
     })
 
-    const names = ['all','bot', 'me', 'friend', 'liker', 'liked', 'other']
+    const layers = new Collection()
+    const names = ['all','bot', 'me', 'friends', 'likers', 'likes', 'other']
     names.forEach(name => {
       const layer = new VectorLayer({
+        title: name,
         name: name,
-        source: new VectorSource(),
+        visible: false,
+        source: new VectorSource({
+          projection: 'EPSG:4326'
+        }),
         style: function(feature) {
           return styles[name]
         }
@@ -129,8 +150,20 @@ export default {
       } else {
         this.names.push(name)
       }
-      this.map.addLayer(layer)
+      layers.push(layer)
     })
+
+    let group
+    this.map.getLayerGroup().getLayers().forEach(l => {
+      if (l.get('title') === 'Vector maps') {
+        group = l
+      }
+    })
+    group.setLayers(layers)
+
+    if(this.type === 'home') {
+      this.setFeatures()
+    }
 
     const self = this
     // cursor on features
@@ -167,11 +200,10 @@ export default {
         popup.style.display = 'none'
       }
     })
-
   },
   watch: {
     status(n, o) {
-      if(n !== o && n === 'success') {
+      if((this.type === 'admin' || this.type === 'match') && n !== o && n === 'success') {
         this.setFeatures()
       }
     }
@@ -179,22 +211,92 @@ export default {
   methods: {
     setFeatures() {
       let features = []
-      this.items.filter(i => i.latitude !== undefined).forEach(i => {
-        let name = 'bot'
-        features.push(
-          new Feature({
-            name : name,
-            geometry: new Point([i.longitude, i.latitude]),
+      if (this.type === 'admin') {
+        this.items.filter(i => i.is_loc === true).forEach(i => {
+          let name = null
+          if (i.username === 'admin') {
+            name = 'me'
+          } else if (i.bot) {
+            name = 'bot'
+          }
+          features.push(
+            new Feature({
+              name : name,
+              geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+              properties: {
+                user: i
+              }
+            })
+          )
+        })
+      } else if (this.type === 'home'){
+        if(this.user.is_loc === true) {
+          features.push(new Feature({
+            name : 'me',
+            geometry: new Point(transform(this.user.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
             properties: {
-              user: i
+              user: this.user
             }
-          })
-        )
-      })
+          }))
+        }
+
+        const relations = ['friends', 'likes', 'likers']
+        relations.forEach(name => {
+          if(this.user[name] && this.user[name]) {
+            this.user[name].forEach(i => {
+              if (i.is_loc) {
+                features.push(
+                  new Feature({
+                    name : name,
+                    geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+                    properties: {
+                      user: i
+                    }
+                  })
+                )
+              }
+            })
+          }
+        })
+      } else if (this.type === 'match') {
+        features.push(new Feature({
+          name : 'me',
+          geometry: new Point(transform(this.user.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+          properties: {
+            user: this.user
+          }
+        }))
+        this.items.filter(i => i.is_loc === true).forEach(i => {
+          let name = 'other'
+          if (this.user.friends.length && this.user.friends.map(u => u.username).includes(i.username)) {
+            name = 'friends'
+          } else if (this.user.likes.length && this.user.likes.map(u => u.username).includes(i.username)) {
+            name = 'likes'
+          } else if (this.user.likers.length && this.user.likers.map(u => u.username).includes(i.username)) {
+            name = 'likers'
+          } else if (i.bot === true) {
+            name = 'bot'
+          }
+          features.push(
+            new Feature({
+              name : name,
+              geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+              properties: {
+                user: i
+              }
+            })
+          )
+        })
+      }
       const view = this.map.getView()
-      const layers = this.map.getLayers()
+      let group
+      this.map.getLayerGroup().getLayers().forEach(l => {
+        if (l.get('title') === 'Vector maps') {
+          group = l
+        }
+      })
+      const layers = group.getLayers()
       let layerAll
-      //récupératioon des names des layers
       layers.forEach(layer => {
         if (layer.get('name') === 'all') {
           layerAll = layer
@@ -232,7 +334,6 @@ export default {
                     layer.setVisible(false)
                   }
                 }
-                //console.log(layer.get('name', layer.getSource().features.length, layer.isVisible()))
               }
             })
           })
@@ -241,10 +342,7 @@ export default {
             view.setZoom(15)
           }
         }
-
         this.featuresSelected = []
-        //this.features = features
-        return features
     }
   },
 }

@@ -1,12 +1,110 @@
 const async = require('async')
 const jwt = require('jsonwebtoken')
 const lodash = require('lodash')
+const axios = require('axios')
 
 const User = require('../models/user')
+// GASTON 12 : Ajouter les modèles exigés
 const Gender = require('../models/gender')
+const Interest = require('../models/interest')
+
 const Like = require('../models/likes')
 const Image = require('../models/image')
 const mailController = require('./mailController')
+
+function searchLocation(updateUser, user, callback) {
+  if (updateUser.zip !== user.zip
+      || updateUser.city !== user.city
+      || (updateUser.zip !== '' && user.is_loc !== true)
+    )
+  {
+    const params = {
+      country: 'France',
+      postalcode: updateUser.zip,
+      format: 'json',
+    }
+    if(updateUser.city) {
+      params.city = updateUser.city
+    }
+    axios.get(process.env.API_OPENSTREETMAP_SEARCH, {
+      params
+    })
+    .then((resp) => {
+      updateUser.location = {
+        type: 'Point',
+        coordinates: [parseFloat(resp.data[0].lon), parseFloat(resp.data[0].lat)]
+      }
+      updateUser.is_loc = true
+      callback(null, updateUser)
+      return
+
+    })
+    .catch((err) => {
+      callback(err, null)
+      return
+    })
+  } else {
+    callback(null, updateUser)
+  }
+}
+
+function nbInterests(iA, iB) {
+  let nb = 0
+  iA.forEach(ui => {
+    iB.forEach(i => {
+      console.log(ui, i)
+      if (ui.toString() == i) {
+        nb++
+      }
+    })
+  })
+  return nb
+}
+
+function userCalcMatching(userA, user) {
+
+  userA.communInterests = nbInterests(userA.interests, user.interests)
+  //userA.distance = userA.dist.calculated
+  const factDist = userA.distance < 10 ? 5 : (userA.distance < 50 ? 3 : (userA.distance < 500 ? 1 : 0))
+  userA.matching = factDist + 2 * userA.communInterests
+}
+
+function usersCalcMatching(users, user) {
+  return new Promise((resolve, reject) => {
+    return Promise.all(users.map((u) => userCalcMatching(u, user)))
+    .then(() => {resolve(users)})
+    .catch((err) => reject(err))
+  })
+}
+
+function updateScore(user, callback) {
+  async.parallel({
+    likes: (callback) => {
+      user.getLikes(user._id, callback)
+    },
+    likers: (callback) => {
+      user.getLikers(user._id, callback)
+    },
+  }, function(err, results) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
+    const likes = lodash.differenceBy(results.likes, friends, 'username')
+    const likers = lodash.differenceBy(results.likers, friends, 'username')
+    const score = friends.length * 2 + likers.length
+    User.findByIdAndUpdate(user._id, {score: score}, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+    })
+    callback(null, score)
+    return
+  })
+}
+
 
 module.exports = {
   findGenders: function(callback){
@@ -74,9 +172,8 @@ module.exports = {
     })
   },
   findCompleteByUsername: function(username, callback) {
-    console.log('findCompleteByUsername')
     User.findOne({username: username})
-      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout')
+      .select('_id username visited firstname lastname age resume city zip visibility avatar gallery gender orientation interests last_logout location is_loc score')
       .populate({
         path: 'avatar.image'
       })
@@ -116,6 +213,8 @@ module.exports = {
           const data = {
             _id: user._id,
             username: user.username,
+            avatar: user.avatar,
+            gallery: user.gallery,
             visited: user.visited,
             firstname: user.firstname,
             lastname: user.lastname,
@@ -130,7 +229,9 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
-            last_logout: user.last_logout
+            last_logout: user.last_logout,
+            location: user.location,
+            score: user.score
           }
           callback(null, {
             success: 1,
@@ -223,15 +324,40 @@ module.exports = {
     })
   },
 
-  update: function (user, callback){
-    User.findOneAndUpdate({username: user.username}, user, {new: true}, function(err, newUser) {
+  // GASTON 11 : ceation d'une méthode getGendersInterests
+  // cette méthode utilise async.parallel pour rechercher les 2 infos
+  getGendersInterests: function(callback) {
+    // a toi de jouer
+  },
+
+  update: function (updateUser, callback){
+    User.findOne({username: updateUser.username}, function(err, user) {
       if (err){
         callback(err, null)
         return
       }
-      callback(null, {
-        success: 1,
-        data: newUser
+      searchLocation(updateUser, user, function(err, updateUser) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        updateScore(user, function(err, score) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          console.log(updateUser)
+          User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
+            if (err){
+              callback(err, null)
+              return
+            }
+            callback(null, {
+              success: 1,
+              data: newUser
+            })
+          })
+        })
       })
     })
   },
@@ -288,11 +414,25 @@ module.exports = {
                 if (result) {
                   data.action = 'relike'
                 }
-                callback(null, {
-                  success: 1,
-                  data: data
+                async.parallel({
+                  actor: (callback) => {
+                    updateScore(data.actor, callback)
+                  },
+                  receptor: (callback) => {
+                    updateScore(data.receptor, callback)
+                  }
+                }, function(err, results) {
+                  if (err){
+                    callback(err, null)
+                    return
+                  }
+                  data.scores = results
+                  callback(null, {
+                    success: 1,
+                    data: data
+                  })
+                  return
                 })
-                return
               })
             })
           })
@@ -315,15 +455,44 @@ module.exports = {
                 callback(err, null)
                 return
               }
-              callback(null, {
-                success: 1,
-                data: data
+              async.parallel({
+                actor: (callback) => {
+                  updateScore(data.actor, callback)
+                },
+                receptor: (callback) => {
+                  updateScore(data.receptor, callback)
+                }
+              }, function(err, results) {
+                if (err){
+                  callback(err, null)
+                  return
+                }
+                data.scores = results
+                callback(null, {
+                  success: 1,
+                  data: data
+                })
+                return
               })
-              return
             })
           })
         break
       }
+    })
+  },
+
+  updateLocation: function(body, callback) {
+    User.findOneAndUpdate({username: body.username}, {
+      is_loc: true,
+      location: body.location
+    }, function(err, user) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1
+      })
     })
   },
 
@@ -335,6 +504,303 @@ module.exports = {
       }
       callback(null, {
         success: 1
+      })
+    })
+  },
+
+  getInfos: function(username, callback) {
+    async.parallel({
+      genders: (callback) => {
+        Gender.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      interests: (callback) => {
+        Interest.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      agemax: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'age': -1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$age'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      },
+      agemin: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'age': 1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$age'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      },
+      distances: (callback) => {
+        User.findOne({username: username}, function(err, user) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          let query = {
+            username: {$ne: user.username},
+            is_completed: true,
+            is_loc: true,
+          }
+          User.aggregate([
+            {
+             $geoNear: {
+                near: { type: "Point", coordinates: user.location.coordinates },
+                distanceField: "dist.calculated",
+                query: query,
+                distanceMultiplier: 0.001,
+                spherical: true,
+              }
+            }
+          ]).exec(function(err, users) {
+            if (err) {
+              callback(err, null)
+              return
+            }
+            if (!users.length) {
+              callback(null, [0,0])
+              return
+            }
+            callback(null, [
+              Math.floor(users[0].dist.calculated),
+              Math.ceil(users[users.length - 1].dist.calculated)
+            ])
+          })
+        })
+      },
+      scoremax: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'score': -1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$score'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      },
+      scoremin: (callback) => {
+        User.aggregate([
+          {$match: {
+            is_completed: true,
+            is_loc: true,
+          }},
+          {$sort: {'score': 1}},
+          {$limit: 1},
+          {$project: {_id: 0, value: '$score'}}
+        ]).exec(function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results[0].value)
+        })
+      }
+    }, function(err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        genders: results.genders,
+        interests: results.interests,
+        ages: [results.agemin, results.agemax],
+        distances: results.distances,
+        scores: [results.scoremin, results.scoremax]
+      })
+    })
+  },
+
+  findMatch: function(body, callback) {
+    async.parallel({
+      user: (callback) => User.findOne({username: body.username}, '_id username orientation location is_loc interests', callback),
+      interests: (callback) => Interest.find({_id: {$in: body.interests}}, '_id', callback),
+      genders: (callback) => Gender.find({_id: {$in: body.genders}}, '_id', callback),
+    }, function(err, results) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      if (!results.user.is_loc) {
+        callback(null, {
+          success: 1,
+          users: [],
+          total: 0
+        })
+        return
+      }
+
+      const interests = results.interests.map(i => i._id)
+      const genders = body.type === 'match'
+        ? results.user.orientation
+        : results.genders.map(i => i._id)
+      if(!interests || !interests.length || !genders || !genders.length) {
+        callback(null, {
+          success: 1,
+          users: [],
+          total: 0
+        })
+        return
+      }
+
+      let query = {
+        username: {$ne: results.user.username},
+        is_completed: true,
+        is_loc: true,
+        gender: {$in: genders},
+        interests: {$elemMatch: {$in: interests}},
+        age: {
+          $gte: body.ages[0],
+          $lte: body.ages[1]
+        },
+        score: {
+          $gte: body.scores[0],
+          $lte: body.scores[1]
+        }
+      }
+      User.aggregate([
+        {
+         $geoNear: {
+            near: { type: "Point", coordinates: results.user.location.coordinates },
+            distanceField: "dist.calculated",
+            query: query,
+            minDistance: parseFloat(body.distances[0]) * 1000,
+            maxDistance: parseFloat(body.distances[1]) * 1000,
+            distanceMultiplier: 0.001,
+            spherical: true
+          }
+        },
+        {
+          $lookup: {
+            from: 'genders',
+            localField: 'gender',
+            foreignField: '_id',
+            as: 'gender'
+          }
+        },
+        {
+          $lookup: {
+            from: 'images',
+            localField: 'avatar.image',
+            foreignField: '_id',
+            as: 'avatar.image'
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            username: 1,
+            avatar: 1,
+            score: 1,
+            age: 1,
+            city: 1,
+            location: 1,
+            is_loc: 1,
+            bot: 1,
+            distance: {$trunc: "$dist.calculated"},
+            interests: 1,
+            matchInterests: {
+              $sum : {
+                $map: {
+                  input: "$interests",
+                  as: "i",
+                  in: {$cond: [{$in : ["$$i" , results.user.interests]}, 1, 0]}
+                }
+              }
+            },
+            gender: "$gender.name",
+          }
+        },
+        {
+          $addFields: {
+            matching: {
+              $add: [{
+                $multiply: [5, "$matchInterests"]
+              }, {
+                $cond: [{$lte : ["$distance" , 5]}, 5, {
+                  $cond: [{$lte : ["$distance" , 10]}, 4, {
+                    $cond: [{$lte : ["$distance" , 50]}, 3, {
+                      $cond: [{$lte : ["$distance" , 100]}, 2, {
+                        $cond: [{$lte : ["$distance" , 500]}, 1, 0]
+                      }]
+                    }]
+                  }]
+                }]
+              }
+            ]},
+          }
+        },
+        {
+          $lookup: {
+            from: 'interests',
+            localField: 'interests',
+            foreignField: '_id',
+            as: 'interests'
+          }
+        },
+        { $unwind: "$gender" },
+        { $unwind: "$avatar.image" },
+        { $sort: body.sortOrder },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            results: { $push: '$$ROOT' }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
+        }
+      }
+    ]).then(([{ count, rows }]) => {
+        callback(null, {
+          success: 1,
+          users: rows,
+          total: count
+        })
+        return
+      }).catch((err) => {
+        callback(err, null)
+        return
       })
     })
   },

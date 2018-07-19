@@ -6,6 +6,7 @@ import {
   AUTH_LOGIN_ERROR,
   AUTH_LOGIN_SUCCESS,
   AUTH_LOGOUT,
+  AUTH_UNLOAD,
   AUTH_PROFILE_REQUEST,
   AUTH_PROFILE_ERROR,
   AUTH_PROFILE_SUCCESS,
@@ -26,6 +27,7 @@ import {
   AUTH_RELATION_ERROR,
   AUTH_RELATION_OTHER,
   AUTH_NOTIFICATION_INSERT,
+  AUTH_CHANGE_LOCATION,
 } from './mutation-types'
 import {
   USER_USER_SUCCESS
@@ -133,6 +135,19 @@ const actions = {
         commit(AUTH_LOGOUT)
         // suppression des variables dans les storages
         removeStorage()
+        resolve()
+      }, (err) => {
+        reject()
+      })
+    })
+  },
+  [AUTH_UNLOAD]: ({commit, dispatch}, username) => {
+    return new Promise((resolve, reject) => {
+      callApi({url: '/auth/logout', data: {username: username}, method: 'POST'})
+      .then((resp) => {
+        commit(AUTH_LOGOUT)
+        // suppression des variables dans les storages
+        // removeStorage()
         resolve()
       }, (err) => {
         reject()
@@ -269,7 +284,8 @@ const mutations = {
         : (localStorage.getItem('token') ? localStorage.getItem('token') : '')
     state.username = sessionStorage.getItem('username')
         ? sessionStorage.getItem('username')
-        : (localStorage.getItem('username') ? localStorage.getItem('username') : '')
+        : (localStorage.getItem('username') ? localStorage.getItem('username')
+        : '')
   },
   [AUTH_CHECKAUTH_SUCCESS]: (state) => {
     state.status = 'success'
@@ -294,6 +310,7 @@ const mutations = {
   },
   [AUTH_LOGOUT]: (state) => {
     state.token = ''
+    state.profile = {}
   },
   [AUTH_PROFILE_REQUEST]: (state) => {
     state.status = 'loading'
@@ -305,11 +322,13 @@ const mutations = {
       role: data.role,
       visited: data.visited,
       is_completed: data.is_completed,
-      //visibility: data.visibility,
+      location: data.location,
+      is_loc: data.is_loc,
       likes: data.likes,
       likers: data.likers,
       friends: data.friends,
-      notifications: data.notifications
+      notifications: data.notifications,
+      score: data.score,
     })
   },
   [AUTH_PROFILE_ERROR]: (state) => {
@@ -363,6 +382,7 @@ const mutations = {
     if (data) {
       let index
       if (data.actor.username === state.profile.username) {
+        state.profile.score = data.scores.actor
         switch(data.action) {
           case 'like':
             state.profile.likes.push(data.receptor)
@@ -384,6 +404,7 @@ const mutations = {
           break
         }
       } else {
+        state.profile.score = data.scores.receptor
         switch(data.action) {
           case 'like':
             index = state.profile.likes.findIndex(u => u.username === data.actor.username)
@@ -420,6 +441,27 @@ const mutations = {
   },
   [AUTH_NOTIFICATION_INSERT]: (state, data) => {
     state.profile.notifications.splice(0, 0, data)
+  },
+  [AUTH_CHANGE_LOCATION]: (state, data) => {
+    // changement de la location sur le profile
+    if (data.username === state.profile.username) {
+      state.profile.is_loc = true
+      state.profile.location = data.location
+    // changement de la location si un profile est en ligne
+    } else {
+      state.profile.friends.filter(u => u.username === data.username).map(u => {
+        u.is_loc = true,
+        u.location = data.location
+      })
+      state.profile.likers.filter(u => u.username === data.username).map(u => {
+        u.is_loc = true,
+        u.location = data.location
+      })
+      state.profile.likes.filter(u => u.username === data.username).map(u => {
+        u.is_loc = true,
+        u.location = data.location
+      })
+    }
   }
 }
 

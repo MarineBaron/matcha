@@ -1,28 +1,23 @@
 <template>
   <b-container fluid>
-    <b-row>
-      <b-col cols="8">
-        <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"/>
-      </b-col>
-      <b-col cols="4">
-        <admin-menu :status="status"/>
-      </b-col>
-    </b-row>
-    <admin-map :status="status" :items="items" />
+    <h2>Gestion des utilisateurs</h2>
+    <admin-menu :status="status" @delete-bots="deleteBots"  @create-bots="createBots"/>
+    <user-list-container :status="status" :items="items" :params="params" :totalRows="totalRows" @change-params="changeParams"  @delete-user="deleteUser"/>
+    <map-user-all type="admin" :status="status" :items="items" />
   </b-container>
 </template>
 
 <script>
   import callApi from '../../Api/callApi'
-  import AdminMenu from './Menu/AdminMenu.vue'
-  import UserListContainer from './Content/UserListContainer.vue'
-  import AdminMap from './Content/AdminMap.vue'
+  import AdminMenu from './AdminMenu.vue'
+  import UserListContainer from './UserListContainer.vue'
+  import MapUserAll from '../Map/MapUserAll.vue'
 
   export default {
     components: {
       AdminMenu,
       UserListContainer,
-      AdminMap
+      MapUserAll
     },
     data() {
       return ({
@@ -65,11 +60,12 @@
           this.totalRows = 0
         })
       },
-      deleteUser(id) {
+      deleteUser(username) {
         if(this.status === 'success') {
           this.status = 'loading'
-          callApi({url: '/admin/delete/' + id})
+          callApi({url: '/admin/delete/' + username})
           .then((resp) => {
+            this.flash('L\'utilisateur a été supprimé.', 'success', {timeout: 5000})
             this.fetchData()
           }, (err) => {
             console.log('ERR', err)
@@ -81,6 +77,7 @@
           this.status = 'loading'
           callApi({url: '/admin/createbots'})
           .then((resp) => {
+            this.flash('Les bots ont été créés.', 'success', {timeout: 5000})
             this.fetchData()
           }, (err) => {
             console.log('ERR', err)
@@ -92,6 +89,7 @@
           this.status = 'loading'
           callApi({url: '/admin/deletebots'})
           .then((resp) => {
+            this.flash('Les bots ont été supprimés.', 'success', {timeout: 5000})
             this.fetchData()
           }, (err) => {
             console.log('ERR', err)
