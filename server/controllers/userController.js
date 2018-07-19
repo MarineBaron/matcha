@@ -582,7 +582,7 @@ module.exports = {
                 near: { type: "Point", coordinates: user.location.coordinates },
                 distanceField: "dist.calculated",
                 query: query,
-                distanceMultiplier: 1.0/6378.1,
+                distanceMultiplier: 0.001,
                 spherical: true,
               }
             }
@@ -704,9 +704,9 @@ module.exports = {
             near: { type: "Point", coordinates: results.user.location.coordinates },
             distanceField: "dist.calculated",
             query: query,
-            minDistance: body.distances[0] * 6378.1,
-            maxDistance: body.distances[1] * 6378.1,
-            distanceMultiplier: 1.0/6378.1,
+            minDistance: parseFloat(body.distances[0]) * 1000,
+            maxDistance: parseFloat(body.distances[1]) * 1000,
+            distanceMultiplier: 0.001,
             spherical: true
           }
         },

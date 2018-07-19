@@ -19,7 +19,7 @@
         </b-col>
       </b-row>
     </b-container>
-    <footer><counter /></footer>
+    <footer><localisation /><counter /></footer>
     <chat-rooms v-if="isAuthenticated"/>
   </div>
 </template>
@@ -32,6 +32,7 @@ import Navigation from './Navigation/Navigation.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
 import ChatRooms from './Chat/ChatRooms.vue'
 import Counter from './Counter/Counter.vue'
+import Localisation from './Localisation/Localisation.vue'
 import callApi from '../Api/callApi'
 
 export default {
@@ -40,7 +41,8 @@ export default {
     Navigation,
     Dashboard,
     ChatRooms,
-    Counter
+    Counter,
+    Localisation
   },
   created() {
     window.addEventListener('beforeunload', this.unload)
