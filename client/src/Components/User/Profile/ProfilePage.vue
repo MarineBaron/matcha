@@ -43,7 +43,7 @@
     data() {
       return {
         mode: 'view',
-        title: 'Votre Interface',
+        title: 'Votre profil',
         buttonText: 'Editer',
         error: '',
         relationStatus: {
@@ -60,13 +60,6 @@
       ...mapState({
         user: state => state.user.user,
         loadingSuccess: state => state.user.status === 'success' ? true : false,
-        // relations: state => {
-        //   return {
-        //     likes: state.auth.profile.likes ? state.auth.profile.likes : [],
-        //     likers: state.auth.profile.likers ? state.auth.profile.likers : [],
-        //     friends: state.auth.profile.friends ? state.auth.profile.friends : [],
-        //   }
-        // }
       })
     },
   }
