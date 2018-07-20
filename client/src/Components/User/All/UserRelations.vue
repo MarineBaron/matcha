@@ -52,6 +52,22 @@
         </b-card-body>
       </b-collapse>
     </b-card>
+    <b-card v-if="relationStatus.isUser === true && relationsComputed.blocked && relationsComputed.blocked.length" no-body class="mb-1">
+      <b-card-header header-tag="header" class="p-1" role="tab">
+        <b-btn block href="#" v-b-toggle.accordion_blocked variant="info">{{relationsTitle.blocked}}</b-btn>
+      </b-card-header>
+      <b-collapse id="accordion_blocked" accordion="my-accordion" role="tabpanel" @shown="askConnexion('blocked')">
+        <b-card-body>
+          <user-list-item v-if="relationStatus.isUser === true"
+            v-for="user in relationsComputed.blocked"
+            :key="user.username"
+            :item="user"
+            :actor="actor"
+            :actions="['view', 'unblock']"
+          />
+        </b-card-body>
+      </b-collapse>
+    </b-card>
   </div>
 </template>
 
@@ -76,6 +92,7 @@
           friends: this.relationStatus.isUser ? "Nous nous aimons" : "Ils s'aiment",
           likes: this.relationStatus.isUser ? "Je les aime" : "Il les aime",
           likers: this.relationStatus.isUser ? "Ils m'aiment" : "Ils l'aiment",
+          blocked: "Je les bloque",
         }
       },
       ...mapGetters([
@@ -86,6 +103,7 @@
         likes: state => state.auth.profile.likes ? state.auth.profile.likes : [],
         likers: state => state.auth.profile.likers ? state.auth.profile.likers : [],
         friends: state => state.auth.profile.friends ? state.auth.profile.friends : [],
+        blocked: state => state.auth.profile.blocked ? state.auth.profile.blocked : [],
       }),
       relationsComputed() {
         if (!this.relationStatus.isUser) {
@@ -94,7 +112,8 @@
         return {
           likes: this.likes,
           likers: this.likers,
-          friends: this.friends
+          friends: this.friends,
+          blocked: this.blocked
         }
       }
     },

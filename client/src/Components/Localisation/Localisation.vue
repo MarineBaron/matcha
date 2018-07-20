@@ -1,17 +1,4 @@
 <template>
-  <div>
-    <h3>Localisation</h3>
-    <div  v-if="bdd">
-      <h4>BDD</h4>
-      <div>lat: {{bdd.coordinates[1]}}</div>
-      <div>lon: {{bdd.coordinates[0]}}</div>
-    </div>
-    <div v-if="dyn">
-      <h4>Dynamique</h4>
-      <div>lat: {{dyn.coordinates[1]}}</div>
-      <div>lon: {{dyn.coordinates[0]}}</div>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -46,12 +33,14 @@
   },
   watch: {
     dyn (n, o) {
-      if(this.isAuthenticated && this.user.username && n !== null) {
+      if(this.isAuthenticated &&  this.user.username && n !== null) {
+        //console.log('change dyn')
         this.updateLocalisation()
       }
     },
     user(n, o) {
-      if(this.isAuthenticated && this.user.username && this.dyn !== null) {
+      if(this.isAuthenticated &&  this.user.username && this.dyn !== null) {
+        //console.log('change dyn')
         this.updateLocalisation()
       }
     }
@@ -75,8 +64,9 @@
         }
         callApi({url: '/user/updatelocation', data , method: 'POST'})
         .then((resp) => {
+          //console.log('CHANGE_LOCATION', data)
           this.$socket.emit('CHANGE_LOCATION', data)
-          this.$store.commit(USER_CHANGE_LOCATION, data)
+          this.$store.commit(AUTH_CHANGE_LOCATION, data)
         })
         .catch((err) => {
           console.log('updateLocalisation Error', err)
@@ -149,6 +139,7 @@
   },
   sockets: {
     CHANGE_LOCATION: function(data) {
+      //console.log(AUTH_CHANGE_LOCATION, data)
       this.$store.commit(AUTH_CHANGE_LOCATION, data)
     }
   }

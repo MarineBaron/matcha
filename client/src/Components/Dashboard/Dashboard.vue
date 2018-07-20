@@ -191,7 +191,7 @@
           this.$socket.emit('IS_CONNECTED_REQUEST', data.actor.username)
         }
         this.$store.commit(AUTH_RELATION_OTHER, data)
-        if (data.action === 'unlike') {
+        if (data.action === 'unlike' || data.action === 'blockunlike') {
           if (this.rooms.find(r => r.otheruser === data.actor.username)) {
             this.$store.commit(CHAT_CLOSE_ROOM, data.actor.username)
           }

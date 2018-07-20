@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const User = require('./user.js')
+const User = require('./user')
 
 const BlockedSchema = new mongoose.Schema({
   blocker: {

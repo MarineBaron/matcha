@@ -330,6 +330,8 @@ const mutations = {
       likes: data.likes,
       likers: data.likers,
       friends: data.friends,
+      blocked: data.blocked,
+      blockers: data.blockers,
       notifications: data.notifications,
       score: data.score,
     })
@@ -381,11 +383,14 @@ const mutations = {
     state.status = 'success'
   },
   [AUTH_RELATION_OTHER]: (state, data) => {
+    //console.log(AUTH_RELATION_OTHER)
     state.status = 'success'
     if (data) {
       let index
       if (data.actor.username === state.profile.username) {
-        state.profile.score = data.scores.actor
+        if(['like', 'relike', 'unlike', 'blockunlike'].includes(data.action)) {
+          state.profile.score = data.scores.actor
+        }
         switch(data.action) {
           case 'like':
             state.profile.likes.push(data.receptor)
@@ -405,9 +410,32 @@ const mutations = {
               state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.receptor.username), 1)
             }
           break
+          case 'block':
+          case 'blockunlike':
+            if (data.action === 'blockunlike') {
+              // action de unlike
+              const index = state.profile.friends.findIndex(u => u.username === data.receptor.username)
+              // s'il est mon ami, on l'enleve des amis, et on le mets dans la liste des likers
+              if (index != -1) {
+                state.profile.friends.splice(index,1)
+                state.profile.likers.push(data.receptor)
+              // sinon on l'enleve des likes
+              } else {
+                state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.receptor.username), 1)
+              }
+            }
+            console.log('actor', data.actor.username, 'receptor', data.receptor.username)
+            // action de block
+            state.profile.blocked.push(data.receptor)
+          break
+          case 'unblock':
+            state.profile.blocked.splice(state.profile.blocked.findIndex(u => u.username === data.receptor.username), 1)
+          break
         }
       } else {
-        state.profile.score = data.scores.receptor
+        if(['like', 'relike', 'unlike', 'blockunlike'].includes(data.action)) {
+          state.profile.score = data.scores.receptor
+        }
         switch(data.action) {
           case 'like':
             index = state.profile.likes.findIndex(u => u.username === data.actor.username)
@@ -434,6 +462,26 @@ const mutations = {
             } else {
               state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.actor.username), 1)
             }
+          break
+          case 'block':
+          case 'blockunlike':
+            // action de unlike
+            if (data.action === 'blockunlike') {
+              index = state.profile.friends.findIndex(u => u.username === data.actor.username)
+              // s'il est mon ami, on l'enleve des amis, et on le mets dans la liste des likes
+              if (index != -1) {
+                state.profile.friends.splice(index, 1)
+                state.profile.likes.push(data.actor)
+              // sinon on l'enleve des likers
+              } else {
+                state.profile.likers.splice(state.profile.likers.findIndex(u => u.username === data.actor.username), 1)
+              }
+            }
+            // action de block
+            state.profile.blockers.push(data.actor)
+          break
+          case 'unblock':
+            state.profile.blockers.splice(state.profile.blockers.findIndex(u => u.username === data.actor.username), 1)
           break
         }
       }

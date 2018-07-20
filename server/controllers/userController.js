@@ -9,6 +9,7 @@ const Gender = require('../models/gender')
 const Interest = require('../models/interest')
 
 const Like = require('../models/likes')
+const Block = require('../models/blocked')
 const Image = require('../models/image')
 const mailController = require('./mailController')
 
@@ -220,6 +221,12 @@ module.exports = {
           likers: (callback) => {
             user.getLikers(user._id, callback)
           },
+          blockers: (callback) => {
+            user.getBlockers(user._id, callback)
+          },
+          blocked: (callback) => {
+            user.getBlocked(user._id, callback)
+          },
         }, function(err, results) {
           if (err) {
             callback(err, null)
@@ -247,6 +254,8 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
+            blockers: results.blockers ? results.blockers : [],
+            blocked: results.blocked ? results.blocked : [],
             last_logout: user.last_logout,
             location: user.location,
             score: user.score
@@ -425,9 +434,14 @@ module.exports = {
         callback(err, null)
         return
       }
-      const users = {
+      const users = data.action === 'like' || data.action === 'unlike'
+      ? {
         liker: results.actor._id,
         liked: results.receptor._id
+      }
+      : {
+        blocker: results.actor._id,
+        blocked: results.receptor._id
       }
       data.actor = results.actor
       data.receptor = results.receptor
@@ -527,6 +541,116 @@ module.exports = {
                 })
                 return
               })
+            })
+          })
+        break
+        case 'block':
+        console.log('updaterelation block', results, users)
+        Block.findOne(users, function (err, block) {
+          if(err) {
+            callback(err, null)
+            return
+          }
+          if(block) {
+            callback(null, {
+              success: 0,
+              message: 'ALLREADY BLOCKED'
+            })
+            return
+          }
+          // on cherche si le receptor était liké pour le déliker
+          Like.findOne({
+            liker: results.actor._id,
+            liked: results.receptor._id
+          }, function(err, like) {
+            if(err) {
+              callback(err, null)
+              return
+            }
+            // il était liké
+            if(like) {
+
+              console.log('isliked',like)
+              Like.deleteOne({
+                liker: results.actor._id,
+                liked: results.receptor._id,
+              }, function(err) {
+                const block = new Block(users)
+                block.save(function(err, result) {
+                  if(err) {
+                    callback(err, null)
+                    return
+                  }
+                  // on met à jour les score
+                  async.parallel({
+                    actor: (callback) => {
+                      updateScore(data.actor, callback)
+                    },
+                    receptor: (callback) => {
+                      updateScore(data.receptor, callback)
+                    }
+                  }, function(err, results) {
+                    if (err){
+                      callback(err, null)
+                      return
+                    }
+                    // on change le nom de l'action
+                    data.action = 'blockunlike'
+                    data.scores = results
+                    // on renvoie le résultat (avec les nouveaux scores)
+                    callback(null, {
+                      success: 1,
+                      data: data
+                    })
+                    return
+                  })
+                })
+              })
+            } else {
+              // il n'était pas liké
+              const block = new Block(users)
+              block.save(function(err, result) {
+                if(err) {
+                  callback(err, null)
+                  return
+                }
+                // on renvoie le résultat
+                callback(null, {
+                  success: 1,
+                  data: data
+                })
+                return
+              })
+            }
+          })
+        })
+
+        break
+        case 'unblock':
+          console.log('updaterelation unblock', results, users)
+          Block.findOne(users, function (err, block) {
+            if(err) {
+              callback(err, null)
+              return
+            }
+            if (!block) {
+              callback(null, {
+                success: 0,
+                message: 'NOT BLOCKED'
+              })
+              return
+            }
+            Block.deleteOne(users, function(err) {
+              if(err) {
+                callback(err, null)
+                return
+              }
+              // on renvoie le résultat
+              callback(null, {
+                success: 1,
+                data: data
+              })
+              return
             })
           })
         break
@@ -691,7 +815,6 @@ module.exports = {
         callback(err, null)
         return
       }
-      console.log('findInfos', results)
       callback(null, {
         genders: results.genders,
         interests: results.interests,
