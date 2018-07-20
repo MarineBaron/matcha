@@ -231,8 +231,7 @@ io.on('connection', function(socket) {
 
   // Changement de location
   socket.on('CHANGE_LOCATION', function(data) {
-    console.log('CHANGE_LOCATION', data)
-    socket.broadcast.emit('CHANGE_LOCATION', data)
+    socket.emit('CHANGE_LOCATION', data)
   })
 
   // Deconnexion d'un utilisateur

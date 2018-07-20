@@ -28,7 +28,9 @@ import {
   AUTH_RELATION_OTHER,
   AUTH_NOTIFICATION_INSERT,
   AUTH_CHANGE_LOCATION,
+  AUTH_MAP_SUCCESS
 } from './mutation-types'
+
 import {
   USER_USER_SUCCESS
 } from '../user/mutation-types'
@@ -57,6 +59,7 @@ const state = {
   username: '',
   profile: {},
   hasLoadedOnce: sessionStorage.getItem('token') ? true : false,
+  mapNeedChange: false
 }
 
 const getters = {
@@ -435,6 +438,7 @@ const mutations = {
         }
       }
     }
+    state.mapNeedChange = true
   },
   [AUTH_RELATION_ERROR]: (state) => {
     state.status = 'error'
@@ -449,19 +453,31 @@ const mutations = {
       state.profile.location = data.location
     // changement de la location si un profile est en ligne
     } else {
-      state.profile.friends.filter(u => u.username === data.username).map(u => {
-        u.is_loc = true,
-        u.location = data.location
-      })
-      state.profile.likers.filter(u => u.username === data.username).map(u => {
-        u.is_loc = true,
-        u.location = data.location
-      })
-      state.profile.likes.filter(u => u.username === data.username).map(u => {
-        u.is_loc = true,
-        u.location = data.location
-      })
+      let index
+      let other
+      index = state.profile.friends.findIndex(u => u.username === data.username)
+      if(index !== -1) {
+        other = state.profile.friends[index]
+        other.location = data.location
+        Vue.set(state.profile.friends, index, other)
+      }
+      index = state.profile.likers.findIndex(u => u.username === data.username)
+      if(index !== -1) {
+        other = state.profile.likers[index]
+        other.location = data.location
+        Vue.set(state.profile.likers, index, other)
+      }
+      index = state.profile.likes.findIndex(u => u.username === data.username)
+      if(index !== -1) {
+        other = state.profile.likes[index]
+        other.location = data.location
+        Vue.set(state.profile.likes, index, other)
+      }
     }
+    state.mapNeedChange = true
+  },
+  [AUTH_MAP_SUCCESS]: (state) => {
+    state.mapNeedChange = false
   }
 }
 

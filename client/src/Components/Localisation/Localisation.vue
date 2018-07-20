@@ -45,29 +45,6 @@
     },
   },
   watch: {
-    // dyn(n, o) {
-    //   if(this.user && n !== o && n) {
-    //     if (this.bdd === null
-    //       || this.bdd.coordinates[0] !== n.coordinates[0]
-    //       || this.bdd.coordinates[1] !== n.coordinates[1]
-    //     ) {
-    //       const data = {
-    //         username: this.user.username,
-    //         location: n
-    //       }
-    //       callApi({url: '/user/updatelocation', data , method: 'POST'})
-    //       .then((resp) => {
-    //         console.log('Localisation Success', resp)
-    //         this.$socket.emit('change-location', data)
-    //         this.$store.commit(AUTH_CHANGE_LOCATION, data)
-    //         this.$store.commit(USER_CHANGE_LOCATION, data)
-    //       })
-    //       .catch((err) => {
-    //         console.log('Localisation Error', err)
-    //       })
-    //     }
-    //   }
-    // },
     dyn (n, o) {
       if(this.isAuthenticated && this.user.username && n !== null) {
         this.updateLocalisation()
@@ -80,7 +57,11 @@
     }
   },
   mounted() {
-    this.getLocalisation()
+    if (config.MODE === 'dev') {
+      this.getDevLocalisation()
+    } else {
+      this.getLocalisation()
+    }
   },
   methods: {
     updateLocalisation() {
@@ -92,33 +73,30 @@
           username: this.user.username,
           location: this.dyn
         }
-        console.log('watch user', data)
         callApi({url: '/user/updatelocation', data , method: 'POST'})
         .then((resp) => {
-          console.log('Localisation Success', resp)
-          this.$socket.emit('change-location', data)
-          this.$store.commit(AUTH_CHANGE_LOCATION, data)
+          this.$socket.emit('CHANGE_LOCATION', data)
           this.$store.commit(USER_CHANGE_LOCATION, data)
         })
         .catch((err) => {
-          console.log('Localisation Error', err)
+          console.log('updateLocalisation Error', err)
         })
       }
     },
     // méthode pour créer des coordonnées aléatoires en mode dev
-    calcCoordinates(pos) {
-      if (config.MODE === 'dev') {
-        const latMax = 51.0686
-        const latMin = 41.3133
-        const lonMax = 9.5599
-        const lonMin = -5.1511
+    getDevLocalisation() {
+      const latMax = 51.0686
+      const latMin = 41.3133
+      const lonMax = 9.5599
+      const lonMin = -5.1511
 
-        pos = [
+      this.dyn = {
+        type: 'Point',
+        coordinates: [
           Math.random() * (lonMax - lonMin) + lonMin,
           Math.random() * (latMax - latMin) + latMin,
         ]
       }
-      return pos
     },
     successHtml5Localisation(pos) {
       this.dyn = {
@@ -147,7 +125,7 @@
       axios.get(config.API_IPSTACK_URL, {
         headers: {
           'Access-Control-Allow-Origin': 'http://api.ipstack.com',
-          'Access-Control-Headers': 'Access-Control-Allow-Origin',
+          'Access-Control-Allow-Headers': 'Access-Control-Allow-Origin',
           'Content-Type': 'application/json',
         },
         params: {

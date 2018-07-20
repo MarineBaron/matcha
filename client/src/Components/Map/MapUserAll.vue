@@ -34,6 +34,8 @@ import 'ol/ol.css'
 import 'ol-layerswitcher/src/ol-layerswitcher.css'
 
 import UserListItem from '../User/All/UserListItem.vue'
+import { AUTH_MAP_SUCCESS } from '../../Store/auth/mutation-types'
+import { mapState } from 'vuex'
 
 const styles = {
   'bot': new Style({
@@ -100,8 +102,14 @@ export default {
       selectedFeatures: [],
       center: [1, 42],
       zoom: 5,
-      names: []
+      names: [],
+      features: []
     }
+  },
+  computed: {
+    ...mapState({
+      mapNeedChange: state => state.auth.mapNeedChange
+    })
   },
   mounted() {
     this.map = new Map({
@@ -206,6 +214,15 @@ export default {
       if((this.type === 'admin' || this.type === 'match') && n !== o && n === 'success') {
         this.setFeatures()
       }
+    },
+    user(n, o) {
+      this.setFeatures()
+    },
+    mapNeedChange(n, o) {
+      if (n) {
+        this.setFeatures()
+        this.$store.commit(AUTH_MAP_SUCCESS)
+      }
     }
   },
   methods: {
@@ -302,6 +319,7 @@ export default {
           layerAll = layer
         }
       })
+      this.features = features
 
       //nettotage des layers
       layers.forEach(layer => {

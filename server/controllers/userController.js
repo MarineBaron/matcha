@@ -12,69 +12,87 @@ const Like = require('../models/likes')
 const Image = require('../models/image')
 const mailController = require('./mailController')
 
-function searchLocation(updateUser, user, callback) {
-  if (updateUser.zip !== user.zip
-      || updateUser.city !== user.city
-      || (updateUser.zip !== '' && user.is_loc !== true)
-    )
-  {
-    const params = {
-      country: 'France',
-      postalcode: updateUser.zip,
-      format: 'json',
+function updateIsCompleted(user, callback) {
+  let maxCompleted = 0
+  let completed = 0
+  // avatar
+  maxCompleted++
+  if (user.avatar.image) {
+    completed++
+  }
+  // gender
+  maxCompleted++
+  if (user.gender) {
+    completed++
+  }
+  // age (field Number)
+  maxCompleted++
+  if (user.age) {
+    completed++
+  }
+  // champs Text ou Array
+  const fields = [
+    'firstname',
+    'lastname',
+    'resume',
+    'zip',
+    'orientation',
+    'interests',
+    'gallery'
+  ]
+  maxCompleted += fields.length
+  fields.forEach(f => {
+    if (user[f].length) {
+      completed++
     }
-    if(updateUser.city) {
-      params.city = updateUser.city
-    }
-    axios.get(process.env.API_OPENSTREETMAP_SEARCH, {
-      params
-    })
-    .then((resp) => {
-      updateUser.location = {
-        type: 'Point',
-        coordinates: [parseFloat(resp.data[0].lon), parseFloat(resp.data[0].lat)]
-      }
-      updateUser.is_loc = true
-      callback(null, updateUser)
-      return
-
-    })
-    .catch((err) => {
+  })
+  const is_completed = completed === maxCompleted ? true : false
+  User.findByIdAndUpdate(user._id, {is_completed}, {new: true}, function(err, newUser) {
+    if(err) {
       callback(err, null)
       return
-    })
-  } else {
-    callback(null, updateUser)
-  }
-}
-
-function nbInterests(iA, iB) {
-  let nb = 0
-  iA.forEach(ui => {
-    iB.forEach(i => {
-      console.log(ui, i)
-      if (ui.toString() == i) {
-        nb++
-      }
-    })
+    }
+    callback(null, newUser)
+    return
   })
-  return nb
 }
 
-function userCalcMatching(userA, user) {
-
-  userA.communInterests = nbInterests(userA.interests, user.interests)
-  //userA.distance = userA.dist.calculated
-  const factDist = userA.distance < 10 ? 5 : (userA.distance < 50 ? 3 : (userA.distance < 500 ? 1 : 0))
-  userA.matching = factDist + 2 * userA.communInterests
-}
-
-function usersCalcMatching(users, user) {
-  return new Promise((resolve, reject) => {
-    return Promise.all(users.map((u) => userCalcMatching(u, user)))
-    .then(() => {resolve(users)})
-    .catch((err) => reject(err))
-  })
+function searchLocation(updateUser, user, callback) {
+  // suppression de ctte partie, car la localisation des users n'est pas associée à leur ville
+  callback(null, updateUser)
+  // if (updateUser.zip !== user.zip
+  //     || updateUser.city !== user.city
+  //     || (updateUser.zip !== '' && user.is_loc !== true)
+  //   )
+  // {
+  //   const params = {
+  //     country: 'France',
+  //     postalcode: updateUser.zip,
+  //     format: 'json',
+  //   }
+  //   if(updateUser.city) {
+  //     params.city = updateUser.city
+  //   }
+  //   axios.get(process.env.API_OPENSTREETMAP_SEARCH, {
+  //     params
+  //   })
+  //   .then((resp) => {
+  //     updateUser.location = {
+  //       type: 'Point',
+  //       coordinates: [parseFloat(resp.data[0].lon), parseFloat(resp.data[0].lat)]
+  //     }
+  //     updateUser.is_loc = true
+  //     callback(null, updateUser)
+  //     return
+  //
+  //   })
+  //   .catch((err) => {
+  //     callback(err, null)
+  //     return
+  //   })
+  // } else {
+  //   callback(null, updateUser)
+  // }
 }
 
 function updateScore(user, callback) {
@@ -327,7 +345,36 @@ module.exports = {
   // GASTON 11 : ceation d'une méthode getGendersInterests
   // cette méthode utilise async.parallel pour rechercher les 2 infos
   getGendersInterests: function(callback) {
-    // a toi de jouer
+    // on fait les 2 requetes en parallele
+    async.parallel({
+      // cette requete renvoie les genders, si pas d'erreur
+      genders: (callback) => {
+        Gender.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      // cette requete renvoie les interests, si pas d'erreur
+      interests: (callback) => {
+        Interest.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      }
+      // lorsque les 2 requetes ont été exécutées, on peut retourner le résultat final
+    }, function(err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, results)
+    })
   },
 
   update: function (updateUser, callback){
@@ -352,9 +399,15 @@ module.exports = {
               callback(err, null)
               return
             }
-            callback(null, {
-              success: 1,
-              data: newUser
+            updateIsCompleted(newUser, function(err, newUser) {
+              if (err){
+                callback(err, null)
+                return
+              }
+              callback(null, {
+                success: 1,
+                data: newUser
+              })
             })
           })
         })
@@ -638,6 +691,7 @@ module.exports = {
         callback(err, null)
         return
       }
+      console.log('findInfos', results)
       callback(null, {
         genders: results.genders,
         interests: results.interests,
