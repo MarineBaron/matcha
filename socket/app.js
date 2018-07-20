@@ -229,7 +229,7 @@ io.on('connection', function(socket) {
   // demande d'état de connexion d'un utilisateur
   socket.on('IS_CONNECTED_REQUEST', function(username) {
     const isConnected = authUsers.findIndex(u => u.username === username)
-    socket.emit('IS_CONNECTED_RESPONSE', {
+    io.emit('IS_CONNECTED_RESPONSE', {
       username: username,
       isConnected: isConnected === -1 ? false : true
     })

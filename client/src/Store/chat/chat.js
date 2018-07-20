@@ -98,10 +98,10 @@ const actions = {
       })
     })
   },
-  [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
-    commit(CHAT_CLOSE_ROOM, room.otheruser)
-    return(room)
-  },
+  // [CHAT_CLOSE_ROOM]: ({commit, dispatch}, room) => {
+  //   commit(CHAT_CLOSE_ROOM, room.otheruser)
+  //   return(room)
+  // },
   [CHAT_CLOSE_ALLROOMS]: ({commit, dispatch}) => {
     commit(CHAT_CLOSE_ALLROOMS)
   },
@@ -177,6 +177,7 @@ const mutations = {
     state.status = 'error'
   },
   [CHAT_CLOSE_ROOM]: (state, room) => {
+    console.log(CHAT_CLOSE_ROOM, room)
     state.status = 'success'
     const index = state.rooms.findIndex(r => r.data._id === room.data._id)
     if (index !== -1) {
