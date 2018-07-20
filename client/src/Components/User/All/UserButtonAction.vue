@@ -61,7 +61,6 @@
             .then((response) => {
               if (response.data.success) {
                 const data = response.data.data
-                console.log(AUTH_RELATION_REQUEST, data)
                 // emission de l'info (socket)
                 this.$socket.emit('AUTH_RELATION', data)
 

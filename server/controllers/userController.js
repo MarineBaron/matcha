@@ -545,7 +545,6 @@ module.exports = {
           })
         break
         case 'block':
-        console.log('updaterelation block', results, users)
         Block.findOne(users, function (err, block) {
           if(err) {
             callback(err, null)
@@ -569,8 +568,6 @@ module.exports = {
             }
             // il était liké
             if(like) {
-
-              console.log('isliked',like)
               Like.deleteOne({
                 liker: results.actor._id,
                 liked: results.receptor._id,
@@ -627,7 +624,6 @@ module.exports = {
 
         break
         case 'unblock':
-          console.log('updaterelation unblock', results, users)
           Block.findOne(users, function (err, block) {
             if(err) {
               callback(err, null)
@@ -843,141 +839,146 @@ module.exports = {
         })
         return
       }
+      Block.find({blocker: results.user._id}, 'blocked')
+      .exec(function(err, blocked) {
+        const blockedUsers = blocked.map(b => b.blocked)
+        const interests = results.interests.map(i => i._id)
+        const genders = body.type === 'match'
+          ? results.user.orientation
+          : results.genders.map(i => i._id)
 
-      const interests = results.interests.map(i => i._id)
-      const genders = body.type === 'match'
-        ? results.user.orientation
-        : results.genders.map(i => i._id)
-      if(!interests || !interests.length || !genders || !genders.length) {
-        callback(null, {
-          success: 1,
-          users: [],
-          total: 0
-        })
-        return
-      }
-
-      let query = {
-        username: {$ne: results.user.username},
-        is_completed: true,
-        is_loc: true,
-        gender: {$in: genders},
-        interests: {$elemMatch: {$in: interests}},
-        age: {
-          $gte: body.ages[0],
-          $lte: body.ages[1]
-        },
-        score: {
-          $gte: body.scores[0],
-          $lte: body.scores[1]
+        if(!interests || !interests.length || !genders || !genders.length) {
+          callback(null, {
+            success: 1,
+            users: [],
+            total: 0
+          })
+          return
         }
-      }
-      User.aggregate([
-        {
-         $geoNear: {
-            near: { type: "Point", coordinates: results.user.location.coordinates },
-            distanceField: "dist.calculated",
-            query: query,
-            minDistance: parseFloat(body.distances[0]) * 1000,
-            maxDistance: parseFloat(body.distances[1]) * 1000,
-            distanceMultiplier: 0.001,
-            spherical: true
+
+        let query = {
+          _id: {$nin: blockedUsers},
+          username: {$ne: results.user.username},
+          is_completed: true,
+          is_loc: true,
+          gender: {$in: genders},
+          interests: {$elemMatch: {$in: interests}},
+          age: {
+            $gte: body.ages[0],
+            $lte: body.ages[1]
+          },
+          score: {
+            $gte: body.scores[0],
+            $lte: body.scores[1]
           }
-        },
-        {
-          $lookup: {
-            from: 'genders',
-            localField: 'gender',
-            foreignField: '_id',
-            as: 'gender'
-          }
-        },
-        {
-          $lookup: {
-            from: 'images',
-            localField: 'avatar.image',
-            foreignField: '_id',
-            as: 'avatar.image'
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            username: 1,
-            avatar: 1,
-            score: 1,
-            age: 1,
-            city: 1,
-            location: 1,
-            is_loc: 1,
-            bot: 1,
-            distance: {$trunc: "$dist.calculated"},
-            interests: 1,
-            matchInterests: {
-              $sum : {
-                $map: {
-                  input: "$interests",
-                  as: "i",
-                  in: {$cond: [{$in : ["$$i" , results.user.interests]}, 1, 0]}
+        }
+        User.aggregate([
+          {
+           $geoNear: {
+              near: { type: "Point", coordinates: results.user.location.coordinates },
+              distanceField: "dist.calculated",
+              query: query,
+              minDistance: parseFloat(body.distances[0]) * 1000,
+              maxDistance: parseFloat(body.distances[1]) * 1000,
+              distanceMultiplier: 0.001,
+              spherical: true
+            }
+          },
+          {
+            $lookup: {
+              from: 'genders',
+              localField: 'gender',
+              foreignField: '_id',
+              as: 'gender'
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              localField: 'avatar.image',
+              foreignField: '_id',
+              as: 'avatar.image'
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              avatar: 1,
+              score: 1,
+              age: 1,
+              city: 1,
+              location: 1,
+              is_loc: 1,
+              bot: 1,
+              distance: {$trunc: "$dist.calculated"},
+              interests: 1,
+              matchInterests: {
+                $sum : {
+                  $map: {
+                    input: "$interests",
+                    as: "i",
+                    in: {$cond: [{$in : ["$$i" , results.user.interests]}, 1, 0]}
+                  }
                 }
-              }
-            },
-            gender: "$gender.name",
-          }
-        },
-        {
-          $addFields: {
-            matching: {
-              $add: [{
-                $multiply: [5, "$matchInterests"]
-              }, {
-                $cond: [{$lte : ["$distance" , 5]}, 5, {
-                  $cond: [{$lte : ["$distance" , 10]}, 4, {
-                    $cond: [{$lte : ["$distance" , 50]}, 3, {
-                      $cond: [{$lte : ["$distance" , 100]}, 2, {
-                        $cond: [{$lte : ["$distance" , 500]}, 1, 0]
+              },
+              gender: "$gender.name",
+            }
+          },
+          {
+            $addFields: {
+              matching: {
+                $add: [{
+                  $multiply: [5, "$matchInterests"]
+                }, {
+                  $cond: [{$lte : ["$distance" , 5]}, 5, {
+                    $cond: [{$lte : ["$distance" , 10]}, 4, {
+                      $cond: [{$lte : ["$distance" , 50]}, 3, {
+                        $cond: [{$lte : ["$distance" , 100]}, 2, {
+                          $cond: [{$lte : ["$distance" , 500]}, 1, 0]
+                        }]
                       }]
                     }]
                   }]
-                }]
-              }
-            ]},
+                }
+              ]},
+            }
+          },
+          {
+            $lookup: {
+              from: 'interests',
+              localField: 'interests',
+              foreignField: '_id',
+              as: 'interests'
+            }
+          },
+          { $unwind: "$gender" },
+          { $unwind: "$avatar.image" },
+          { $sort: body.sortOrder },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 },
+              results: { $push: '$$ROOT' }
+            }
+          },
+          {
+            $project: {
+              count: 1,
+              rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
           }
-        },
-        {
-          $lookup: {
-            from: 'interests',
-            localField: 'interests',
-            foreignField: '_id',
-            as: 'interests'
-          }
-        },
-        { $unwind: "$gender" },
-        { $unwind: "$avatar.image" },
-        { $sort: body.sortOrder },
-        {
-          $group: {
-            _id: null,
-            count: { $sum: 1 },
-            results: { $push: '$$ROOT' }
-          }
-        },
-        {
-          $project: {
-            count: 1,
-            rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
         }
-      }
-    ]).then(([{ count, rows }]) => {
-        callback(null, {
-          success: 1,
-          users: rows,
-          total: count
+      ]).then(([{ count, rows }]) => {
+          callback(null, {
+            success: 1,
+            users: rows,
+            total: count
+          })
+          return
+        }).catch((err) => {
+          callback(err, null)
+          return
         })
-        return
-      }).catch((err) => {
-        callback(err, null)
-        return
       })
     })
   },
