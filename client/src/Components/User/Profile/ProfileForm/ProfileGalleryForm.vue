@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="avatar">
+    <div v-if="avatar.image">
       <h2>Avatar</h2>
       <img :src="config.IMAGES_URL + '/' + avatar.image.name" class="img-responsive img-thumbnail" :alt="avatar.alt">
     </div>
@@ -15,7 +15,7 @@
           ><icon name="times" /></b-button>
           <input  type="radio" title="Avatar" name="choose-avatar"
              :value="item._id"
-             :checked="item.image._id === user.avatar.image._id"
+             :checked="avatar.image && item.image._id === avatar.image._id"
              @click="chooseAvatar(item._id)"
           />
         </div>
@@ -119,7 +119,7 @@
       },
       filesChange(fieldName, fileList) {
         let formData = new FormData()
-
+        console.log('filesChange')
         if (!fileList.length) {
           return
         }

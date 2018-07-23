@@ -522,8 +522,9 @@ module.exports = {
       }
       moveFiles(user, files)
       .then((results) => {
+        console.log('user', user, user.avatar)
         // si le user a déjà un Avatar
-        if (user.avatar) {
+        if (user.avatar.image) {
           callback(null, {
             success: 1,
             data: {
@@ -532,6 +533,7 @@ module.exports = {
           })
           return
         }
+        console.log('results.length',results.length)
         if (!results.length) {
           callback(null, {
             success: 1,
@@ -541,6 +543,7 @@ module.exports = {
           })
           return
         }
+        console.log('not avatar')
         // si le user n'a pas d'avatar, on lui met le premier des files
         User.findByIdAndUpdate(user._id, {
           avatar: {
@@ -622,7 +625,7 @@ module.exports = {
       }
       console.log('gallery', user.gallery.map(i => i.image))
       // on recherche si le user possède bien cette image
-      const index = user.gallery.findIndex(i => i.image.toString() === id.toString())
+      const index = user.gallery.findIndex(i => i.image._id.toString() === id.toString())
       if(index === -1) {
         callback(err, null)
         return
@@ -637,8 +640,8 @@ module.exports = {
       let dataToSend = {
         id: idGallery
       }
-      console.log('index', user.gallery[index], idGallery, idImage, user.avatar.image)
-      if (idImage.toString() === user.avatar.image.toString()) {
+      console.log('index', user.gallery[index], idGallery, idImage)
+      if (user.avatar.image && idImage.toString() === user.avatar.image.toString()) {
         console.log('isAvatar')
         let avatar = {}
         if(user.gallery.length) {
