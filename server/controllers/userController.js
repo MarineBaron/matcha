@@ -550,7 +550,9 @@ module.exports = {
             image: results[0].image._id,
             alt: results[0].alt,
           }
-        }, {new: true}, function (err, newUser) {
+        }, {new: true})
+        .populate('avatar.image')
+        .exec(function (err, newUser) {
           if (err){
             callback(err, null)
             return
