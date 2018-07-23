@@ -2,6 +2,7 @@ const async = require('async')
 const jwt = require('jsonwebtoken')
 const lodash = require('lodash')
 const axios = require('axios')
+const fs = require('fs')
 
 const User = require('../models/user')
 // GASTON 12 : Ajouter les modèles exigés
@@ -9,72 +10,170 @@ const Gender = require('../models/gender')
 const Interest = require('../models/interest')
 
 const Like = require('../models/likes')
+const Block = require('../models/blocked')
 const Image = require('../models/image')
 const mailController = require('./mailController')
 
-function searchLocation(updateUser, user, callback) {
-  if (updateUser.zip !== user.zip
-      || updateUser.city !== user.city
-      || (updateUser.zip !== '' && user.is_loc !== true)
-    )
-  {
-    const params = {
-      country: 'France',
-      postalcode: updateUser.zip,
-      format: 'json',
-    }
-    if(updateUser.city) {
-      params.city = updateUser.city
-    }
-    axios.get(process.env.API_OPENSTREETMAP_SEARCH, {
-      params
-    })
-    .then((resp) => {
-      updateUser.location = {
-        type: 'Point',
-        coordinates: [parseFloat(resp.data[0].lon), parseFloat(resp.data[0].lat)]
-      }
-      updateUser.is_loc = true
-      callback(null, updateUser)
-      return
-
-    })
-    .catch((err) => {
-      callback(err, null)
-      return
-    })
-  } else {
-    callback(null, updateUser)
-  }
+function getAltFromFilename(filename) {
+  return filename
 }
 
-function nbInterests(iA, iB) {
-  let nb = 0
-  iA.forEach(ui => {
-    iB.forEach(i => {
-      console.log(ui, i)
-      if (ui.toString() == i) {
-        nb++
+function moveFile(user, file) {
+  return new Promise((resolve, reject) => {
+    Image.findOne({name: file.originalname}, function(err, image) {
+      if(err) {
+        reject(err)
+        return
+      }
+      if (image) {
+        fs.unlink(file.path, function(err) {
+          if(err) {
+            reject(err)
+            return
+          }
+          let newImage = {
+            image: image,
+            alt: getAltFromFilename(file.originalname)
+          }
+          let gallery = user.gallery ? user.gallery : []
+          gallery.push(newImage)
+          newImage = gallery[gallery.length - 1]
+          User.findByIdAndUpdate(user._id, {
+            gallery: gallery
+          }, function (err, user) {
+            if(err) {
+              reject(err)
+              return
+            }
+            resolve(newImage)
+          })
+        })
+      } else {
+        fs.rename(file.path, 'public/images/' + file.originalname, function(err) {
+          if(err) {
+            reject(err)
+            return
+          }
+          const newImage = new Image({
+            name: file.originalname
+          })
+          newImage.save(function(err, image) {
+            if(err) {
+              reject(err)
+              return
+            }
+            let newImage = {
+              image: image,
+              alt: getAltFromFilename(file.originalname)
+            }
+            let gallery = user.gallery ? user.gallery : []
+            gallery.push(newImage)
+            newImage = gallery[gallery.length - 1]
+            User.findByIdAndUpdate(user._id, {
+              gallery: gallery
+            }, function (err, user) {
+              if(err) {
+                reject(err)
+                return
+              }
+              resolve(newImage)
+            })
+          })
+        })
       }
     })
   })
-  return nb
 }
 
-function userCalcMatching(userA, user) {
-
-  userA.communInterests = nbInterests(userA.interests, user.interests)
-  //userA.distance = userA.dist.calculated
-  const factDist = userA.distance < 10 ? 5 : (userA.distance < 50 ? 3 : (userA.distance < 500 ? 1 : 0))
-  userA.matching = factDist + 2 * userA.communInterests
-}
-
-function usersCalcMatching(users, user) {
+function moveFiles(user, files) {
   return new Promise((resolve, reject) => {
-    return Promise.all(users.map((u) => userCalcMatching(u, user)))
-    .then(() => {resolve(users)})
+    return Promise.all(files.map((file) => moveFile(user, file)))
+    .then((results) => {resolve(results)})
     .catch((err) => reject(err))
   })
+}
+
+function updateIsCompleted(user, callback) {
+  let maxCompleted = 0
+  let completed = 0
+  // avatar
+  maxCompleted++
+  if (user.avatar.image) {
+    completed++
+  }
+  // gender
+  maxCompleted++
+  if (user.gender) {
+    completed++
+  }
+  // age (field Number)
+  maxCompleted++
+  if (user.age) {
+    completed++
+  }
+  // champs Text ou Array
+  const fields = [
+    'firstname',
+    'lastname',
+    'resume',
+    'zip',
+    'orientation',
+    'interests',
+    'gallery'
+  ]
+  maxCompleted += fields.length
+  fields.forEach(f => {
+    if (user[f].length) {
+      completed++
+    }
+  })
+  const is_completed = completed === maxCompleted ? true : false
+  User.findByIdAndUpdate(user._id, {is_completed}, {new: true}, function(err, newUser) {
+    if(err) {
+      callback(err, null)
+      return
+    }
+    callback(null, newUser)
+    return
+  })
+}
+
+function searchLocation(updateUser, user, callback) {
+  // suppression de ctte partie, car la localisation des users n'est pas associée à leur ville
+  callback(null, updateUser)
+  // if (updateUser.zip !== user.zip
+  //     || updateUser.city !== user.city
+  //     || (updateUser.zip !== '' && user.is_loc !== true)
+  //   )
+  // {
+  //   const params = {
+  //     country: 'France',
+  //     postalcode: updateUser.zip,
+  //     format: 'json',
+  //   }
+  //   if(updateUser.city) {
+  //     params.city = updateUser.city
+  //   }
+  //   axios.get(process.env.API_OPENSTREETMAP_SEARCH, {
+  //     params
+  //   })
+  //   .then((resp) => {
+  //     updateUser.location = {
+  //       type: 'Point',
+  //       coordinates: [parseFloat(resp.data[0].lon), parseFloat(resp.data[0].lat)]
+  //     }
+  //     updateUser.is_loc = true
+  //     callback(null, updateUser)
+  //     return
+  //
+  //   })
+  //   .catch((err) => {
+  //     callback(err, null)
+  //     return
+  //   })
+  // } else {
+  //   callback(null, updateUser)
+  // }
 }
 
 function updateScore(user, callback) {
@@ -202,6 +301,12 @@ module.exports = {
           likers: (callback) => {
             user.getLikers(user._id, callback)
           },
+          blockers: (callback) => {
+            user.getBlockers(user._id, callback)
+          },
+          blocked: (callback) => {
+            user.getBlocked(user._id, callback)
+          },
         }, function(err, results) {
           if (err) {
             callback(err, null)
@@ -229,6 +334,8 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
+            blockers: results.blockers ? results.blockers : [],
+            blocked: results.blocked ? results.blocked : [],
             last_logout: user.last_logout,
             location: user.location,
             score: user.score
@@ -275,7 +382,6 @@ module.exports = {
           })
         }
       })
-
   },
 
 
@@ -327,7 +433,36 @@ module.exports = {
   // GASTON 11 : ceation d'une méthode getGendersInterests
   // cette méthode utilise async.parallel pour rechercher les 2 infos
   getGendersInterests: function(callback) {
-    // a toi de jouer
+    // on fait les 2 requetes en parallele
+    async.parallel({
+      // cette requete renvoie les genders, si pas d'erreur
+      genders: (callback) => {
+        Gender.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      },
+      // cette requete renvoie les interests, si pas d'erreur
+      interests: (callback) => {
+        Interest.find({}, function(err, results) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, results)
+        })
+      }
+      // lorsque les 2 requetes ont été exécutées, on peut retourner le résultat final
+    }, function(err, results) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      callback(null, results)
+    })
   },
 
   update: function (updateUser, callback){
@@ -346,17 +481,177 @@ module.exports = {
             callback(err, null)
             return
           }
-          console.log(updateUser)
           User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
             if (err){
               callback(err, null)
               return
             }
-            callback(null, {
-              success: 1,
-              data: newUser
+            updateIsCompleted(newUser, function(err, newUser) {
+              if (err){
+                callback(err, null)
+                return
+              }
+              User.findById(user._id, '_id firstname lastname age gender orientation interests zip city is_completed')
+              .populate('gender')
+              .populate('orientation')
+              .populate('interests')
+              .exec(function(err, user) {
+                if (err){
+                  callback(err, null)
+                  return
+                }
+                callback(null, {
+                  success: 1,
+                  data: user
+                })
+              })
             })
           })
+        })
+      })
+    })
+  },
+
+  uploadFiles: function(username, files, callback) {
+    // recherche du user
+    User.findOne({username: username}, '_id gallery avatar', function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(err, null)
+        return
+      }
+      moveFiles(user, files)
+      .then((results) => {
+        // si le user a déjà un Avatar
+        if (user.avatar.image) {
+          callback(null, {
+            success: 1,
+            data: {
+              imgs: results
+            }
+          })
+          return
+        }
+        if (!results.length) {
+          callback(null, {
+            success: 1,
+            data: {
+              imgs: results
+            }
+          })
+          return
+        }
+        // si le user n'a pas d'avatar, on lui met le premier des files
+        User.findByIdAndUpdate(user._id, {
+          avatar: {
+            image: results[0].image._id,
+            alt: results[0].alt,
+          }
+        }, {new: true})
+        .populate('avatar.image')
+        .exec(function (err, newUser) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, {
+            success: 1,
+            data: {
+              imgs: results,
+              avatar: newUser.avatar
+            }
+          })
+        })
+      })
+      .catch((err) => {
+        callback(err, null)
+      })
+    })
+  },
+
+  chooseAvatar: function(username, id, callback) {
+    User.findOne({username: username}, '_id gallery', function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(err, null)
+        return
+      }
+      const image = user.gallery.id(id)
+      if(!image) {
+        callback(err, null)
+        return
+      }
+      User.findByIdAndUpdate(user._id, {
+        avatar: {
+          image: image.image._id,
+          alt: image.alt
+        }
+      }, {new: true})
+      .populate('avatar.image')
+      .exec(function(err, newUser) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        callback(null, {
+          success: 1,
+          avatar: newUser.avatar
+        })
+      })
+    })
+  },
+
+  deleteImage: function(username, id, callback) {
+    // on recherche le user
+    User.findOne({username: username}, '_id gallery avatar')
+    .populate('gallery.image')
+    .exec(function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(err, null)
+        return
+      }
+      // on recherche si le user possède bien cette image
+      const index = user.gallery.findIndex(i => i.image._id.toString() === id.toString())
+      if(index === -1) {
+        callback(err, null)
+        return
+      }
+      // on supprime l'image de la gallery
+      const idGallery = user.gallery[index]._id
+      const idImage = user.gallery[index].image._id
+      user.gallery.splice(index, 1)
+      let data = {
+        gallery: user.gallery
+      }
+      let dataToSend = {
+        id: idGallery
+      }
+      if (user.avatar.image && idImage.toString() === user.avatar.image.toString()) {
+        let avatar = {}
+        if(user.gallery.length) {
+          avatar = user.gallery[0]
+        }
+        data.avatar = avatar
+        dataToSend.avatar = avatar
+      }
+      User.findByIdAndUpdate(user._id, data, function(err, user) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        callback(null, {
+          success: 1,
+          data: dataToSend
         })
       })
     })
@@ -372,9 +667,14 @@ module.exports = {
         callback(err, null)
         return
       }
-      const users = {
+      const users = data.action === 'like' || data.action === 'unlike'
+      ? {
         liker: results.actor._id,
         liked: results.receptor._id
+      }
+      : {
+        blocker: results.actor._id,
+        blocked: results.receptor._id
       }
       data.actor = results.actor
       data.receptor = results.receptor
@@ -474,6 +774,112 @@ module.exports = {
                 })
                 return
               })
+            })
+          })
+        break
+        case 'block':
+        Block.findOne(users, function (err, block) {
+          if(err) {
+            callback(err, null)
+            return
+          }
+          if(block) {
+            callback(null, {
+              success: 0,
+              message: 'ALLREADY BLOCKED'
+            })
+            return
+          }
+          // on cherche si le receptor était liké pour le déliker
+          Like.findOne({
+            liker: results.actor._id,
+            liked: results.receptor._id
+          }, function(err, like) {
+            if(err) {
+              callback(err, null)
+              return
+            }
+            // il était liké
+            if(like) {
+              Like.deleteOne({
+                liker: results.actor._id,
+                liked: results.receptor._id,
+              }, function(err) {
+                const block = new Block(users)
+                block.save(function(err, result) {
+                  if(err) {
+                    callback(err, null)
+                    return
+                  }
+                  // on met à jour les score
+                  async.parallel({
+                    actor: (callback) => {
+                      updateScore(data.actor, callback)
+                    },
+                    receptor: (callback) => {
+                      updateScore(data.receptor, callback)
+                    }
+                  }, function(err, results) {
+                    if (err){
+                      callback(err, null)
+                      return
+                    }
+                    // on change le nom de l'action
+                    data.action = 'blockunlike'
+                    data.scores = results
+                    // on renvoie le résultat (avec les nouveaux scores)
+                    callback(null, {
+                      success: 1,
+                      data: data
+                    })
+                    return
+                  })
+                })
+              })
+            } else {
+              // il n'était pas liké
+              const block = new Block(users)
+              block.save(function(err, result) {
+                if(err) {
+                  callback(err, null)
+                  return
+                }
+                // on renvoie le résultat
+                callback(null, {
+                  success: 1,
+                  data: data
+                })
+                return
+              })
+            }
+          })
+        })
+
+        break
+        case 'unblock':
+          Block.findOne(users, function (err, block) {
+            if(err) {
+              callback(err, null)
+              return
+            }
+            if (!block) {
+              callback(null, {
+                success: 0,
+                message: 'NOT BLOCKED'
+              })
+              return
+            }
+            Block.deleteOne(users, function(err) {
+              if(err) {
+                callback(err, null)
+                return
+              }
+              // on renvoie le résultat
+              callback(null, {
+                success: 1,
+                data: data
+              })
+              return
             })
           })
         break
@@ -666,141 +1072,146 @@ module.exports = {
         })
         return
       }
+      Block.find({blocker: results.user._id}, 'blocked')
+      .exec(function(err, blocked) {
+        const blockedUsers = blocked.map(b => b.blocked)
+        const interests = results.interests.map(i => i._id)
+        const genders = body.type === 'match'
+          ? results.user.orientation
+          : results.genders.map(i => i._id)
 
-      const interests = results.interests.map(i => i._id)
-      const genders = body.type === 'match'
-        ? results.user.orientation
-        : results.genders.map(i => i._id)
-      if(!interests || !interests.length || !genders || !genders.length) {
-        callback(null, {
-          success: 1,
-          users: [],
-          total: 0
-        })
-        return
-      }
-
-      let query = {
-        username: {$ne: results.user.username},
-        is_completed: true,
-        is_loc: true,
-        gender: {$in: genders},
-        interests: {$elemMatch: {$in: interests}},
-        age: {
-          $gte: body.ages[0],
-          $lte: body.ages[1]
-        },
-        score: {
-          $gte: body.scores[0],
-          $lte: body.scores[1]
+        if(!interests || !interests.length || !genders || !genders.length) {
+          callback(null, {
+            success: 1,
+            users: [],
+            total: 0
+          })
+          return
         }
-      }
-      User.aggregate([
-        {
-         $geoNear: {
-            near: { type: "Point", coordinates: results.user.location.coordinates },
-            distanceField: "dist.calculated",
-            query: query,
-            minDistance: parseFloat(body.distances[0]) * 1000,
-            maxDistance: parseFloat(body.distances[1]) * 1000,
-            distanceMultiplier: 0.001,
-            spherical: true
+
+        let query = {
+          _id: {$nin: blockedUsers},
+          username: {$ne: results.user.username},
+          is_completed: true,
+          is_loc: true,
+          gender: {$in: genders},
+          interests: {$elemMatch: {$in: interests}},
+          age: {
+            $gte: body.ages[0],
+            $lte: body.ages[1]
+          },
+          score: {
+            $gte: body.scores[0],
+            $lte: body.scores[1]
           }
-        },
-        {
-          $lookup: {
-            from: 'genders',
-            localField: 'gender',
-            foreignField: '_id',
-            as: 'gender'
-          }
-        },
-        {
-          $lookup: {
-            from: 'images',
-            localField: 'avatar.image',
-            foreignField: '_id',
-            as: 'avatar.image'
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            username: 1,
-            avatar: 1,
-            score: 1,
-            age: 1,
-            city: 1,
-            location: 1,
-            is_loc: 1,
-            bot: 1,
-            distance: {$trunc: "$dist.calculated"},
-            interests: 1,
-            matchInterests: {
-              $sum : {
-                $map: {
-                  input: "$interests",
-                  as: "i",
-                  in: {$cond: [{$in : ["$$i" , results.user.interests]}, 1, 0]}
+        }
+        User.aggregate([
+          {
+           $geoNear: {
+              near: { type: "Point", coordinates: results.user.location.coordinates },
+              distanceField: "dist.calculated",
+              query: query,
+              minDistance: parseFloat(body.distances[0]) * 1000,
+              maxDistance: parseFloat(body.distances[1]) * 1000,
+              distanceMultiplier: 0.001,
+              spherical: true
+            }
+          },
+          {
+            $lookup: {
+              from: 'genders',
+              localField: 'gender',
+              foreignField: '_id',
+              as: 'gender'
+            }
+          },
+          {
+            $lookup: {
+              from: 'images',
+              localField: 'avatar.image',
+              foreignField: '_id',
+              as: 'avatar.image'
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              avatar: 1,
+              score: 1,
+              age: 1,
+              city: 1,
+              location: 1,
+              is_loc: 1,
+              bot: 1,
+              distance: {$trunc: "$dist.calculated"},
+              interests: 1,
+              matchInterests: {
+                $sum : {
+                  $map: {
+                    input: "$interests",
+                    as: "i",
+                    in: {$cond: [{$in : ["$$i" , results.user.interests]}, 1, 0]}
+                  }
                 }
-              }
-            },
-            gender: "$gender.name",
-          }
-        },
-        {
-          $addFields: {
-            matching: {
-              $add: [{
-                $multiply: [5, "$matchInterests"]
-              }, {
-                $cond: [{$lte : ["$distance" , 5]}, 5, {
-                  $cond: [{$lte : ["$distance" , 10]}, 4, {
-                    $cond: [{$lte : ["$distance" , 50]}, 3, {
-                      $cond: [{$lte : ["$distance" , 100]}, 2, {
-                        $cond: [{$lte : ["$distance" , 500]}, 1, 0]
+              },
+              gender: "$gender.name",
+            }
+          },
+          {
+            $addFields: {
+              matching: {
+                $add: [{
+                  $multiply: [5, "$matchInterests"]
+                }, {
+                  $cond: [{$lte : ["$distance" , 5]}, 5, {
+                    $cond: [{$lte : ["$distance" , 10]}, 4, {
+                      $cond: [{$lte : ["$distance" , 50]}, 3, {
+                        $cond: [{$lte : ["$distance" , 100]}, 2, {
+                          $cond: [{$lte : ["$distance" , 500]}, 1, 0]
+                        }]
                       }]
                     }]
                   }]
-                }]
-              }
-            ]},
+                }
+              ]},
+            }
+          },
+          {
+            $lookup: {
+              from: 'interests',
+              localField: 'interests',
+              foreignField: '_id',
+              as: 'interests'
+            }
+          },
+          { $unwind: "$gender" },
+          { $unwind: "$avatar.image" },
+          { $sort: body.sortOrder },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 },
+              results: { $push: '$$ROOT' }
+            }
+          },
+          {
+            $project: {
+              count: 1,
+              rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
           }
-        },
-        {
-          $lookup: {
-            from: 'interests',
-            localField: 'interests',
-            foreignField: '_id',
-            as: 'interests'
-          }
-        },
-        { $unwind: "$gender" },
-        { $unwind: "$avatar.image" },
-        { $sort: body.sortOrder },
-        {
-          $group: {
-            _id: null,
-            count: { $sum: 1 },
-            results: { $push: '$$ROOT' }
-          }
-        },
-        {
-          $project: {
-            count: 1,
-            rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
         }
-      }
-    ]).then(([{ count, rows }]) => {
-        callback(null, {
-          success: 1,
-          users: rows,
-          total: count
+      ]).then(([{ count, rows }]) => {
+          callback(null, {
+            success: 1,
+            users: rows,
+            total: count
+          })
+          return
+        }).catch((err) => {
+          callback(err, null)
+          return
         })
-        return
-      }).catch((err) => {
-        callback(err, null)
-        return
       })
     })
   },

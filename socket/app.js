@@ -194,11 +194,17 @@ io.on('connection', function(socket) {
 
   // action de relation (like/unlike)
   socket.on('AUTH_RELATION', function(data) {
-    let message = data.actor.username + ' vous a '
-    message += (data.action === 'unlike') ? 'unliké.' : 'liké.'
-    message += ' Vous êtes amis.'
-    // fermeture du chat si un like et chat ouvert
-    if (data.action === 'unlike') {
+    console.log('AUTH_RELATION', data)
+    // // creéation du message
+    // let message = ''
+    // if (data.action === 'like' || data.action === 'unlike'  || data.action === 'blockunlike') {
+    //   message = data.actor.username + ' vous a '
+    //   message += (data.action === 'like') ? 'liké.' : 'unliké.'
+    //   message += ' Vous êtes amis.'
+    // }
+
+    // fermeture du chat si unlike et chat ouvert
+    if (data.action === 'unlike' || data.action === 'blockunlike') {
       const room = rooms.find(r => r.usernames.includes(data.actor.username) && r.usernames.includes(data.receptor.username))
       if (room) {
         let sockets = authUsers.find(u => u.username === data.actor.username).sockets
@@ -223,7 +229,7 @@ io.on('connection', function(socket) {
   // demande d'état de connexion d'un utilisateur
   socket.on('IS_CONNECTED_REQUEST', function(username) {
     const isConnected = authUsers.findIndex(u => u.username === username)
-    socket.emit('IS_CONNECTED_RESPONSE', {
+    io.emit('IS_CONNECTED_RESPONSE', {
       username: username,
       isConnected: isConnected === -1 ? false : true
     })
@@ -231,8 +237,7 @@ io.on('connection', function(socket) {
 
   // Changement de location
   socket.on('CHANGE_LOCATION', function(data) {
-    console.log('CHANGE_LOCATION', data)
-    socket.broadcast.emit('CHANGE_LOCATION', data)
+    io.emit('CHANGE_LOCATION', data)
   })
 
   // Deconnexion d'un utilisateur

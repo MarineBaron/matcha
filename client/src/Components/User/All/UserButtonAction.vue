@@ -20,7 +20,7 @@
           case 'view':
             this.$emit('close', this.type)
             this.$router.push('/user/' + this.receptor)
-          break;
+          break
           case 'like':
           case 'unlike':
             // dispatch du like/unlike
@@ -49,7 +49,37 @@
                 }, (error) => {
                   console.log("UserButtonAction click Error 1: ", error)
                 })
+              }
+            }, (error) => {
+                console.log("UserButtonAction click Error 2: ", error)
+            })
+          break
+          case 'block':
+          case 'unblock':
+            // dispatch du block/unblock
+            this.$store.dispatch(AUTH_RELATION_REQUEST, this.data)
+            .then((response) => {
+              if (response.data.success) {
+                const data = response.data.data
+                // emission de l'info (socket)
+                this.$socket.emit('AUTH_RELATION', data)
 
+                if (data.action === 'blockunlike') {
+                  // creation d'un message en BDD
+                  let message = ' vous a unliké.'
+                  const notif = {
+                    username: data.receptor.username,
+                    type: 'relation',
+                    message: message,
+                    origin: data.actor.username
+                  }
+                  this.$store.dispatch(NOTIFICATION_CREATE_REQUEST, notif)
+                  .then((response) => {
+                      this.$socket.emit('NOTIFICATION_SEND', response)
+                  }, (error) => {
+                    console.log("UserButtonAction click Error 1: ", error)
+                  })
+                }
               }
             }, (error) => {
                 console.log("UserButtonAction click Error 2: ", error)
@@ -103,6 +133,12 @@
           case 'delete':
             return 'Supprimer'
           break
+          case 'block':
+            return 'Bloquer'
+          break
+          case 'unblock':
+            return 'Débloquer'
+          break
           default:
             return 'No action'
           break
@@ -124,6 +160,12 @@
           break
           case 'delete':
             return 'trash'
+          break
+          case 'block':
+            return 'lock'
+          break
+          case 'unblock':
+            return 'unlock'
           break
           default:
             return 'No action'

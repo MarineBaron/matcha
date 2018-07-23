@@ -46,4 +46,8 @@
     font-weight: bold;
     font-size: 1.25em;
 }
+
+#ulthumb {
+  margin-top: 20px;
+}
 </style>

@@ -104,6 +104,9 @@
         .then((response) => {
           this.$socket.emit('AUTH_LOGIN', this.getProfile)
           this.flash('Bienvenue ' + username + ' !', 'success', {timeout: 5000})
+          if (!this.getProfile.is_completed) {
+            this.flash('Votre profil est incomplet !', 'warning', {timeout: 5000})
+          }
           this.$router.push('/')
 
         }, (error) => {

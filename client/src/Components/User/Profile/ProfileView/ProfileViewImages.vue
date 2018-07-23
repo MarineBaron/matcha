@@ -13,7 +13,7 @@
   export default {
     data() {
       return {
-      image: this.images.length ? this.images[0] : {}
+        image: this.images.find(i => i.selected)
       }
     },
     props: {

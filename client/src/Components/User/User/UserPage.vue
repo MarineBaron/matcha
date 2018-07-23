@@ -98,6 +98,8 @@
           friends: resp.friends,
           likes: resp.likes,
           likers: resp.likers,
+          blocked: resp.blocked,
+          blockers: resp.blockers
         }
         this.relations = relations
 
@@ -143,6 +145,8 @@
         likes: state => state.auth.profile.likes ? state.auth.profile.likes : [],
         likers: state => state.auth.profile.likers ? state.auth.profile.likers : [],
         friends: state => state.auth.profile.friends ? state.auth.profile.friends : [],
+        blocked: state => state.auth.profile.blocked ? state.auth.profile.blocked : [],
+        blockers: state => state.auth.profile.blockers ? state.auth.profile.blockers : [],
         username: state => state.auth.profile.username ? state.auth.profile.username : '',
       }),
       isUser() {
@@ -160,31 +164,41 @@
       isFriend() {
         return this.friends.find(u => u.username === this.userPage) ? true : false
       },
+      isBlocked() {
+        return this.blocked.find(u => u.username === this.userPage) ? true : false
+      },
+      isBlocker() {
+        return this.blockers.find(u => u.username === this.userPage) ? true : false
+      },
       relationStatus() {
         return {
           isLiked: this.isLiked,
           isLiker: this.isLiker,
           isFriend: this.isFriend,
+          isBlocked: this.isBlocked,
+          isBlocker: this.isBlocker,
           isUser: this.isUser,
         }
       },
       relation() {
-        if (this.username === '') {
-          return this.userPage
+        let txt = this.userPage
+        if (this.username !== '') {
+          if (this.isUser) {
+            txt += " : c'est vous !"
+          } else {
+            if (this.isFriend === true) {
+              txt += ' est votre ami.'
+            } else if (this.isLiker === true) {
+              txt += ' aimerait devenir votre ami.'
+            } else if (this.isLiked === true) {
+              txt += ', que vous aimez tant !!!'
+            }
+            if (this.isBlocked === true) {
+              txt += ' Vous l\'avez bloqué...'
+            }
+          }
         }
-        if (this.isUser) {
-          return this.username + " : c'est vous !"
-        }
-        if (this.isFriend === true) {
-          return this.userPage + ' est votre ami.'
-        }
-        if (this.isLiker === true) {
-          return this.userPage + ' aimerait devenir votre ami.'
-        }
-        if (this.isLiked === true) {
-          return this.userPage + ', que vous aimez tant !!!'
-        }
-        return this.userPage
+        return txt
       }
     },
   }

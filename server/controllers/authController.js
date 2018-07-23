@@ -94,11 +94,18 @@ module.exports = {
           likers: (callback) => {
             user.getLikers(user._id, callback)
           },
+          blockers: (callback) => {
+            user.getBlockers(user._id, callback)
+          },
+          blocked: (callback) => {
+            user.getBlocked(user._id, callback)
+          },
         }, function(err, results) {
           if (err) {
             callback(err, null)
             return
           }
+          console.log(results.blocked)
           const friends = lodash.intersectionBy(results.likes, results.likers, 'username')
           const likes = lodash.differenceBy(results.likes, friends, 'username')
           const likers = lodash.differenceBy(results.likers, friends, 'username')
@@ -124,6 +131,8 @@ module.exports = {
             likes: likes ? likes : [],
             likers: likers ? likers : [],
             friends: friends ? friends : [],
+            blockers: results.blockers ? results.blockers : [],
+            blocked: results.blocked ? results.blocked : [],
             notifications: results.notifications.data.filter(n => !n.read),
             last_logout: user.last_logout,
             location: user.location,

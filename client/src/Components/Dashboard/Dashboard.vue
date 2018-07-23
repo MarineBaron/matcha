@@ -191,12 +191,15 @@
           this.$socket.emit('IS_CONNECTED_REQUEST', data.actor.username)
         }
         this.$store.commit(AUTH_RELATION_OTHER, data)
-        if (data.action === 'unlike') {
-          if (this.rooms.find(r => r.otheruser === data.actor.username)) {
-            this.$store.commit(CHAT_CLOSE_ROOM, data.actor.username)
+        if (data.action === 'unlike' || data.action === 'blockunlike') {
+          let index = -1
+          index = this.rooms.findIndex(r => r.otheruser === data.actor.username)
+          if(index !== -1) {
+            this.$store.commit(CHAT_CLOSE_ROOM, this.rooms[index])
           }
-          if (this.rooms.find(r => r.otheruser === data.receptor.username)) {
-            this.$store.commit(CHAT_CLOSE_ROOM, data.receptor.username)
+          index = this.rooms.findIndex(r => r.otheruser === data.receptor.username)
+          if(index !== -1) {
+            this.$store.commit(CHAT_CLOSE_ROOM, this.rooms[index])
           }
         }
       },

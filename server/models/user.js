@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
-const Gender = require('./gender.js')
-const Interest = require('./interest.js')
-const Image = require('./image.js')
-const Like = require('./likes.js')
-const Blocked = require('./blocked.js')
+const Gender = require('./gender')
+const Interest = require('./interest')
+const Image = require('./image')
+const Like = require('./likes')
+const Blocked = require('./blocked')
 
 const SALT_WORK_FACTOR = 10
 
@@ -85,10 +85,10 @@ const UserSchema = new mongoose.Schema({
     },
     alt: String
   },
-  gender: [{
+  gender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Gender'
-  }],
+  },
   orientation: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Gender'
@@ -199,6 +199,54 @@ UserSchema.methods.getLikers = function(id, callback) {
       })
     }
     callback(null, liked)
+  })
+}
+
+UserSchema.methods.getBlocked = function(id, callback) {
+  Blocked.find({blocker: id})
+  .populate({
+    select: 'username avatar last_logout location is_loc score',
+    path: 'blocked',
+    populate: {
+      path: 'avatar.image'
+    }
+  })
+  .exec(function(err, results) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    let blocked = []
+    if (results) {
+      results.forEach(r => {
+        blocked.push(r.blocked)
+      })
+    }
+    callback(null, blocked)
+  })
+}
+
+UserSchema.methods.getBlockers = function(id, callback) {
+  Blocked.find({blocked: id})
+  .populate({
+    select: 'username avatar last_logout location is_loc score',
+    path: 'blocker',
+    populate: {
+      path: 'avatar.image'
+    }
+  })
+  .exec(function(err, results) {
+    if (err) {
+      callback(err, null)
+      return
+    }
+    let blocked = []
+    if (results) {
+      results.forEach(r => {
+        blocked.push(r.blocker)
+      })
+    }
+    callback(null, blocked)
   })
 }
 

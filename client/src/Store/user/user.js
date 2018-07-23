@@ -15,6 +15,9 @@ import {
   USER_ACCOUNT_SUCCESS,
   USER_ACCOUNT_ERROR,
   USER_CHANGE_LOCATION,
+  USER_ACCOUNT_ADDIMG,
+  USER_ACCOUNT_REMIMG,
+  USER_ACCOUNT_CHANGEAVATAR,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -54,7 +57,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(USER_USER_REQUEST)
       callApi({url: 'user/user/' + username})
-      .then((resp, err) => {
+      .then((resp) => {
         if (!resp.data.success) {
           commit(USER_USER_ERROR)
           reject(resp.data.message)
@@ -73,7 +76,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(USER_USERS_REQUEST)
       callApi({url: 'user/users'})
-      .then((resp, err) => {
+      .then((resp) => {
         if (!resp.data.success) {
           commit(USER_USERS_ERROR)
           reject(resp.data.message)
@@ -200,7 +203,19 @@ const mutations = {
   },
   [USER_ACCOUNT_SUCCESS]: (state, data) => {
     state.status = 'success'
-    Vue.set(state, 'user', Object.assign(state.user, data))
+    if(data) {
+      Vue.set(state, 'user', Object.assign(state.user, {
+        firstname: data.firstname,
+        lastname: data.lastname,
+        age: data.age,
+        gender: data.gender,
+        orientation: data.orientation,
+        interests: data.interests,
+        zip: data.zip,
+        city: data.city
+      }))
+    }
+
   },
   [USER_ACCOUNT_ERROR]: (state) => {
     state.status = 'error'
@@ -210,8 +225,29 @@ const mutations = {
       state.user.is_loc = true
       state.user.location = data.location
     }
+  },
+  [USER_ACCOUNT_ADDIMG]: (state, data) => {
+    if(data.imgs && data.imgs.length) {
+      data.imgs.map(d => {
+        state.user.gallery.splice(state.user.gallery.length, 0, d)
+      })
+    }
+    if (data.avatar) {
+      state.user.avatar = data.avatar
+    }
+  },
+  [USER_ACCOUNT_REMIMG]: (state, data) => {
+    const index = state.user.gallery.findIndex(i => i._id === data.id)
+    if(index !== -1) {
+      state.user.gallery.splice(index, 1)
+    }
+    if (data.avatar) {
+      state.user.avatar = data.avatar
+    }
+  },
+  [USER_ACCOUNT_CHANGEAVATAR]: (state, avatar) => {
+    state.user.avatar = avatar
   }
-
 }
 
 export default {
