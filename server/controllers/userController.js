@@ -2,6 +2,7 @@ const async = require('async')
 const jwt = require('jsonwebtoken')
 const lodash = require('lodash')
 const axios = require('axios')
+const fs = require('fs')
 
 const User = require('../models/user')
 // GASTON 12 : Ajouter les modèles exigés
@@ -12,6 +13,90 @@ const Like = require('../models/likes')
 const Block = require('../models/blocked')
 const Image = require('../models/image')
 const mailController = require('./mailController')
+
+function getAltFromFilename(filename) {
+  return filename
+}
+
+function moveFile(user, file) {
+  console.log('moveFile', user._id, file)
+  return new Promise((resolve, reject) => {
+    Image.findOne({name: file.originalname}, function(err, image) {
+      if(err) {
+        reject(err)
+        return
+      }
+      if (image) {
+        console.log('isImage')
+        fs.unlink(file.path, function(err) {
+          if(err) {
+            reject(err)
+            return
+          }
+          let newImage = {
+            image: image,
+            alt: getAltFromFilename(file.originalname)
+          }
+          let gallery = user.gallery ? user.gallery : []
+          gallery.push(newImage)
+          newImage = gallery[gallery.length - 1]
+          console.log('gallery', user._id, gallery[gallery.length -1])
+          User.findByIdAndUpdate(user._id, {
+            gallery: gallery
+          }, function (err, user) {
+            if(err) {
+              reject(err)
+              return
+            }
+            resolve(newImage)
+          })
+        })
+      } else {
+        console.log('createImage')
+        fs.rename(file.path, 'public/images/' + file.originalname, function(err) {
+          if(err) {
+            reject(err)
+            return
+          }
+          const newImage = new Image({
+            name: file.originalname
+          })
+          newImage.save(function(err, image) {
+            if(err) {
+              reject(err)
+              return
+            }
+            let newImage = {
+              image: image,
+              alt: getAltFromFilename(file.originalname)
+            }
+            let gallery = user.gallery ? user.gallery : []
+            gallery.push(newImage)
+            newImage = gallery[gallery.length - 1]
+            console.log('gallery', user._id, gallery[gallery.length -1])
+            User.findByIdAndUpdate(user._id, {
+              gallery: gallery
+            }, function (err, user) {
+              if(err) {
+                reject(err)
+                return
+              }
+              resolve(newImage)
+            })
+          })
+        })
+      }
+    })
+  })
+}
+
+function moveFiles(user, files) {
+  return new Promise((resolve, reject) => {
+    return Promise.all(files.map((file) => moveFile(user, file)))
+    .then((results) => {resolve(results)})
+    .catch((err) => reject(err))
+  })
+}
 
 function updateIsCompleted(user, callback) {
   let maxCompleted = 0
@@ -302,7 +387,6 @@ module.exports = {
           })
         }
       })
-
   },
 
 
@@ -419,6 +503,158 @@ module.exports = {
               })
             })
           })
+        })
+      })
+    })
+  },
+
+  uploadFiles: function(username, files, callback) {
+    console.log('uploadFiles', username, files)
+    // recherche du user
+    User.findOne({username: username}, '_id gallery avatar', function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(err, null)
+        return
+      }
+      moveFiles(user, files)
+      .then((results) => {
+        // si le user a déjà un Avatar
+        if (user.avatar) {
+          callback(null, {
+            success: 1,
+            data: {
+              imgs: results
+            }
+          })
+          return
+        }
+        if (!results.length) {
+          callback(null, {
+            success: 1,
+            data: {
+              imgs: results
+            }
+          })
+          return
+        }
+        // si le user n'a pas d'avatar, on lui met le premier des files
+        User.findByIdAndUpdate(user._id, {
+          avatar: {
+            image: results[0].image._id,
+            alt: results[0].alt,
+          }
+        }, {new: true}, function (err, newUser) {
+          if (err){
+            callback(err, null)
+            return
+          }
+          callback(null, {
+            success: 1,
+            data: {
+              imgs: results,
+              avatar: newUser.avatar
+            }
+          })
+        })
+      })
+      .catch((err) => {
+        callback(err, null)
+      })
+    })
+  },
+
+  chooseAvatar: function(username, id, callback) {
+    console.log('chooseAvatar', username, id)
+    User.findOne({username: username}, '_id gallery', function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(err, null)
+        return
+      }
+      console.log('gallery', user.gallery)
+      const image = user.gallery.id(id)
+      if(!image) {
+        callback(err, null)
+        return
+      }
+      console.log('image', image)
+      User.findByIdAndUpdate(user._id, {
+        avatar: {
+          image: image.image._id,
+          alt: image.alt
+        }
+      }, {new: true})
+      .populate('avatar.image')
+      .exec(function(err, newUser) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        console.log('avatar.image', newUser.avatar)
+        callback(null, {
+          success: 1,
+          avatar: newUser.avatar
+        })
+      })
+    })
+  },
+
+  deleteImage: function(username, id, callback) {
+    console.log('deleteImage', username, id)
+    // on recherche le user
+    User.findOne({username: username}, '_id gallery avatar')
+    .populate('gallery.image')
+    .exec(function(err, user) {
+      if (err){
+        callback(err, null)
+        return
+      }
+      if (!user) {
+        callback(err, null)
+        return
+      }
+      console.log('gallery', user.gallery.map(i => i.image))
+      // on recherche si le user possède bien cette image
+      const index = user.gallery.findIndex(i => i.image.toString() === id.toString())
+      if(index === -1) {
+        callback(err, null)
+        return
+      }
+      // on supprime l'image de la gallery
+      const idGallery = user.gallery[index]._id
+      const idImage = user.gallery[index].image._id
+      user.gallery.splice(index, 1)
+      let data = {
+        gallery: user.gallery
+      }
+      let dataToSend = {
+        id: idGallery
+      }
+      console.log('index', user.gallery[index], idGallery, idImage, user.avatar.image)
+      if (idImage.toString() === user.avatar.image.toString()) {
+        console.log('isAvatar')
+        let avatar = {}
+        if(user.gallery.length) {
+          avatar = user.gallery[0]
+        }
+        data.avatar = avatar
+        dataToSend.avatar = avatar
+      }
+      User.findByIdAndUpdate(user._id, data, function(err, user) {
+        if (err){
+          callback(err, null)
+          return
+        }
+        callback(null, {
+          success: 1,
+          data: dataToSend
         })
       })
     })

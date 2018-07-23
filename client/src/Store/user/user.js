@@ -15,6 +15,9 @@ import {
   USER_ACCOUNT_SUCCESS,
   USER_ACCOUNT_ERROR,
   USER_CHANGE_LOCATION,
+  USER_ACCOUNT_ADDIMG,
+  USER_ACCOUNT_REMIMG,
+  USER_ACCOUNT_CHANGEAVATAR,
 } from './mutation-types'
 import callApi from '../../Api/callApi'
 import Vue from 'vue'
@@ -210,8 +213,33 @@ const mutations = {
       state.user.is_loc = true
       state.user.location = data.location
     }
+  },
+  [USER_ACCOUNT_ADDIMG]: (state, data) => {
+    console.log(USER_ACCOUNT_ADDIMG, data)
+    if(data.imgs && data.imgs.length) {
+      data.imgs.map(d => {
+        state.user.gallery.splice(state.user.gallery.length, 0, d)
+      })
+    }
+    if (data.avatar) {
+      state.user.avatar = data.avatar
+    }
+  },
+  [USER_ACCOUNT_REMIMG]: (state, data) => {
+    console.log(USER_ACCOUNT_REMIMG, data.id)
+    const index = state.user.gallery.findIndex(i => i._id === data.id)
+    console.log(index)
+    if(index !== -1) {
+      state.user.gallery.splice(index, 1)
+    }
+    if (data.avatar) {
+      state.user.avatar = data.avatar
+    }
+  },
+  [USER_ACCOUNT_CHANGEAVATAR]: (state, avatar) => {
+    console.log(USER_ACCOUNT_CHANGEAVATAR, avatar)
+    state.user.avatar = avatar
   }
-
 }
 
 export default {

@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/userController')
 const verifyToken = require('../middleware/verifyToken')
+const multer = require('multer')
+const upload = multer({ dest: 'public/tmp' })
 
 /* POST create */
 router.post('/create', function(req, res, next) {
@@ -31,6 +33,56 @@ router.post('/update', function(req, res, next) {
       return
     }
     //console.log('server/routes/user.js', result)
+    res.status(200).json(result)
+  })
+})
+
+/* POST files */
+router.post('/gallery/:username', upload.array('gallery', 12), function(req, res, next) {
+  console.log('gallery', req.files)
+  controller.uploadFiles(req.params.username, req.files, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    console.log('route return',result)
+    res.status(200).json(result)
+  })
+})
+
+/* POST files */
+router.get('/avatar/:username/:id', verifyToken, function(req, res, next) {
+  console.log('avatar', req.params.username, req.params.id)
+  controller.chooseAvatar(req.params.username, req.params.id, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
+    console.log('route return',result)
+    res.status(200).json(result)
+  })
+})
+
+/* GET deleteImg */
+router.get('/gallerydelete/:username/:id', verifyToken, function(req, res, next) {
+  console.log('gallery', req.params.username, req.params.id)
+  controller.deleteImage(req.params.username, req.params.id, function (err, result) {
+    if (err) {
+      console.log(err)
+      res.status(500).json({
+        success: 0,
+        error: err
+      })
+      return
+    }
     res.status(200).json(result)
   })
 })

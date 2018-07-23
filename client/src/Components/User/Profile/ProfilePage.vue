@@ -6,6 +6,7 @@
           <b-container>
             <profile-view v-if="mode==='view'" :user="user" />
             <profile-form v-if="mode==='edit'" :user="user" />
+            <profile-gallery-form v-if="mode==='edit'" :user="user" />
           </b-container>
         </b-col>
         <b-col md="4">
@@ -30,6 +31,7 @@
   import ProfileView from './ProfileView/ProfileView.vue'
   import ProfileViewInterest from './ProfileView/ProfileViewInterest.vue'
   import ProfileForm from './ProfileForm/ProfileForm.vue'
+  import ProfileGalleryForm from './ProfileForm/ProfileGalleryForm.vue'
   import UserRelations from '../All/UserRelations.vue'
   import { mapGetters, mapState } from 'vuex'
   export default {
@@ -37,6 +39,7 @@
       ProfilePageActions,
       ProfileView,
       ProfileForm,
+      ProfileGalleryForm,
       ProfileViewInterest,
       UserRelations
     },
