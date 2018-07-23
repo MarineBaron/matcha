@@ -25,17 +25,14 @@ export default {
     computed: {
         getImages() {
             let images = []
-            if (this.user.avatar && this.user.avatar.image) {
-                images.push({
-                    name: this.user.avatar.image.name,
-                    alt: this.user.avatar.alt,
-                })
-            }
             if (this.user.gallery) {
-                this.user.gallery.forEach(i => images.push({
-                    name: i.image.name,
-                    alt: i.alt,
-                }))
+                this.user.gallery.forEach(i => {
+                  images.push({
+                      name: i.image.name,
+                      alt: i.alt,
+                      selected: this.user.avatar && this.user.avatar.image && this.user.avatar.image._id === i.image._id ? true : false 
+                  })
+                })
             }
             return images
         }
