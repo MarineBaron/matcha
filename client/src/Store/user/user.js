@@ -57,7 +57,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(USER_USER_REQUEST)
       callApi({url: 'user/user/' + username})
-      .then((resp, err) => {
+      .then((resp) => {
         if (!resp.data.success) {
           commit(USER_USER_ERROR)
           reject(resp.data.message)
@@ -76,7 +76,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(USER_USERS_REQUEST)
       callApi({url: 'user/users'})
-      .then((resp, err) => {
+      .then((resp) => {
         if (!resp.data.success) {
           commit(USER_USERS_ERROR)
           reject(resp.data.message)
@@ -203,7 +203,19 @@ const mutations = {
   },
   [USER_ACCOUNT_SUCCESS]: (state, data) => {
     state.status = 'success'
-    Vue.set(state, 'user', Object.assign(state.user, data))
+    if(data) {
+      Vue.set(state, 'user', Object.assign(state.user, {
+        firstname: data.firstname,
+        lastname: data.lastname,
+        age: data.age,
+        gender: data.gender,
+        orientation: data.orientation,
+        interests: data.interests,
+        zip: data.zip,
+        city: data.city
+      }))
+    }
+
   },
   [USER_ACCOUNT_ERROR]: (state) => {
     state.status = 'error'
@@ -215,7 +227,6 @@ const mutations = {
     }
   },
   [USER_ACCOUNT_ADDIMG]: (state, data) => {
-    console.log(USER_ACCOUNT_ADDIMG, data)
     if(data.imgs && data.imgs.length) {
       data.imgs.map(d => {
         state.user.gallery.splice(state.user.gallery.length, 0, d)
@@ -226,9 +237,7 @@ const mutations = {
     }
   },
   [USER_ACCOUNT_REMIMG]: (state, data) => {
-    console.log(USER_ACCOUNT_REMIMG, data.id)
     const index = state.user.gallery.findIndex(i => i._id === data.id)
-    console.log(index)
     if(index !== -1) {
       state.user.gallery.splice(index, 1)
     }
@@ -237,7 +246,6 @@ const mutations = {
     }
   },
   [USER_ACCOUNT_CHANGEAVATAR]: (state, avatar) => {
-    console.log(USER_ACCOUNT_CHANGEAVATAR, avatar)
     state.user.avatar = avatar
   }
 }

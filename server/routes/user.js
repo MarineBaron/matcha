@@ -22,7 +22,6 @@ router.post('/create', function(req, res, next) {
 
 /* POST update */
 router.post('/update', function(req, res, next) {
-  //console.log('server/routes/user.js', req.body)
   controller.update(req.body, function (err, result) {
     if (err) {
       console.log(err)
@@ -32,14 +31,12 @@ router.post('/update', function(req, res, next) {
       })
       return
     }
-    //console.log('server/routes/user.js', result)
     res.status(200).json(result)
   })
 })
 
 /* POST files */
 router.post('/gallery/:username', upload.array('gallery', 12), function(req, res, next) {
-  console.log('gallery', req.files)
   controller.uploadFiles(req.params.username, req.files, function (err, result) {
     if (err) {
       console.log(err)
@@ -49,14 +46,12 @@ router.post('/gallery/:username', upload.array('gallery', 12), function(req, res
       })
       return
     }
-    console.log('route return',result)
     res.status(200).json(result)
   })
 })
 
 /* POST files */
 router.get('/avatar/:username/:id', verifyToken, function(req, res, next) {
-  console.log('avatar', req.params.username, req.params.id)
   controller.chooseAvatar(req.params.username, req.params.id, function (err, result) {
     if (err) {
       console.log(err)
@@ -66,14 +61,12 @@ router.get('/avatar/:username/:id', verifyToken, function(req, res, next) {
       })
       return
     }
-    console.log('route return',result)
     res.status(200).json(result)
   })
 })
 
 /* GET deleteImg */
 router.get('/gallerydelete/:username/:id', verifyToken, function(req, res, next) {
-  console.log('gallery', req.params.username, req.params.id)
   controller.deleteImage(req.params.username, req.params.id, function (err, result) {
     if (err) {
       console.log(err)
@@ -123,7 +116,6 @@ router.post('/relation', verifyToken, function(req, res, next) {
 
 /* POST update relations */
 router.post('/updatelocation', verifyToken, function(req, res, next) {
-  console.log(req.user.username, req.body.username)
   if (req.user.username !== req.body.username) {
     console.log(err)
     res.status(500).json({
@@ -149,14 +141,13 @@ router.post('/updatelocation', verifyToken, function(req, res, next) {
 router.get('/profile', verifyToken, function(req, res, next) {
   controller.findById(req.user._id, function (err, result) {
     if (err) {
-      console.log('Route KO : /profile L25', err)
+      console.log(err)
       res.status(500).json({
         success: 0,
         error: err
       })
       return
     }
-    console.log('Route OK : /profile L32', result)
     res.status(200).json(result)
   })
 })
@@ -205,7 +196,6 @@ router.get('/addvisit/:username', function(req, res, next) {
 
 /* GET user Accès à tous les users */
 router.get('/users', function(req, res, next) {
-  console.log('fucking /user/users')
   controller.findAll(function (err, result) {
     if (err) {
       // console.log(err)
@@ -221,7 +211,6 @@ router.get('/users', function(req, res, next) {
 
 /* GET gender Accès à tous les genres */
 router.get('/genders', function(req, res, next) {
-  console.log('fucking /user/genders')
   controller.findGenders(function (err, result) {
     if (err) {
       console.log(err)
@@ -239,7 +228,7 @@ router.get('/genders', function(req, res, next) {
 router.get('/infos/:username', verifyToken, function(req, res, next) {
   controller.getInfos(req.params.username, function(err, result) {
     if (err) {
-      // console.log(err)
+      console.log(err)
       res.status(500).json({
         success: 0,
         error: err
@@ -255,7 +244,7 @@ router.post('/match', verifyToken, function(req, res, next) {
   //console.log(req.body)
   controller.findMatch(req.body, function(err, result) {
     if (err) {
-      // console.log(err)
+      console.log(err)
       res.status(500).json({
         success: 0,
         error: err

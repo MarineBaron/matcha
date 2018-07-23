@@ -21,7 +21,6 @@
         >
           <b-form-input id="firstname"
             type="text"
-            required
             v-model.trim="form.firstname"
             placeholder="Votre prénom"
             :state="statusField($v.form.firstname)"
@@ -31,13 +30,13 @@
               Ce champ est requis et ne doit pas dépasser 20 caractères.
           </b-form-invalid-feedback>
         </b-form-group>
+
         <b-form-group id="lastnameGroup"
           label="Nom"
           label-for="lastname"
         >
           <b-form-input id="lastname"
             type="text"
-            required
             v-model.trim="form.lastname"
             placeholder="Votre nom"
             :state="statusField($v.form.lastname)"
@@ -45,6 +44,22 @@
           />
           <b-form-invalid-feedback id="lastnameFeedback">
             Ce champ est requis et ne doit pas dépasser 20 caractères.
+          </b-form-invalid-feedback>
+        </b-form-group>
+
+        <b-form-group id="ageGroup"
+          label="Age"
+          label-for="age"
+        >
+          <b-form-input id="age"
+            type="number"
+            v-model.trim="form.age"
+            placeholder="Votre âge"
+            :state="statusField($v.form.age)"
+            @input="$v.form.age.$touch()"
+          />
+          <b-form-invalid-feedback id="ageFeedback">
+            Vous devez avoir avoir entre 18 et 250 ans.
           </b-form-invalid-feedback>
         </b-form-group>
 
@@ -75,7 +90,7 @@
         <!-- GASTON 5 : création d'une list de checkbox pour les interests (ajouter plain, sinon cela ne marche pas...)-->
         <b-form-group id="interestsGroup"
           label="Centre d'intérêts"
-          label-for="interestsn"
+          label-for="interests"
         >
           <b-form-checkbox-group id="interests"
             v-model="form.interests"
@@ -129,7 +144,7 @@
   const codesPostaux = require('codes-postaux')
   import { USER_ACCOUNT_REQUEST } from '../../../../Store/user/mutation-types'
   import { validationMixin } from "vuelidate"
-  import { required, requiredIf, minLength, maxLength, sameAs, numeric, helpers } from 'vuelidate/lib/validators'
+  import { required, requiredIf, minLength, maxLength, minValue, maxValue, sameAs, numeric, helpers } from 'vuelidate/lib/validators'
   import { mapState } from 'vuex'
 
   const zipValidate = helpers.regex('alpha', /^\d{5}$/)
@@ -144,9 +159,9 @@
           age: this.user.age,
 
           // GASTON 1 : Ajouter gender, orientation, interests au formulaire
-          gender: this.user.gender,
-          orientation: this.user.orientation,
-          interests: this.user.interests,
+          gender: this.user.gender._id,
+          orientation: this.user.orientation.map(o => o._id),
+          interests: this.user.interests.map(i => i._id),
 
           email: this.user.email,
           city: this.user.city,
@@ -163,6 +178,9 @@
           string: [
             'firstname',
             'lastname',
+          ],
+          number: [
+            'age',
           ],
           object: [
             'gender',
@@ -192,6 +210,10 @@
         lastname: {
           minLength: minLength(3),
           maxLength: maxLength(20),
+        },
+        age: {
+          minValue: minValue(18),
+          maxValue: maxValue(250)
         },
         zip: {
           zipValidate
@@ -233,6 +255,7 @@
         const {
           firstname,
           lastname,
+          age,
           // GASTON 6  : ajouter les champs gender, orientation, interests
           gender,
           orientation,
@@ -244,6 +267,7 @@
         const data = {
           firstname: firstname,
           lastname: lastname,
+          age,
           username: this.user.username,
           // GASTON 7  : ajouter les champs gender, orientation, interests
           gender,
@@ -257,6 +281,9 @@
 
         this.$store.dispatch(USER_ACCOUNT_REQUEST, data)
           .then((response) => {
+            this.form.gender = this.user.gender._id
+            this.form.orientation = this.user.orientation.map(o => o._id)
+            this.form.interests = this.user.interests.map(i => i._id)
             this.showForm = true
             this.showError = false
             this.showUpdate = true
@@ -304,8 +331,12 @@
       },
       progressValue() {
         let nb = 0
+        if(this.user.avatar.image) {
+          nb++
+        }
         Object.keys(this.fieldsToComplete).forEach(k => {
           if(this.fieldsToComplete[k].length) {
+
             if(k === 'string') {
               this.fieldsToComplete[k].forEach(f => {
                 if ((!this.$v.form[f].$dirty && this.form[f].length)
@@ -313,15 +344,24 @@
                   nb++
                 }
               })
+            } else if (k === 'number') {
+              this.fieldsToComplete[k].forEach(f => {
+                if ((!this.$v.form[f].$dirty && this.form[f])
+              || (this.$v.form[f].$dirty && !this.$v.form[f].$invalid)) {
+                  nb++
+                }
+              })
             } else if (k === 'object') {
               this.fieldsToComplete[k].forEach(f => {
                 if (this.form[f]) {
+
                   nb++
                 }
               })
             } else if (k === 'objects') {
               this.fieldsToComplete[k].forEach(f => {
                 if (this.form[f].length) {
+
                   nb++
                 }
               })
@@ -331,7 +371,8 @@
         return nb
       },
       progressMax() {
-        let nb = 0
+        // nb = 1 pour compter l'avatar
+        let nb = 1
         Object.keys(this.fieldsToComplete).forEach(k => {
           nb += this.fieldsToComplete[k].length
         })
@@ -346,4 +387,3 @@
     margin-bottom: 30px;
   }
 </style>
-

@@ -19,7 +19,6 @@ function getAltFromFilename(filename) {
 }
 
 function moveFile(user, file) {
-  console.log('moveFile', user._id, file)
   return new Promise((resolve, reject) => {
     Image.findOne({name: file.originalname}, function(err, image) {
       if(err) {
@@ -27,7 +26,6 @@ function moveFile(user, file) {
         return
       }
       if (image) {
-        console.log('isImage')
         fs.unlink(file.path, function(err) {
           if(err) {
             reject(err)
@@ -40,7 +38,6 @@ function moveFile(user, file) {
           let gallery = user.gallery ? user.gallery : []
           gallery.push(newImage)
           newImage = gallery[gallery.length - 1]
-          console.log('gallery', user._id, gallery[gallery.length -1])
           User.findByIdAndUpdate(user._id, {
             gallery: gallery
           }, function (err, user) {
@@ -52,7 +49,6 @@ function moveFile(user, file) {
           })
         })
       } else {
-        console.log('createImage')
         fs.rename(file.path, 'public/images/' + file.originalname, function(err) {
           if(err) {
             reject(err)
@@ -73,7 +69,6 @@ function moveFile(user, file) {
             let gallery = user.gallery ? user.gallery : []
             gallery.push(newImage)
             newImage = gallery[gallery.length - 1]
-            console.log('gallery', user._id, gallery[gallery.length -1])
             User.findByIdAndUpdate(user._id, {
               gallery: gallery
             }, function (err, user) {
@@ -486,7 +481,6 @@ module.exports = {
             callback(err, null)
             return
           }
-          console.log(updateUser)
           User.findOneAndUpdate({username: updateUser.username}, updateUser, {new: true}, function(err, newUser) {
             if (err){
               callback(err, null)
@@ -497,9 +491,19 @@ module.exports = {
                 callback(err, null)
                 return
               }
-              callback(null, {
-                success: 1,
-                data: newUser
+              User.findById(user._id, '_id firstname lastname age gender orientation interests zip city is_completed')
+              .populate('gender')
+              .populate('orientation')
+              .populate('interests')
+              .exec(function(err, user) {
+                if (err){
+                  callback(err, null)
+                  return
+                }
+                callback(null, {
+                  success: 1,
+                  data: user
+                })
               })
             })
           })
@@ -509,7 +513,6 @@ module.exports = {
   },
 
   uploadFiles: function(username, files, callback) {
-    console.log('uploadFiles', username, files)
     // recherche du user
     User.findOne({username: username}, '_id gallery avatar', function(err, user) {
       if (err){
@@ -522,7 +525,6 @@ module.exports = {
       }
       moveFiles(user, files)
       .then((results) => {
-        console.log('user', user, user.avatar)
         // si le user a déjà un Avatar
         if (user.avatar.image) {
           callback(null, {
@@ -533,7 +535,6 @@ module.exports = {
           })
           return
         }
-        console.log('results.length',results.length)
         if (!results.length) {
           callback(null, {
             success: 1,
@@ -543,7 +544,6 @@ module.exports = {
           })
           return
         }
-        console.log('not avatar')
         // si le user n'a pas d'avatar, on lui met le premier des files
         User.findByIdAndUpdate(user._id, {
           avatar: {
@@ -573,7 +573,6 @@ module.exports = {
   },
 
   chooseAvatar: function(username, id, callback) {
-    console.log('chooseAvatar', username, id)
     User.findOne({username: username}, '_id gallery', function(err, user) {
       if (err){
         callback(err, null)
@@ -583,13 +582,11 @@ module.exports = {
         callback(err, null)
         return
       }
-      console.log('gallery', user.gallery)
       const image = user.gallery.id(id)
       if(!image) {
         callback(err, null)
         return
       }
-      console.log('image', image)
       User.findByIdAndUpdate(user._id, {
         avatar: {
           image: image.image._id,
@@ -602,7 +599,6 @@ module.exports = {
           callback(err, null)
           return
         }
-        console.log('avatar.image', newUser.avatar)
         callback(null, {
           success: 1,
           avatar: newUser.avatar
@@ -612,7 +608,6 @@ module.exports = {
   },
 
   deleteImage: function(username, id, callback) {
-    console.log('deleteImage', username, id)
     // on recherche le user
     User.findOne({username: username}, '_id gallery avatar')
     .populate('gallery.image')
@@ -625,7 +620,6 @@ module.exports = {
         callback(err, null)
         return
       }
-      console.log('gallery', user.gallery.map(i => i.image))
       // on recherche si le user possède bien cette image
       const index = user.gallery.findIndex(i => i.image._id.toString() === id.toString())
       if(index === -1) {
@@ -642,9 +636,7 @@ module.exports = {
       let dataToSend = {
         id: idGallery
       }
-      console.log('index', user.gallery[index], idGallery, idImage)
       if (user.avatar.image && idImage.toString() === user.avatar.image.toString()) {
-        console.log('isAvatar')
         let avatar = {}
         if(user.gallery.length) {
           avatar = user.gallery[0]
