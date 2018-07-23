@@ -1,52 +1,60 @@
 <template>
-  <div>
-    <div v-if="avatar.image">
-      <h2>Avatar</h2>
-      <img :src="config.IMAGES_URL + '/' + avatar.image.name" class="img-responsive img-thumbnail" :alt="avatar.alt">
-    </div>
-    <div>
-      <h2>Gallerie</h2>
-      <div>
-        <div v-for="item in gallery">
-          <img :src="config.IMAGES_URL + '/' + item.image.name" class="img-responsive img-thumbnail" :alt="item.originalName">
-          <b-button variant="link"
-            title="Supprimer"
-            @click.prevent="deleteImage(item.image._id)"
-          ><icon name="times" /></b-button>
-          <input  type="radio" title="Avatar" name="choose-avatar"
-             :value="item._id"
-             :checked="avatar.image && item.image._id === avatar.image._id"
-             @click="chooseAvatar(item._id)"
-          />
+  <b-container id="form-gallery" fluid>
+    <b-row>
+      <b-col sm="4">
+        <div v-if="avatar.image">
+          <h4>Avatar</h4>
+          <img :src="config.IMAGES_URL + '/' + avatar.image.name" class="img-responsive img-thumbnail" :alt="avatar.alt">
         </div>
-      </div>
-    </div>
-    <form enctype="multipart/form-data" novalidate v-if="(isInitial || isSaving) && gallery.length < 5">
-      <h4>Ajouter des images</h4>
-      <div class="dropbox">
-        <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length" accept="image/*" class="input-file">
-          <p v-if="isInitial">
-            Déposez vos fichiers ici<br> ou cliquez pour parcourir vos dossiers
-          </p>
-          <p v-if="isSaving">
-            Chargement de  {{ fileCount }} fichier(s)...
-          </p>
-      </div>
-    </form>
-    <div v-if="isSuccess">
-      <h2>Uploaded {{ uploadedFiles.length }} file(s) successfully.</h2>
-      <p>
-        <a href="javascript:void(0)" @click="reset()">Upload again</a>
-      </p>
-    </div>
-    <div v-if="isFailed">
-      <h2>Echec du chargement.</h2>
-      <p>
-        <a href="javascript:void(0)" @click="reset()">Try again</a>
-      </p>
-      <pre>{{ uploadError }}</pre>
-    </div>
-  </div>
+        <div id="form-gallery-gallery">
+          <h4>Gallerie</h4>
+          <div>
+            <div v-for="item in gallery">
+              <img :src="config.IMAGES_URL + '/' + item.image.name" class="img-responsive img-thumbnail" :alt="item.originalName">
+              <b-button variant="link"
+                title="Supprimer"
+                @click.prevent="deleteImage(item.image._id)"
+              ><icon name="times" /></b-button>
+              <input  type="radio" title="Avatar" name="choose-avatar"
+                 :value="item._id"
+                 :checked="avatar.image && item.image._id === avatar.image._id"
+                 @click="chooseAvatar(item._id)"
+              />
+            </div>
+          </div>
+        </div>
+      </b-col>
+      <b-col sm="8">
+        <div v-if="gallery.length < 5">
+          <form enctype="multipart/form-data" novalidate v-if="(isInitial || isSaving) && gallery.length < 5">
+            <h5>Ajouter des images</h5>
+            <div class="dropbox">
+              <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length" accept="image/*" class="input-file">
+                <p v-if="isInitial">
+                  Déposez vos fichiers ici<br> ou cliquez pour parcourir vos dossiers
+                </p>
+                <p v-if="isSaving">
+                  Chargement de  {{ fileCount }} fichier(s)...
+                </p>
+            </div>
+          </form>
+          <div v-if="isSuccess">
+            <h2>Uploaded {{ uploadedFiles.length }} file(s) successfully.</h2>
+            <p>
+              <a href="javascript:void(0)" @click="reset()">Upload again</a>
+            </p>
+          </div>
+          <div v-if="isFailed">
+            <h2>Echec du chargement.</h2>
+            <p>
+              <a href="javascript:void(0)" @click="reset()">Try again</a>
+            </p>
+            <pre>{{ uploadError }}</pre>
+          </div>
+        </div>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
@@ -65,39 +73,25 @@
     data() {
       return {
         config: config,
-        //gallery: this.user.gallery,
         uploadedFiles: [],
         uploadError: null,
         currentStatus: null,
         uploadFieldName: 'gallery'
       }
     },
-    // mixins: [
-    //   validationMixin
-    // ],
-    // validations: {
-    //   form: {
-    //
-    //   }
-    // },
     mounted() {
       this.reset()
     },
     methods: {
       reset() {
-        // reset form to initial state
-        this.currentStatus = STATUS_INITIAL;
-        this.uploadedFiles = [];
-        this.uploadError = null;
+        this.currentStatus = STATUS_INITIAL
+        this.uploadedFiles = []
+        this.uploadError = null
       },
       save(formData) {
         const fd = new FormData()
-        // upload data to the server
-        this.currentStatus = STATUS_SAVING;
-        const data = {
-          username: this.user.username,
-          data: formData
-        }
+        this.currentStatus = STATUS_SAVING
+        // appel de axios directement car le header est différent du header classique
         axios.post(config.SERVER_URL + '/user/gallery/' + this.user.username,
           formData,
           { headers: {
@@ -107,7 +101,6 @@
         .then(x => x.data)
         .then(x => {
           this.$store.commit(USER_ACCOUNT_ADDIMG, x.data)
-          //this.gallery = push(x)
           this.currentStatus = STATUS_SUCCESS
           this.reset()
         })
@@ -119,23 +112,21 @@
       },
       filesChange(fieldName, fileList) {
         let formData = new FormData()
-        console.log('filesChange')
         if (!fileList.length) {
           return
         }
-
+        const nbFiles = this.gallery.length
         Array.from(Array(fileList.length).keys()).map(k => {
+          if (nbFiles + k < 5) {
             formData.append(fieldName, fileList[k], fileList[k].name)
           }
-        )
+        })
         this.save(formData)
       },
       deleteImage(id) {
-        console.log('delateImage',id)
         this.currentStatus === STATUS_SAVING
         callApi({url: '/user/gallerydelete/' + this.user.username + '/' + id})
         .then((resp) => {
-          console.log('deleteImage return', resp.data.data)
           this.$store.commit(USER_ACCOUNT_REMIMG, resp.data.data)
           this.currentStatus === STATUS_SUCCESS
         })
@@ -144,11 +135,9 @@
         })
       },
       chooseAvatar(id) {
-        console.log('chooseAvatar',id)
         this.currentStatus === STATUS_SAVING
         callApi({url: '/user/avatar/' + this.user.username + '/' + id})
         .then((resp) => {
-          console.log('chooseAvatar return', resp.data.avatar)
           this.$store.commit(USER_ACCOUNT_CHANGEAVATAR, resp.data.avatar)
           this.currentStatus === STATUS_SUCCESS
         })
@@ -179,6 +168,14 @@
 </script>
 
 <style scoped >
+#form-gallery {
+  margin-top: 30px;
+}
+
+#form-gallery-gallery {
+  margin-top: 20px;
+}
+
 .dropbox {
   outline: 2px dashed grey; /* the dash box */
   outline-offset: -10px;
@@ -212,4 +209,3 @@
   width: 50px;
 }
 </style>
-
