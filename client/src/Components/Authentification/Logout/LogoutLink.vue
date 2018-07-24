@@ -17,7 +17,9 @@
         this.$store.dispatch(AUTH_LOGOUT, username)
           .then(() => {
             this.$store.dispatch(CHAT_CLOSE_ALLROOMS)
-            this.$socket.emit('AUTH_LOGOUT', this.getProfile)
+            this.$socket.emit('AUTH_LOGOUT', {
+              username: username
+            })
             this.$router.push('/login')
           })
       }

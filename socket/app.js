@@ -19,24 +19,30 @@ function getUsersNb() {
 
 function alertOthers(profile, isConnected) {
   if(profile) {
-    let relations = []
-    if (profile.friends) {
-      relations = relations.concat(profile.friends)
-    }
-    if (profile.likes) {
-      relations = relations.concat(profile.likes)
-    }
-    if (profile.likers) {
-      relations = relations.concat(profile.likers)
-    }
-    relations.forEach(r => {
-      if (authUsers.find(u => u.username === r.username)) {
-        io.to(r.username).emit('IS_CONNECTED_RESPONSE', {
-          username: profile.username,
-          isConnected: isConnected
-        })
-      }
+    // on envoie a tout le monde
+    io.emit('IS_CONNECTED_RESPONSE', {
+      username: profile.username,
+      isConnected: isConnected
     })
+    // les lignes suivantes decrivent un envoi uniquement aux relations
+    // let relations = []
+    // if (profile.friends) {
+    //   relations = relations.concat(profile.friends)
+    // }
+    // if (profile.likes) {
+    //   relations = relations.concat(profile.likes)
+    // }
+    // if (profile.likers) {
+    //   relations = relations.concat(profile.likers)
+    // }
+    // relations.forEach(r => {
+    //   if (authUsers.find(u => u.username === r.username)) {
+    //     io.to(r.username).emit('IS_CONNECTED_RESPONSE', {
+    //       username: profile.username,
+    //       isConnected: isConnected
+    //     })
+    //   }
+    // })
   }
 }
 
@@ -194,16 +200,7 @@ io.on('connection', function(socket) {
 
   // action de relation (like/unlike)
   socket.on('AUTH_RELATION', function(data) {
-    console.log('AUTH_RELATION', data)
-    // // creéation du message
-    // let message = ''
-    // if (data.action === 'like' || data.action === 'unlike'  || data.action === 'blockunlike') {
-    //   message = data.actor.username + ' vous a '
-    //   message += (data.action === 'like') ? 'liké.' : 'unliké.'
-    //   message += ' Vous êtes amis.'
-    // }
-
-    // fermeture du chat si unlike et chat ouvert
+        // fermeture du chat si unlike et chat ouvert
     if (data.action === 'unlike' || data.action === 'blockunlike') {
       const room = rooms.find(r => r.usernames.includes(data.actor.username) && r.usernames.includes(data.receptor.username))
       if (room) {
