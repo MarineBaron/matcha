@@ -34,7 +34,6 @@ import ChatRooms from './Chat/ChatRooms.vue'
 import Counter from './Counter/Counter.vue'
 import Localisation from './Localisation/Localisation.vue'
 import callApi from '../Api/callApi'
-import callApiFiles from '../Api/callApiFiles'
 
 export default {
   name: 'app',
@@ -59,7 +58,6 @@ export default {
     setAxiosAuthorization() {
       if (this.token && this.token !== '') {
         callApi.defaults.headers.common['Authorization'] = this.token
-        callApiFiles.defaults.headers.common['Authorization'] = this.token
       }
     },
     unload(event) {

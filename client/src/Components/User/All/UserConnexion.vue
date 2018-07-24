@@ -1,6 +1,6 @@
 <template>
   <p class="p-connexion" v-if="!icon">
-    <span v-if="isConnected">Connected</span>
+    <span v-if="isConnected">Connecté</span>
     <span v-else>Dernière connexion : {{connexion.last_logout | moment("DD/MM/YY HH:mm")}}</span>
   </p>
   <span v-else :title="isConnected ? 'Connecté' : 'Déconnecté'">

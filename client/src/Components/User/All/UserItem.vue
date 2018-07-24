@@ -4,6 +4,9 @@
       <user-avatar v-if="user.avatar"
         :avatar="user.avatar"
       />
+      <user-avatar v-else
+        :avatar="defaultAvatar"
+      />
     </b-link>
     <br/>
     <b-link :to="{path: '/user/' + user.username}">
@@ -19,5 +22,15 @@
       UserAvatar
     },
     props: ['user'],
+    data(){
+      return {
+        defaultAvatar: {
+          image: {
+            name: '00.jpg'
+          },
+          alt: "Pas d'Avatar"
+        }
+      }
+    }
   }
 </script>

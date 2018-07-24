@@ -195,8 +195,9 @@ router.get('/addvisit/:username', function(req, res, next) {
 })
 
 /* GET user Accès à tous les users */
-router.get('/users', function(req, res, next) {
-  controller.findAll(function (err, result) {
+router.get('/users/:nbByPage/:page', function(req, res, next) {
+  console.log('/users/:nbByPage/:page')
+  controller.findUsers(req.params.nbByPage, req.params.page, function (err, result) {
     if (err) {
       // console.log(err)
       res.status(500).json({
