@@ -1,16 +1,19 @@
 <template>
   <div class="user-avatar">
-    <b-img :src=" IMAGES_URL + '/' + avatar.image.name" fluid :alt="avatar.alt" />
+    <b-img :style="styleObject" :src="IMAGES_URL + '/' + avatar.image.name" fluid :alt="avatar.alt" />
   </div>
 </template>
 
 <script>
   import config from '../../../Config/config'
   export default {
-    props: ['avatar'],
+    props: ['avatar', 'width'],
     data() {
       return {
-        IMAGES_URL: config.IMAGES_URL
+        IMAGES_URL: config.IMAGES_URL,
+        styleObject: {
+          width: (!this.width ? '50' :this.width) + 'px'
+        }
       }
     }
   }
@@ -19,6 +22,6 @@
 <style>
   div.user-avatar {
     display: inline-block;
-    width: 50px;
+    /*width: 50px;*/
   }
 </style>

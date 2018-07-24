@@ -230,6 +230,28 @@ module.exports = {
       })
     })
   },
+  findUsers: function(nbByPage, page, callback){
+    User.find({
+      confirmed: true,
+      //banished: false
+    }, 'username avatar last_logout')
+    .populate('avatar.image')
+    .sort({
+      created: -1
+    })
+    .skip(parseInt(nbByPage) * parseInt(page))
+    .limit(parseInt(nbByPage))
+    .exec(function(err, users) {
+      if (err) {
+        callback(err, null)
+        return
+      }
+      callback(null, {
+        success: 1,
+        data: users
+      })
+    })
+  },
   findById: function(id, callback) {
     User.findById(id, function (err, user) {
       if (err) {
@@ -1072,6 +1094,7 @@ module.exports = {
         })
         return
       }
+
       Block.find({blocker: results.user._id}, 'blocked')
       .exec(function(err, blocked) {
         const blockedUsers = blocked.map(b => b.blocked)
@@ -1201,7 +1224,16 @@ module.exports = {
               rows: { $slice: ['$results', (body.currentPage - 1) * body.perPage, (body.currentPage) * body.perPage] }
           }
         }
-      ]).then(([{ count, rows }]) => {
+      ]).then((resp) => {
+        if (!resp.length) {
+          callback(null, {
+            success: 1,
+            users: [],
+            total: 0
+          })
+          return
+        }
+        const [{count, rows}] = resp
           callback(null, {
             success: 1,
             users: rows,
