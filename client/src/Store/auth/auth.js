@@ -383,7 +383,6 @@ const mutations = {
     state.status = 'success'
   },
   [AUTH_RELATION_OTHER]: (state, data) => {
-    //console.log(AUTH_RELATION_OTHER)
     state.status = 'success'
     if (data) {
       let index
@@ -424,7 +423,6 @@ const mutations = {
                 state.profile.likes.splice(state.profile.likes.findIndex(u => u.username === data.receptor.username), 1)
               }
             }
-            console.log('actor', data.actor.username, 'receptor', data.receptor.username)
             // action de block
             state.profile.blocked.push(data.receptor)
           break
@@ -503,23 +501,37 @@ const mutations = {
     } else {
       let index
       let other
-      index = state.profile.friends.findIndex(u => u.username === data.username)
-      if(index !== -1) {
-        other = state.profile.friends[index]
-        other.location = data.location
-        Vue.set(state.profile.friends, index, other)
+      if (state.profile && state.profile.friends) {
+        index = state.profile.friends.findIndex(u => u.username === data.username)
+        if(index !== -1) {
+          other = state.profile.friends[index]
+          other.location = data.location
+          Vue.set(state.profile.friends, index, other)
+        }
       }
-      index = state.profile.likers.findIndex(u => u.username === data.username)
-      if(index !== -1) {
-        other = state.profile.likers[index]
-        other.location = data.location
-        Vue.set(state.profile.likers, index, other)
+      if (state.profile && state.profile.likers) {
+        index = state.profile.likers.findIndex(u => u.username === data.username)
+        if(index !== -1) {
+          other = state.profile.likers[index]
+          other.location = data.location
+          Vue.set(state.profile.likers, index, other)
+        }
       }
-      index = state.profile.likes.findIndex(u => u.username === data.username)
-      if(index !== -1) {
-        other = state.profile.likes[index]
-        other.location = data.location
-        Vue.set(state.profile.likes, index, other)
+      if (state.profile && state.profile.likes) {
+        index = state.profile.likes.findIndex(u => u.username === data.username)
+        if(index !== -1) {
+          other = state.profile.likes[index]
+          other.location = data.location
+          Vue.set(state.profile.likes, index, other)
+        }
+      }
+      if (state.profile && state.profile.blocked) {
+        index = state.profile.blocked.findIndex(u => u.username === data.username)
+        if(index !== -1) {
+          other = state.profile.blocked[index]
+          other.location = data.location
+          Vue.set(state.profile.blocked, index, other)
+        }
       }
     }
     state.mapNeedChange = true
