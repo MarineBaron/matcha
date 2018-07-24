@@ -12,7 +12,7 @@
             :key="user.username"
             :item="user"
             :actor="actor"
-            :actions="['view', 'unlike', 'chat']"
+            :actions="['unlike', 'chat']"
           />
           <user-relation-items v-else :users="relationsComputed.friends" />
         </b-card-body>
@@ -29,7 +29,7 @@
             :key="user.username"
             :item="user"
             :actor="actor"
-            :actions="['view', 'unlike']"
+            :actions="['unlike']"
           />
           <user-relation-items v-else :users="relationsComputed.likes" />
         </b-card-body>
@@ -46,7 +46,7 @@
             :key="user.username"
             :item="user"
             :actor="actor"
-            :actions="['view', 'like']"
+            :actions="['like']"
           />
           <user-relation-items v-else :users="relationsComputed.likers" />
         </b-card-body>
@@ -63,7 +63,7 @@
             :key="user.username"
             :item="user"
             :actor="actor"
-            :actions="['view', 'unblock']"
+            :actions="['unblock']"
           />
         </b-card-body>
       </b-collapse>
