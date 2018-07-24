@@ -120,7 +120,7 @@
             icon: 'heart',
             value: this.likes.length,
             items: this.likes,
-            actions: ['view', 'unlike']
+            actions: ['unlike']
           },
           {
             name: 'likers',
@@ -129,7 +129,7 @@
             icon: 'heart',
             value: this.likers.length,
             items: this.likers,
-            actions: ['view', 'like']
+            actions: ['like']
           },
           {
             name: 'friends',
@@ -138,7 +138,7 @@
             icon: 'user',
             value: this.friends.length,
             items: this.friends,
-            actions: ['view', 'chat', 'unlike']
+            actions: ['chat', 'unlike']
           },
         ]
       },

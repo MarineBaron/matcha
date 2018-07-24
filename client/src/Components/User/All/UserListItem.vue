@@ -1,11 +1,6 @@
 <template>
   <div class="user-list-item d-flex justify-content-between">
-    <user-avatar v-if="item.avatar"
-      :avatar="item.avatar"
-    />
-    <div class="user-name">
-      {{item.username}}
-    </div>
+    <user-item :user="item" /> 
     <div class="user-connected">
       <user-connexion :connexion="connexion" icon="1" />
     </div>
@@ -23,12 +18,12 @@
 <script>
   import UserButtonAction from './UserButtonAction.vue'
   import UserConnexion from './UserConnexion.vue'
-  import UserAvatar from './UserAvatar.vue'
+  import UserItem from './UserItem.vue'
   export default {
     components: {
       UserButtonAction,
       UserConnexion,
-      UserAvatar
+      UserItem
     },
     props: ['item', 'actor', 'actions'],
     computed: {
