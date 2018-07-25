@@ -13,11 +13,7 @@
           :receptor="userPage"
           :relationStatus="relationStatus"
         />
-         <profile-view-interest  :user="user"/>
-          <user-relations
-            :actor="user.username"
-            :relationStatus="relationStatus"
-          />
+        <profile-view-interest  :user="user"/>
         <user-relations
           :relationStatus="relationStatus"
           :relations="relations"
