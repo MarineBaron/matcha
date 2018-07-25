@@ -1,14 +1,13 @@
 <template>
-<b-row>
+  <b-row>
     <b-col cols="6">
-        <profile-view-images :images="getImages" />
+      <profile-view-images :images="getImages" />
     </b-col>
     <b-col cols="6">
-        <profile-view-infos :user="user" />
-
+      <profile-view-infos :user="user" />
     </b-col>
-        <profile-view-field :field="{name: 'Annonce', value: user.resume}" />
-</b-row>
+    <profile-view-field :field="{name: 'Annonce', value: user.resume}" />
+  </b-row>
 </template>
 
 <script>

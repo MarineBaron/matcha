@@ -7,14 +7,18 @@
       </b-card-header>
       <b-collapse id="accordion_friends" accordion="my-accordion" role="tabpanel" @shown="askConnexion('friends')">
         <b-card-body>
-          <user-list-item v-if="relationStatus.isUser === true"
-            v-for="user in relationsComputed.friends"
-            :key="user.username"
-            :item="user"
-            :actor="actor"
-            :actions="['unlike', 'chat']"
-          />
-          <user-relation-items v-else :users="relationsComputed.friends" />
+          <div v-if="relationStatus.isUser">
+            <user-list-item
+              v-for="user in relationsComputed.friends"
+              :key="user.username"
+              :item="user"
+              :actor="actor"
+              :actions="['unlike', 'chat']"
+            />
+          </div>
+          <div v-else>
+            <user-relation-items :users="relationsComputed.friends" />
+          </div>
         </b-card-body>
       </b-collapse>
     </b-card>
@@ -24,14 +28,18 @@
       </b-card-header>
       <b-collapse id="accordion_likes" accordion="my-accordion" role="tabpanel"  @shown="askConnexion('likes')">
         <b-card-body>
-          <user-list-item v-if="relationStatus.isUser === true"
-            v-for="user in relationsComputed.likes"
-            :key="user.username"
-            :item="user"
-            :actor="actor"
-            :actions="['unlike']"
-          />
-          <user-relation-items v-else :users="relationsComputed.likes" />
+          <div v-if="relationStatus.isUser">
+            <user-list-item v-if="relationStatus.isUser === true"
+              v-for="user in relationsComputed.likes"
+              :key="user.username"
+              :item="user"
+              :actor="actor"
+              :actions="['unlike']"
+            />
+          </div>
+          <div v-else>
+            <user-relation-items  :users="relationsComputed.likes" />
+          </div>
         </b-card-body>
       </b-collapse>
     </b-card>
@@ -41,18 +49,22 @@
       </b-card-header>
       <b-collapse id="accordion_likers" accordion="my-accordion" role="tabpanel" @shown="askConnexion('likers')">
         <b-card-body>
-          <user-list-item v-if="relationStatus.isUser === true"
-            v-for="user in relationsComputed.likers"
-            :key="user.username"
-            :item="user"
-            :actor="actor"
-            :actions="['like']"
-          />
-          <user-relation-items v-else :users="relationsComputed.likers" />
+          <div v-if="relationStatus.isUser">
+            <user-list-item
+              v-for="user in relationsComputed.likers"
+              :key="user.username"
+              :item="user"
+              :actor="actor"
+              :actions="['like']"
+            />
+          </div>
+          <div v-else>
+            <user-relation-items :users="relationsComputed.likers" />
+          </div>
         </b-card-body>
       </b-collapse>
     </b-card>
-    <b-card v-if="relationStatus.isUser === true && relationsComputed.blocked && relationsComputed.blocked.length" no-body class="mb-1">
+    <b-card v-if="relationStatus.isUser && relationsComputed.blocked && relationsComputed.blocked.length" no-body class="mb-1">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-btn block href="#" v-b-toggle.accordion_blocked variant="info">{{relationsTitle.blocked}}</b-btn>
       </b-card-header>
