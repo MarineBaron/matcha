@@ -13,6 +13,11 @@
           :receptor="userPage"
           :relationStatus="relationStatus"
         />
+         <profile-view-interest  :user="user"/>
+          <user-relations
+            :actor="user.username"
+            :relationStatus="relationStatus"
+          />
         <user-relations
           :relationStatus="relationStatus"
           :relations="relations"
@@ -34,6 +39,7 @@
   import UserRelations from '../All/UserRelations.vue'
   import UserView from './UserView.vue'
   import UserConnexion from '../All/UserConnexion.vue'
+  import ProfileViewInterest from '../Profile/ProfileView/ProfileViewInterest.vue'
 
   export default {
     data() {
@@ -49,7 +55,8 @@
       UserPageActions,
       UserRelations,
       UserView,
-      UserConnexion
+      UserConnexion,
+      ProfileViewInterest
     },
     // Pour un user, on n'enregistre pas les données dans le state, donc on appelle l'API directement
     beforeRouteEnter(to, from, next) {

@@ -1,24 +1,21 @@
 <template>
-    <b-col sm="3" class="img-large">
+    
     <div class="text-center">
-        <b-link :to="{path: '/user/' + user.username}">
-        <user-avatar v-if="user.avatar"
-            :avatar="user.avatar"
-            width="500"
-        />
-       <user-avatar v-else
-            :avatar="defaultAvatar"
-            width="500"
-        />
-        </b-link>
-        <br/>
         <b-link :to="{path: '/user/' + user.username}">
         {{user.username}}
         </b-link>
-        <br/>
-        <user-connexion :connexion="connexion" />
+            <user-avatar v-if="user.avatar"
+                :avatar="user.avatar"
+                width="500"
+            />
+            <user-avatar v-else
+                :avatar="defaultAvatar"
+                width="500"
+            />
+        
+        <user-connexion :connexion="connexion" icon="icon" />
     </div>
-  </b-col>
+ 
 </template>
 
 <script>
@@ -53,6 +50,11 @@
 
 <style scoped>
     .img-large {
-        padding: 3vw;
+        padding: .5vw;
+    }
+    .text-center{    
+    padding: .7em;
+    margin: 1vh;
+
     }
 </style>
