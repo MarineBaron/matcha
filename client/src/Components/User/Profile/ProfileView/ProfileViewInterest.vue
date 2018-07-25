@@ -25,7 +25,7 @@
     computed: {
       groups() {
         let groups = []
-
+  
         groups = this.addGroup(groups,
           'Intérêts :', [
           {field: 'gender', name: this.isUser ? 'Vous êtes' : "Il est"},
