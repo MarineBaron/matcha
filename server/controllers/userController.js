@@ -234,7 +234,7 @@ module.exports = {
     User.find({
       confirmed: true,
       //banished: false
-    }, 'username avatar last_logout')
+    }, 'username avatar last_logout is_loc location')
     .populate('avatar.image')
     .sort({
       created: -1
