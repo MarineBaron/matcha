@@ -9,12 +9,6 @@
         <br />
         Vivamus tincidunt, arcu sed convallis fringilla, ante nulla elementum lorem, ac posuere est erat at dolor. Aliquam tempus ipsum nulla, et facilisis mi accumsan ullamcorper. Etiam pellentesque, ante sed luctus consequat, orci nulla viverra urna, vitae imperdiet nunc justo convallis metus. Sed et eleifend tortor. Fusce a scelerisque ipsum, sed malesuada augue. Fusce a justo condimentum, mattis sapien ac, congue neque. Vestibulum nec erat nisl. Aliquam commodo rutrum dolor, non volutpat nulla volutpat nec. Morbi elit magna, dapibus at elementum et, auctor et nisi.
         </p>
-<<<<<<< HEAD
-         
-      </b-col>
-      <b-col md="4">
-               <b-container fluid>
-=======
         <h2>Carte des utilisateurs</h2>
         <map-user-all
           type="homeanonymous"
@@ -22,12 +16,9 @@
           :items="users"
         />
       </b-col>
-
-
       <b-col cols="4">
 
         <b-container fluid>
->>>>>>> 6a887b69bcea8f9eac4e3609334e184f74572176
         <div v-if="!users.length">Pas de users</div>
           <b-row v-else>
             <b-col md="6" v-for="user in users"  :key="user.username" class="titi">
@@ -47,16 +38,10 @@
   import UserItemLarge from '../User/All/UserItemLarge.vue'
   import MapUserAll from '../Map/MapUserAll.vue'
   import callApi from '../../Api/callApi'
-   import MapUserAll from '../Map/MapUserAll.vue'
   import { mapState } from 'vuex'
   export default {
     components: {
       UserItemLarge,
-<<<<<<< HEAD
-      callApi,
-      UserRelations,
-=======
->>>>>>> 6a887b69bcea8f9eac4e3609334e184f74572176
       MapUserAll
     },
     data() {
