@@ -57,9 +57,6 @@
         return groups
       }
     },
-      // ...mapState({
-      //   Toto: state => state.auth.profile.username ? state.auth.profile.username : [],
-      // }),
     mounted() {
      
       this.isUser = this.user.username === this.getUsername ? true : false
