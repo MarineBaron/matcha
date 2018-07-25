@@ -5,12 +5,22 @@
 </template>
 
 <script>
+  import { mapState, mapGetters } from 'vuex'
   import ProfileViewFieldGroupInterets from './ProfileViewFieldGroupInterets.vue'
+  import UserRelationItems from '../../All/UserRelationItems.vue'
+  import UserListItem from '../../All/UserListItem.vue'
 
   export default {
     props: ['user'],
     components: {
-      ProfileViewFieldGroupInterets
+      ProfileViewFieldGroupInterets,
+      UserRelationItems,
+      UserListItem
+    },
+    data() {
+      return ({
+        isUser: false
+      })
     },
     computed: {
       groups() {
@@ -18,12 +28,16 @@
 
         groups = this.addGroup(groups,
           'Intérêts :', [
-          {field: 'gender', name: 'Vous êtes'},
-          {field: 'orientation', name: 'Vous recherchez'},
-          {field: 'interests', name: 'Vos intérêts'},
+          {field: 'gender', name: this.isUser ? 'Vous êtes' : "Il est"},
+          {field: 'orientation', name: this.isUser ? 'Vous recherchez' : "Il recherche"},
+          {field: 'interests', name: this.isUser ? 'Vos intérêts' : "Ses intérêts"},
         ])
       return groups
-      }
+      },
+      ...mapGetters([
+        'isAuthenticated',
+        'getUsername'
+      ])
     },
     methods: {
       addGroup(groups, title, fields) {
@@ -42,6 +56,14 @@
         })
         return groups
       }
+    },
+      // ...mapState({
+      //   Toto: state => state.auth.profile.username ? state.auth.profile.username : [],
+      // }),
+    mounted() {
+      console.log('sur le profil ', this.user.username)
+      console.log('TEST2', this.getUsername)
+      this.isUser = this.user.username === this.getUsername ? true : false
     }
   }
 </script>
