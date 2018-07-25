@@ -61,8 +61,7 @@
       //   Toto: state => state.auth.profile.username ? state.auth.profile.username : [],
       // }),
     mounted() {
-      console.log('sur le profil ', this.user.username)
-      console.log('TEST2', this.getUsername)
+     
       this.isUser = this.user.username === this.getUsername ? true : false
     }
   }
