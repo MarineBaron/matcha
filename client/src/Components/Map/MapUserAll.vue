@@ -211,7 +211,7 @@ export default {
   },
   watch: {
     status(n, o) {
-      if((this.type === 'admin' || this.type === 'match') && n !== o && n === 'success') {
+      if((this.type === 'admin' || this.type === 'match' || this.type === 'homeanonymous') && n !== o && n === 'success') {
         this.setFeatures()
       }
     },
@@ -239,6 +239,18 @@ export default {
           features.push(
             new Feature({
               name : name,
+              geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
+              properties: {
+                user: i
+              }
+            })
+          )
+        })
+      } else if (this.type === 'homeanonymous'){
+        this.items.filter(i => i.is_loc === true).forEach(i => {
+          features.push(
+            new Feature({
+              name : 'other',
               geometry: new Point(transform(i.location.coordinates, 'EPSG:4326', 'EPSG:3857')),
               properties: {
                 user: i
